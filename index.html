@@ -223,7 +223,7 @@ td.v-bad{color:var(--bad);font-weight:700}
 <script>
 /* ================= CẤU HÌNH ================= */
 var CONFIG = {
-  API_URL: 'https://script.google.com/macros/s/AKfycby_2hh_ym93oXONWEpLj4Uh0oW1UZnB_R4jvzMvP2P6s4KpecfsZMllIVnBJPQMOBzodQ/exec',                 // dán link Web App của Apps Script vào đây (để trống = chế độ dùng thử)
+  API_URL: 'https://script.google.com/macros/s/AKfycby_2hh_ym93oXONWEpLj4Uh0oW1UZnB_R4jvzMvP2P6s4KpecfsZMllIVnBJPQMOBzodQ/exec ',                 // dán link Web App của Apps Script vào đây (để trống = chế độ dùng thử)
   SCHOOLS: ['Ngoại Ngữ – ĐHTN', 'KEN CLASSES', 'VÕ NGUYÊN GIÁP', 'Lớp luyện tập'],
   READING_LOCK_RATIO: 50 / 60, // Reading 60 phút: chỉ được nộp sớm sau 50 phút
   LISTEN_EXTRA_SEC: 120,       // Listening: thêm 2 phút kiểm tra sau khi audio kết thúc
@@ -713,20 +713,33 @@ function setupAudio() {
     else if (!sess.audioDone) { btn.disabled = false; btn.textContent = '▶ Tiếp tục nghe'; st.innerHTML = 'Đã tạm ngắt<small>Bấm để nghe tiếp từ đúng thời điểm hiện tại</small>'; }
   };
   audioEl.addEventListener('loadedmetadata', ready);
-  audioEl.addEventListener('error', function () { st.innerHTML = '⚠️ Không tải được audio<small>Kiểm tra mạng rồi tải lại trang</small>'; btn.disabled = true; });
-  setTimeout(function () { if (btn.disabled && !sess.start && current.duration) ready(); }, 4000);
+  audioEl.addEventListener('error', function () { failMsg(); btn.disabled = false; btn.textContent = '↻ Thử tải lại'; });
+  setTimeout(function () { if (btn.disabled && !sess.start && current.duration && !audioEl.error) ready(); }, 4000);
   if (sess.audioDone) { btn.classList.add('hidden'); st.innerHTML = '✅ Audio đã phát xong<small>Hãy kiểm tra lại đáp án</small>'; document.getElementById('aBar').style.width = '100%'; }
+  var failMsg = function () {
+    var u = esc(current.audio || '');
+    st.innerHTML = '⚠️ Không tải được file nghe<small>Kiểm tra mạng, hoặc báo giáo viên: thiếu file <b>' + u + '</b></small>';
+  };
   btn.onclick = function () {
-    if (!sess.start) {
-      var d = audioDur();
-      sess.start = Date.now(); sess.end = Date.now() + (d + CONFIG.LISTEN_EXTRA_SEC) * 1000; sess.dur = d;
-      LS.set('ken_sess_' + current.id, sess);
-      goFull();
-    }
-    var off = (Date.now() - sess.start) / 1000;
-    if (off >= audioDur()) { audioEnded(); return; }
-    try { audioEl.currentTime = off; } catch (e) {}
-    audioEl.play().then(function () { btn.classList.add('hidden'); }).catch(function () { st.innerHTML = 'Trình duyệt chặn tự phát<small>Bấm lại nút ▶</small>'; });
+    if (audioEl.error) { failMsg(); audioEl.load(); return; }
+    var first = !sess.start;
+    var off = first ? 0 : (Date.now() - sess.start) / 1000;
+    if (!first && off >= audioDur()) { audioEnded(); return; }
+    try { if (off > 0) audioEl.currentTime = off; } catch (e) {}
+    btn.disabled = true; st.innerHTML = 'Đang mở audio…<small>Vui lòng chờ</small>';
+    audioEl.play().then(function () {
+      btn.classList.add('hidden'); btn.disabled = false;
+      if (first) {
+        var d = audioDur();
+        sess.start = Date.now(); sess.end = Date.now() + (d + CONFIG.LISTEN_EXTRA_SEC) * 1000; sess.dur = d;
+        LS.set('ken_sess_' + current.id, sess);
+        goFull();
+      }
+    }).catch(function (e) {
+      btn.disabled = false;
+      if (audioEl.error || (e && e.name === 'NotSupportedError')) failMsg();
+      else st.innerHTML = 'Trình duyệt chưa cho phát<small>Bấm lại nút ▶ (đồng hồ chưa chạy)</small>';
+    });
   };
   audioEl.addEventListener('playing', function () { st.innerHTML = '🎧 Đang phát…<small>Không tua, không dừng – audio chỉ phát 1 lần</small>'; });
   audioEl.addEventListener('pause', function () {

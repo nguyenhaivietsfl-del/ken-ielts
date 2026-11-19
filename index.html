@@ -706,7 +706,17 @@ function setupAudio() {
   var url = current.audio || '';
   var dm = url.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:export=\w+&)?id=)([\w-]+)/);
   if (dm) url = 'https://drive.google.com/uc?export=download&id=' + dm[1];
-  audioEl = new Audio(); audioEl.preload = 'auto'; audioEl.src = url;
+  var cands = [url], m = /^audio\/L(\d+)\.mp3$/.exec(url);
+  if (m) {   /* dự phòng: audio nằm trong các thư mục "KEN IELTS Audio 1 L01-L10 - 19.11.2026"… */
+    var n = +m[1], g = n <= 10 ? 1 : n <= 20 ? 2 : n <= 30 ? 3 : 4;
+    var r = ['L01-L10', 'L11-L20', 'L21-L30', 'L31-L41'][g - 1], f = 'L' + m[1] + '.mp3';
+    cands.push(encodeURI('KEN IELTS Audio ' + g + ' ' + r + ' - 19.11.2026/' + f), encodeURI('KEN IELTS Audio ' + g + ' (' + r + ') - 19.11.2026/' + f));
+  }
+  var ci = 0;
+  audioEl = new Audio(); audioEl.preload = 'auto'; audioEl.src = cands[0];
+  audioEl.addEventListener('error', function (e) {
+    if (ci < cands.length - 1 && !sess.start) { ci++; audioEl.src = cands[ci]; audioEl.load(); e.stopImmediatePropagation(); }
+  });
   var btn = document.getElementById('aPlay'), st = document.getElementById('aState');
   var ready = function () {
     if (!sess.start) { btn.disabled = false; st.innerHTML = 'Sẵn sàng<small>Tổng thời gian nghe: ' + fmtTime(audioDur()) + ' · audio chỉ phát 1 lần</small>'; }

@@ -214,6 +214,30 @@ td.v-bad{color:var(--bad);font-weight:700}
 .modal.warn{border-top:6px solid var(--bad)}
 .toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:999px;font-size:14px;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,.2);max-width:90vw;text-align:center}
 .overlay{position:fixed;inset:0;background:rgba(246,242,235,.9);display:grid;place-items:center;z-index:150;font-weight:600}
+
+.tcard.Writing::before{background:#7a5cc4}.tcard.Speaking::before{background:#c4473d}
+.tag.Writing{background:#efe9fb;color:#5a3ea8}.tag.Speaking{background:#fbeae8;color:#a3352c}
+details.grp{margin:6px 0}details.grp>summary{cursor:pointer;list-style:none;padding:10px 14px;background:#fff;border:1px solid var(--line);border-radius:12px;margin:10px 0}
+details.grp>summary::before{content:"▸ ";color:var(--brand2)}details.grp[open]>summary::before{content:"▾ "}
+details.grp>summary small{font-weight:500;text-transform:none;letter-spacing:0}
+.wpart{margin-bottom:30px;scroll-margin-top:10px}
+.wpart>h3{padding:8px 12px;background:var(--brand);color:#fff;border-radius:10px;font-size:16px}
+.wprompt{background:#fff;border:1.5px solid var(--brand2);border-radius:14px;padding:10px 16px}.wprompt p{margin:.4em 0}
+.wq2{font-size:17px;font-weight:600;line-height:1.55}
+img.t1img{max-width:100%;max-height:70vh;margin:12px auto;border:1px solid var(--line);border-radius:10px;background:#fff}
+.wbox{margin-top:10px}
+textarea.wtext{min-height:340px;font-size:16.5px;line-height:1.65;font-family:'Source Serif 4',Georgia,serif;background:#fffdf8}
+.wc{font-size:13.5px;font-weight:700;margin-top:4px;text-align:right}.wc.low{color:#b26b00}.wc.ok{color:var(--ok)}
+.is-writing .ptabs button{cursor:pointer}
+.sp-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:clamp(16px,3vw,26px);margin-top:6px}
+.sp-q{font-size:20px;font-weight:700;line-height:1.4;margin:14px 0}
+.cuecard{border:2px solid var(--brand2);border-radius:14px;padding:12px 18px;margin:12px 0;background:#fffdf8;font-size:16.5px}.cuecard p{margin:.25em 0}.cuecard .cc-h{font-weight:700;font-size:18px}
+label.notes{margin-top:10px}label.notes textarea{min-height:110px}
+.sp-state{font-weight:700;font-size:17px;margin:14px 0 8px}.sp-state.rec{color:var(--bad)}.sp-state.prep{color:var(--brand2)}
+.meter{margin:12px 0}.meter .a-bar i{background:var(--ok);transition:width .08s}
+#spParts button[disabled]{opacity:1;cursor:default}
+.sub-row{border-bottom:1px solid var(--line);padding:12px 0}.sub-row summary{cursor:pointer;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.sub-row pre{white-space:pre-wrap;font-family:'Source Serif 4',Georgia,serif;font-size:15.5px;background:#fffdf8;border:1px solid var(--line);border-radius:10px;padding:12px;margin:8px 0}
 </style>
 </head>
 <body>
@@ -224,7 +248,7 @@ td.v-bad{color:var(--bad);font-weight:700}
   <button class="who hidden" id="whoBtn" title="Đổi thông tin"><span id="whoName"></span> ✎</button>
 </header>
 <main id="app"></main>
-<footer>© KEN CLASSES · IELTS Reading &amp; Listening Practice · <button id="adminLink">Khu vực giáo viên</button></footer>
+<footer>© KEN CLASSES · IELTS Practice – Reading · Listening · Writing · Speaking · <button id="adminLink">Khu vực giáo viên</button></footer>
 
 <script>
 /* ================= CẤU HÌNH ================= */
@@ -412,7 +436,7 @@ function api(action, data) {
 /* chế độ dùng thử: lưu trên máy, chấm bằng DEMO_KEYS nếu có */
 function demoApi(b) {
   var custom = LS.get('ken_demo_custom', []), settings = LS.get('ken_demo_settings', {}), results = LS.get('ken_demo_results', []);
-  if (['login', 'admin_data', 'set_settings', 'save_test', 'delete_test', 'results'].indexOf(b.action) > -1 && b.pw !== CONFIG.DEMO_PASSWORD) throw new Error('Sai mật khẩu giáo viên.');
+  if (['login', 'admin_data', 'set_settings', 'save_test', 'delete_test', 'results', 'subs'].indexOf(b.action) > -1 && b.pw !== CONFIG.DEMO_PASSWORD) throw new Error('Sai mật khẩu giáo viên.');
   var find = function (id) { return custom.filter(function (t) { return t.id === id; })[0]; };
   var st = function (id) { var s = settings[id] || {}; return { active: s.active !== false, showKey: s.showKey !== false }; };
   switch (b.action) {
@@ -436,6 +460,8 @@ function demoApi(b) {
     case 'save_test': { var nt = cleanCustom(b.test); var i = custom.map(function (x) { return x.id; }).indexOf(nt.id); if (i > -1) custom[i] = nt; else custom.push(nt); LS.set('ken_demo_custom', custom); return { ok: true }; }
     case 'delete_test': LS.set('ken_demo_custom', custom.filter(function (t) { return t.id !== b.id; })); return { ok: true };
     case 'results': return { ok: true, results: results };
+    case 'submit_writing': case 'submit_speaking': { var subs = LS.get('ken_demo_subs', []), ss = cleanStudent(b.student); subs.unshift({ kind: b.action === 'submit_writing' ? 'Writing' : 'Speaking', time: new Date().toLocaleString('vi-VN'), name: ss.name, sid: ss.sid, school: ss.school, cls: ss.cls, testId: b.id, testTitle: b.title, p1: b.p1 || '', p2: b.p2 || '', t1: b.t1 || '', t2: b.t2 || '', words1: wordCount(b.t1), words2: wordCount(b.t2), audioUrl: b.audio ? '(dùng thử: không lưu file ghi âm)' : '', duration: Math.round((+b.duration || 0) / 6) / 10, timeline: b.timeline || '', violations: (b.viol || []).length, violLog: violText(b.viol) }); LS.set('ken_demo_subs', subs.slice(0, 50)); return { ok: true }; }
+    case 'subs': return { ok: true, subs: LS.get('ken_demo_subs', []) };
   }
   throw new Error('Yêu cầu không hợp lệ.');
 }
@@ -454,10 +480,10 @@ function renderInfo() {
   var s = student || {};
   var isOther = s.school && CONFIG.SCHOOLS.indexOf(s.school) < 0;
   app.innerHTML =
-    '<section class="hero"><div><span class="eyebrow">IELTS Reading &amp; Listening</span>' +
+    '<section class="hero"><div><span class="eyebrow">IELTS · 4 kỹ năng</span>' +
     '<h1>Luyện đề như thi thật,<br>trên mọi thiết bị.</h1>' +
-    '<p class="lead">98 đề Reading &amp; Listening, bấm giờ chuẩn IELTS, giao diện chia đôi như thi trên máy. Kết quả được gửi thẳng tới giáo viên.</p>' +
-    '<div class="hero-points"><span>📱 Điện thoại</span><span>📲 iPad</span><span>💻 Laptop</span><span>⏱ 60 phút Reading</span><span>🎧 Nghe 1 lần</span><span>🎯 Quy đổi band</span></div></div>' +
+    '<p class="lead">Đủ 4 kỹ năng: 98 đề Reading &amp; Listening chấm tự động, bấm giờ chuẩn IELTS, giao diện chia đôi như thi trên máy; Writing (Task 1, Task 2 theo 5 dạng) và Speaking (đề đầy đủ, luyện theo từng Part, ghi âm) gửi thẳng tới giáo viên chấm.</p>' +
+    '<div class="hero-points"><span>📱 Điện thoại</span><span>📲 iPad</span><span>💻 Laptop</span><span>⏱ 60 phút Reading</span><span>🎧 Nghe 1 lần</span><span>✍️ Writing</span><span>🎤 Speaking ghi âm</span><span>🎯 Quy đổi band</span></div></div>' +
     '<form class="card" id="infoForm" novalidate><h2>Thông tin học viên</h2>' +
     '<label>Họ và tên SV/HS<input name="name" autocomplete="name" value="' + esc(s.name || '') + '" placeholder="VD: Nguyễn Văn An"></label>' +
     '<label>Mã SV/HS<input name="sid" value="' + esc(s.sid || '') + '" placeholder="VD: 2257220201"></label>' +
@@ -478,18 +504,18 @@ function renderInfo() {
   });
 }
 
-var catalog = null, settings = {}, allTests = [], filt = { type: 'all', q: '', vol: '' };
+var catalog = null, wsItems = null, settings = {}, allTests = [], filt = { type: 'all', q: '', vol: '' };
 function loadCatalog() {
-  return Promise.all([catalog ? Promise.resolve(catalog) : getJSON('data/catalog.json'), api('list')]).then(function (r) {
-    catalog = r[0]; settings = r[1].settings || {};
+  return Promise.all([catalog ? Promise.resolve(catalog) : getJSON('data/catalog.json'), api('list'), wsItems ? Promise.resolve(wsItems) : getJSON('data/ws.json').catch(function () { return []; })]).then(function (r) {
+    catalog = r[0]; settings = r[1].settings || {}; wsItems = r[2] || [];
     var on = function (id) { var s = settings[id]; return !s || s.active !== false; };
-    allTests = (r[1].custom || []).concat(catalog.filter(function (t) { return on(t.id); }));
+    allTests = (r[1].custom || []).concat(catalog.filter(function (t) { return on(t.id); })).concat(wsItems);
   });
 }
 function renderList() {
   setTesting(false); updateWho();
   app.innerHTML = '<div class="list-head"><div><span class="eyebrow">Xin chào, ' + esc(student.name.split(' ').pop()) + '</span><h2 style="margin-top:10px">Chọn đề để luyện</h2></div>' +
-    '<div class="seg" id="seg"><button data-f="all">Tất cả</button><button data-f="Reading">📖 Reading</button><button data-f="Listening">🎧 Listening</button></div></div>' +
+    '<div class="seg" id="seg"><button data-f="all">Tất cả</button><button data-f="Reading">📖 Reading</button><button data-f="Listening">🎧 Listening</button><button data-f="Writing">✍️ Writing</button><button data-f="Speaking">🎤 Speaking</button></div></div>' +
     '<div class="toolbar"><input id="q" placeholder="🔍 Tìm đề (VD: Test 12, VOL 8…)" value="' + esc(filt.q) + '"><select id="vol"><option value="">Tất cả bộ đề</option></select></div>' +
     '<div id="tests"><div class="loading">Đang tải đề…</div></div>';
   document.getElementById('seg').onclick = function (e) { var b = e.target.closest('button'); if (b) { filt.type = b.getAttribute('data-f'); drawTests(); } };
@@ -501,7 +527,7 @@ function renderList() {
     drawTests();
   }).catch(function (e) { document.getElementById('tests').innerHTML = '<div class="empty">Không tải được đề: ' + esc(e.message) + '<br><br><button class="btn ghost" onclick="renderList()">Thử lại</button></div>'; });
 }
-function volOf(t) { var m = String(t.source || '').match(/VOL \d+/); return m ? m[0] : (t.source || 'Khác'); }
+function volOf(t) { if (t.set) return t.set; var m = String(t.source || '').match(/VOL \d+/); return m ? m[0] : (t.source || 'Khác'); }
 function drawTests() {
   [].forEach.call(document.querySelectorAll('#seg button'), function (b) { b.classList.toggle('on', b.getAttribute('data-f') === filt.type); });
   var hist = LS.get('ken_hist', {}), q = filt.q.trim().toLowerCase();
@@ -514,14 +540,15 @@ function drawTests() {
   list.forEach(function (t) { var v = volOf(t); if (!groups[v]) { groups[v] = []; order.push(v); } groups[v].push(t); });
   box.className = '';
   box.innerHTML = order.map(function (v) {
-    return '<h3 class="vol-h">' + esc(v) + '</h3><div class="tests">' + groups[v].map(function (t) {
+    var ws = IS_PROD(groups[v][0]), open = !ws || q || filt.vol;
+    return (ws ? '<details class="grp"' + (open ? ' open' : '') + '><summary class="vol-h">' + esc(v) + ' <small>(' + groups[v].length + ')</small></summary>' : '<h3 class="vol-h">' + esc(v) + '</h3>') + '<div class="tests">' + groups[v].map(function (t) {
       var h = hist[t.id], inProg = LS.get('ken_sess_' + t.id, null);
-      var time = t.type === 'Reading' ? (t.minutes || 60) + ' phút' : (t.duration ? Math.ceil(t.duration / 60) + ' phút nghe' : 'Theo audio');
-      return '<div class="tcard ' + t.type + '"><span class="tag ' + t.type + '">' + (t.type === 'Reading' ? '📖 ' : '🎧 ') + t.type + '</span>' +
-        '<h3>' + esc(t.title) + '</h3><div class="meta"><span>' + esc(t.source || '') + '</span><span>📝 ' + t.count + ' câu</span><span>⏱ ' + time + '</span></div>' +
-        (h ? '<span class="badge">Lần gần nhất: ' + h.score + '/' + h.total + ' · Band ' + bandText(h.band) + '</span>' : '') +
+      var time = IS_PROD(t) ? (t.type === 'Writing' ? t.minutes + ' phút' : t.mode === 'full' ? '11–14 phút' : t.mode === 'p2' ? '3–4 phút' : '4–5 phút') : t.type === 'Reading' ? (t.minutes || 60) + ' phút' : (t.duration ? Math.ceil(t.duration / 60) + ' phút nghe' : 'Theo audio');
+      return '<div class="tcard ' + t.type + '"><span class="tag ' + t.type + '">' + ({ Reading: '📖 ', Listening: '🎧 ', Writing: '✍️ ', Speaking: '🎤 ' }[t.type] || '') + t.type + '</span>' +
+        '<h3>' + esc(t.title) + '</h3><div class="meta"><span>' + esc(t.source || '') + '</span>' + (IS_PROD(t) ? '' : '<span>📝 ' + t.count + ' câu</span>') + '<span>⏱ ' + time + '</span></div>' +
+        (h && h.done ? '<span class="badge">✅ Đã nộp – chờ giáo viên chấm</span>' : h ? '<span class="badge">Lần gần nhất: ' + h.score + '/' + h.total + ' · Band ' + bandText(h.band) + '</span>' : '') +
         '<button class="btn ' + (inProg ? 'accent' : 'primary') + '" data-start="' + esc(t.id) + '">' + (inProg ? 'Làm tiếp ▶' : (h ? 'Làm lại' : 'Bắt đầu làm bài')) + '</button></div>';
-    }).join('') + '</div>';
+    }).join('') + '</div>' + (ws ? '</details>' : '');
   }).join('');
   box.onclick = function (e) { var b = e.target.closest('[data-start]'); if (b) startTest(b.getAttribute('data-start')); };
 }
@@ -529,6 +556,7 @@ function drawTests() {
 function startTest(id) {
   var card = allTests.filter(function (x) { return x.id === id; })[0] || { id: id };
   var key = 'ken_sess_' + id, old = LS.get(key, null);
+  if (IS_PROD(card)) { if (old && card.type === 'Writing') return startProd(card); return modal('Quy chế làm bài', prodRules(card), 'Tôi đã hiểu, vào thi', 'Để sau').then(function (ok) { if (ok) startProd(card); }); }
   var go = function () {
     overlay(true, 'Đang mở đề…');
     (card.custom ? api('get', { id: id }).then(function (r) { return r.test; }) : getJSON('data/tests/' + id + '.json')).then(function (t) {
@@ -932,6 +960,7 @@ function showViol() { var c = document.getElementById('violChip'); if (!c) retur
 
 /* ---- nộp bài ---- */
 function doSubmit(auto, reason) {
+  if (IS_PROD(current)) return prodSubmit(auto, reason);
   if (submitting) return;
   var nums = [].concat.apply([], current.parts.map(function (p) { return p.nums; }));
   var un = nums.filter(function (n) { return !String(sess.answers[n] || '').trim(); }).length;
@@ -976,6 +1005,317 @@ function renderResult(r, dur) {
   document.getElementById('backList').onclick = renderList;
 }
 
+/* ================= WRITING & SPEAKING (IELTS) ================= */
+var IS_PROD = function (t) { return !!t && (t.type === 'Writing' || t.type === 'Speaking'); };
+function wordCount(s) { var m = String(s || '').trim().match(/[A-Za-zÀ-ỹ0-9’'-]+/g); return m ? m.length : 0; }
+function prodRules(card) {
+  var V = CONFIG.MAX_VIOLATIONS;
+  if (card.type === 'Writing') {
+    var w = card.mode === 'full' ? '<b>Task 1</b> (ít nhất 150 từ, nên dành khoảng 20 phút) và <b>Task 2</b> (ít nhất 250 từ, khoảng 40 phút)' : card.mode === 'task1' ? '<b>Task 1</b>: ít nhất <b>150 từ</b>' : '<b>Task 2</b>: ít nhất <b>250 từ</b>';
+    return '<b>' + esc(card.title) + '</b> · ' + esc(card.set || '') + '<br>⏱ Thời gian <b>' + card.minutes + ' phút</b>, hết giờ bài tự nộp.<br>✍️ ' + w + '. Máy tự đếm số từ.<br>🚫 Không được dán chữ, không chuyển tab, không mở ứng dụng khác hay chia đôi màn hình. Mọi lần vi phạm đều bị ghi lại' + (V ? ', đến lần thứ ' + V + ' bài sẽ tự nộp' : '') + '.<br>📝 Bài làm được gửi cho giáo viên chấm theo 4 tiêu chí IELTS.';
+  }
+  var parts = card.mode === 'full' ? 'Đủ 3 phần như thi thật (11–14 phút): Part 1 phỏng vấn · Part 2 cue card (1 phút chuẩn bị, nói tối đa 2 phút) · Part 3 thảo luận.' : card.mode === 'p1' ? 'Part 1: trả lời các câu hỏi về bản thân (mỗi câu khoảng 20–30 giây).' : card.mode === 'p2' ? 'Part 2: 1 phút chuẩn bị (có ô ghi chú), sau đó nói 1–2 phút về cue card.' : 'Part 3: thảo luận các câu hỏi mở rộng (mỗi câu khoảng 40–60 giây).';
+  return '<b>' + esc(card.title) + '</b> · ' + esc(card.source || '') + '<br>🎙 ' + parts + '<br>🔊 Máy đọc câu hỏi bằng tiếng Anh; câu hỏi cũng hiện trên màn hình. Mỗi câu có đồng hồ đếm ngược, hết giờ tự chuyển câu.<br>🎧 Bài nói được <b>ghi âm liên tục</b> và gửi cho giáo viên chấm. Cần micro và nơi yên tĩnh; nên đeo tai nghe.<br>⚠️ Làm một lần từ đầu đến cuối, không tải lại trang.<br>🚫 Không chuyển tab hay mở ứng dụng khác' + (V ? '; đến lần vi phạm thứ ' + V + ' bài sẽ tự kết thúc và nộp' : '') + '.';
+}
+function startProd(t) {
+  var key = 'ken_sess_' + t.id;
+  current = t;
+  if (t.type === 'Writing') {
+    sess = LS.get(key, null);
+    if (sess && sess.end && sess.end < Date.now() - 6 * 3600e3) { LS.del(key); sess = null; }
+    if (!sess) sess = { answers: { t1: '', t2: '' }, viol: [], start: Date.now(), end: Date.now() + t.minutes * 60000 };
+    LS.set(key, sess); renderWriting(); goFull();
+  } else {
+    sess = { answers: {}, viol: [], start: 0, end: 0, timeline: [], notes: '' };
+    renderSpeaking();
+  }
+}
+
+/* ---------- WRITING ---------- */
+function renderWriting() {
+  setTesting(true);
+  var t = current, a = sess.answers, key = 'ken_sess_' + t.id;
+  var tasks = []; if (t.t1) tasks.push(1); if (t.t2) tasks.push(2);
+  var box = function (n) { return '<div class="wbox"><textarea class="wtext" id="w' + n + '" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="sentences" placeholder="Viết bài Task ' + n + ' ở đây…">' + esc(a['t' + n] || '') + '</textarea><div class="wc" id="w' + n + 'c"></div></div>'; };
+  var task = function (n) {
+    if (n === 1) return '<section class="wpart" id="wp1"><h3>WRITING TASK 1 <small>· khoảng 20 phút</small></h3><div class="wprompt"><p>' + esc(t.t1.p) + '</p><p>Summarise the information by selecting and reporting the main features, and make comparisons where relevant.</p><p><b>Write at least 150 words.</b></p></div><img class="t1img" src="' + esc(t.t1.img) + '" alt="Task 1 chart">' + box(1) + '</section>';
+    return '<section class="wpart" id="wp2"><h3>WRITING TASK 2 <small>· khoảng 40 phút</small></h3><div class="wprompt"><p>Write about the following topic:</p><p class="wq2"><i>' + esc(t.t2.p) + '</i></p><p>Give reasons for your answer and include any relevant examples from your own knowledge or experience.</p><p><b>Write at least 250 words.</b></p></div>' + box(2) + '</section>';
+  };
+  app.innerHTML = '<div class="test is-writing" id="testRoot">' +
+    '<div class="test-bar"><div class="tb-title"><b>' + esc(t.title) + '</b><small>' + esc(student.name) + ' · ' + esc(student.sid) + ' · ' + esc(t.source || '') + '</small></div>' +
+    '<span class="viol-chip hidden" id="violChip"></span><div class="timer" id="timer">--:--</div><button class="btn" id="submitBtn">Nộp bài</button></div>' +
+    '<div class="rule">✍️ ' + (tasks.length > 1 ? 'Làm <b>cả 2 task</b> · Task 1 ≥ 150 từ · Task 2 ≥ 250 từ' : tasks[0] === 1 ? 'Task 1 ≥ 150 từ' : 'Task 2 ≥ 250 từ') + ' · 🚫 Không dán chữ, không rời trang</div>' +
+    '<div class="test-body"><section class="pane questions" id="qpane"><div class="qwrap">' + tasks.map(task).join('') + '</div></section></div>' +
+    '<div class="bottom"><div class="ptabs">' + tasks.map(function (n) { return '<button data-go="wp' + n + '">Task ' + n + ' <small id="tc' + n + '"></small></button>'; }).join('') + '</div></div></div>';
+  var root = document.getElementById('testRoot');
+  var upd = function () {
+    tasks.forEach(function (n) {
+      var c = wordCount(a['t' + n]), min = n === 1 ? 150 : 250, el = document.getElementById('w' + n + 'c');
+      el.textContent = c + ' từ' + (c < min ? ' · cần ít nhất ' + min + ' từ' : ' ✓'); el.className = 'wc ' + (c < min ? 'low' : 'ok');
+      document.getElementById('tc' + n).textContent = '(' + c + ' từ)';
+    });
+  };
+  root.addEventListener('input', function (e) { var m = /^w([12])$/.exec(e.target.id); if (!m) return; a['t' + m[1]] = e.target.value; LS.set(key, sess); upd(); });
+  ['paste', 'drop', 'copy', 'cut', 'contextmenu'].forEach(function (ev) { root.addEventListener(ev, function (e) { e.preventDefault(); if (ev === 'paste' || ev === 'drop') toast('Không được dán chữ vào bài viết.'); }); });
+  root.addEventListener('click', function (e) { var g = e.target.closest('[data-go]'); if (g) document.getElementById(g.getAttribute('data-go')).scrollIntoView({ behavior: 'smooth' }); });
+  document.getElementById('submitBtn').onclick = function () { prodSubmit(false); };
+  upd(); monitor(true); showViol();
+  clearInterval(timerId); prodTick(); timerId = setInterval(prodTick, 1000);
+}
+function prodTick() {
+  var el = document.getElementById('timer'); if (!el || !sess) return;
+  if (current.type === 'Writing') {
+    var left = (sess.end - Date.now()) / 1000;
+    el.textContent = '⏱ ' + fmtTime(left); el.classList.toggle('warn', left < 300);
+    if (left <= 0) { clearInterval(timerId); prodSubmit(true, 'Hết giờ!'); }
+  } else if (sp.recStart) el.textContent = '🎙 ' + fmtTime((Date.now() - sp.recStart) / 1000);
+}
+function prodSubmit(auto, reason) {
+  if (submitting) return;
+  if (current.type === 'Speaking') { if (auto) spFinish(reason); else toast('Hãy làm hết các phần, bài sẽ tự nộp khi kết thúc.'); return; }
+  var a = sess.answers, t = current, n1 = wordCount(a.t1), n2 = wordCount(a.t2), warn = [];
+  if (t.t1 && n1 < 150) warn.push('Task 1 mới có ' + n1 + '/150 từ');
+  if (t.t2 && n2 < 250) warn.push('Task 2 mới có ' + n2 + '/250 từ');
+  var p = auto ? Promise.resolve(true) : modal('Nộp bài Writing?', (warn.length ? '⚠️ ' + warn.join('; ') + ' (thiếu từ sẽ bị trừ điểm Task Achievement/Response).<br>' : '') + (t.t1 ? 'Task 1: <b>' + n1 + '</b> từ. ' : '') + (t.t2 ? 'Task 2: <b>' + n2 + '</b> từ. ' : '') + 'Nộp xong không sửa được nữa.', 'Nộp bài', 'Viết tiếp');
+  p.then(function (ok) {
+    if (!ok) return;
+    submitting = true; clearInterval(timerId);
+    overlay(true, (reason ? reason + ' ' : '') + 'Đang nộp bài…');
+    var dur = Math.round((Math.min(Date.now(), sess.end) - sess.start) / 1000);
+    api('submit_writing', { id: t.id, title: t.title + ' (' + (t.set || '') + ')', student: student, t1: a.t1 || '', t2: a.t2 || '', p1: t.t1 ? t.t1.p : '', p2: t.t2 ? t.t2.p : '', duration: dur, viol: sess.viol || [] }).then(function () {
+      submitting = false; overlay(false); monitor(false);
+      LS.del('ken_sess_' + t.id);
+      var h = LS.get('ken_hist', {}); h[t.id] = { done: true }; LS.set('ken_hist', h);
+      prodResult(dur, n1, n2);
+    }).catch(function (e) {
+      submitting = false; overlay(false);
+      modal('Chưa nộp được bài', esc(e.message) + '<br>Bài viết vẫn được lưu trên máy. Kiểm tra mạng rồi bấm <b>Nộp lại</b>.', 'Nộp lại', false).then(function () { prodSubmit(true); });
+    });
+  });
+}
+function prodResult(dur, n1, n2, audioUrl) {
+  setTesting(false); updateWho();
+  var t = current, nv = (sess.viol || []).length, W = t.type === 'Writing';
+  var html = '<section class="result"><div class="card"><span class="eyebrow">' + t.type + '</span><h2 style="margin-top:10px">✅ Đã nộp: ' + esc(t.title) + '</h2>' +
+    '<p>' + (W ? 'Bài viết đã gửi tới giáo viên. Giáo viên sẽ chấm band và nhận xét.' : 'Bài nói (file ghi âm) đã gửi tới giáo viên. Giáo viên sẽ nghe, chấm band và nhận xét.') + '</p>' +
+    '<div class="info-grid"><span>Học viên</span><span>' + esc(student.name) + ' (' + esc(student.sid) + ')</span><span>Lớp</span><span>' + esc(student.cls) + ' · ' + esc(student.school) + '</span>' +
+    '<span>Thời gian</span><span>' + fmtTime(dur) + '</span>' + (W ? '<span>Số từ</span><span>' + (t.t1 ? 'Task 1: ' + n1 + ' ' : '') + (t.t2 ? 'Task 2: ' + n2 : '') + '</span>' : '') +
+    '<span>Vi phạm</span><span>' + (nv ? '<b style="color:var(--bad)">' + nv + ' lần</b>' : 'Không') + '</span></div>' +
+    (audioUrl ? '<p style="margin-top:14px"><b>Nghe lại bài của bạn:</b></p><audio controls src="' + audioUrl + '" style="width:100%"></audio>' : '') +
+    '<div class="row" style="margin-top:18px"><button class="btn primary" id="backList">← Về danh sách đề</button></div></div>' +
+    '<div class="card review"><h2>Tiêu chí chấm IELTS ' + (W ? 'Writing' : 'Speaking') + '</h2>' + (W
+      ? '<p><b>Task Achievement / Task Response</b> – trả lời đủ yêu cầu đề, (Task 1) có overview rõ, (Task 2) quan điểm rõ ràng xuyên suốt.<br><b>Coherence &amp; Cohesion</b> – bố cục đoạn hợp lý, từ nối đa dạng, dùng đúng.<br><b>Lexical Resource</b> – từ vựng phong phú, chính xác, ít lỗi chính tả.<br><b>Grammatical Range &amp; Accuracy</b> – đa dạng cấu trúc câu, ít lỗi ngữ pháp.</p>'
+      : '<p><b>Fluency &amp; Coherence</b> – nói trôi chảy, ít ngập ngừng, ý mạch lạc.<br><b>Lexical Resource</b> – từ vựng đa dạng, dùng collocation và paraphrase.<br><b>Grammatical Range &amp; Accuracy</b> – đa dạng cấu trúc, ít lỗi.<br><b>Pronunciation</b> – phát âm rõ, trọng âm, ngữ điệu tự nhiên.</p>') + '</div>';
+  app.innerHTML = html + '</section>';
+  window.scrollTo(0, 0);
+  document.getElementById('backList').onclick = renderList;
+}
+
+/* ---------- SPEAKING ---------- */
+var sp = {};
+function spSay(text) {
+  return new Promise(function (res) {
+    var S = window.speechSynthesis; if (!S || !window.SpeechSynthesisUtterance || !text) return res();
+    try {
+      S.cancel();
+      var u = new SpeechSynthesisUtterance(text), vs = S.getVoices();
+      var v = vs.filter(function (x) { return /en-GB/i.test(x.lang); })[0] || vs.filter(function (x) { return /^en/i.test(x.lang); })[0];
+      if (v) u.voice = v; u.lang = v ? v.lang : 'en-GB'; u.rate = 0.95;
+      var done = false, fin = function () { if (!done) { done = true; clearTimeout(tm); res(); } };
+      var tm = setTimeout(fin, 2500 + text.length * 85);
+      u.onend = fin; u.onerror = fin; S.speak(u);
+    } catch (e) { res(); }
+  });
+}
+function spSteps(t) {
+  var s = [], full = t.mode === 'full';
+  if (full) {
+    s.push({ part: 'Intro', head: 'Introduction', say: 'Good morning. My name is Ken, and I will be your examiner today. Can you tell me your full name, please?', q: 'Can you tell me your full name, please?', rec: 10 });
+    s.push({ part: 'Intro', head: 'Introduction', say: 'Thank you. And can you tell me where you are from?', q: 'Can you tell me where you are from?', rec: 12 });
+  }
+  if (t.p1) {
+    var first = true;
+    t.p1.forEach(function (tp) {
+      tp.qs.forEach(function (q, i) {
+        var intro = (first ? (full ? 'Now, in this first part of the test, I would like to ask you some questions about yourself. ' : 'In this part, I would like to ask you some questions about yourself. ') : '') + (i === 0 ? 'Let’s talk about ' + tp.topic.toLowerCase() + '. ' : '');
+        s.push({ part: 'Part 1', head: 'Part 1 – ' + tp.topic, q: q, say: intro + q, rec: 25 });
+        first = false;
+      });
+    });
+  }
+  if (t.p2) {
+    var card = t.p2.card, topic = card[0].replace(/^Describe\s+/i, '').replace(/\.$/, '');
+    s.push({ part: 'Part 2', head: 'Part 2 – Long turn: 1 phút chuẩn bị', card: card, notes: true,
+      say: 'Now, I am going to give you a topic, and I would like you to talk about it for one to two minutes. Before you talk, you will have one minute to think about what you are going to say. You can make some notes if you wish. Here is your topic. I would like you to describe ' + topic + '.',
+      prep: 60, prepLabel: 'Chuẩn bị (có thể ghi chú)', rec: 120, minRec: 60, recSay: 'All right? Remember you have one to two minutes for this, so don’t worry if I stop you. I will tell you when the time is up. Can you start speaking now, please?' });
+    (t.p2.round || []).forEach(function (q) { s.push({ part: 'Part 2', head: 'Part 2 – Rounding-off question', q: q, say: q, rec: 15 }); });
+  }
+  if (t.p3) {
+    var tp3 = t.p2 ? t.p2.card[0].replace(/^Describe\s+/i, '').replace(/\.$/, '') : '';
+    t.p3.forEach(function (q, i) {
+      s.push({ part: 'Part 3', head: 'Part 3 – Discussion · ' + (i + 1) + '/' + t.p3.length, q: q, say: (i === 0 ? (tp3 ? 'We have been talking about ' + tp3 + ', and I would like to discuss with you one or two more general questions related to this. ' : 'I would like to discuss with you some more general questions. ') : '') + q, rec: 50 });
+    });
+  }
+  s.push({ part: 'End', head: 'Kết thúc', say: 'Thank you. That is the end of the speaking test.', end: true });
+  return s;
+}
+function renderSpeaking() {
+  setTesting(true);
+  var t = current, parts = ['Part 1', 'Part 2', 'Part 3'].filter(function (p) { return t[p.replace('Part ', 'p').toLowerCase()]; });
+  sp = { steps: spSteps(t), i: -1, chunks: [], rec: null, stream: null, recStart: 0, timer: null, mime: '' };
+  app.innerHTML = '<div class="test is-speaking" id="testRoot">' +
+    '<div class="test-bar"><div class="tb-title"><b>' + esc(t.title) + '</b><small>' + esc(student.name) + ' · ' + esc(student.sid) + ' · ' + esc(t.source || '') + '</small></div>' +
+    '<span class="viol-chip hidden" id="violChip"></span><div class="timer" id="timer">🎙 00:00</div></div>' +
+    '<div class="rule">🎙 Bài nói được <b>ghi âm liên tục</b> và gửi cho giáo viên · Nói to, rõ · 🚫 Không rời trang</div>' +
+    '<div class="test-body"><section class="pane questions"><div class="qwrap" id="spBox"></div></section></div>' +
+    '<div class="bottom"><div class="ptabs" id="spParts">' + parts.map(function (p) { return '<button disabled data-p="' + p + '">' + p + '</button>'; }).join('') + '</div></div></div>';
+  ['copy', 'cut', 'contextmenu'].forEach(function (ev) { document.getElementById('testRoot').addEventListener(ev, function (e) { e.preventDefault(); }); });
+  spMicCheck();
+}
+function spMicCheck() {
+  var box = document.getElementById('spBox');
+  box.innerHTML = '<div class="sp-card"><h3>🎧 Bước 1: Kiểm tra micro</h3>' +
+    '<p>Đeo tai nghe có micro (hoặc dùng micro của máy), ngồi nơi yên tĩnh. Bấm nút bên dưới và <b>cho phép dùng micro</b> khi trình duyệt hỏi.</p>' +
+    '<button class="btn primary big" id="micBtn">🎙 Bật micro</button><div class="meter hidden" id="meterWrap"><p>Hãy nói thử “Hello, my name is…”, thanh xanh phải nhảy lên:</p><div class="a-bar"><i id="meter"></i></div></div>' +
+    '<div id="micMsg" class="err-text"></div>' +
+    '<div id="goWrap" class="hidden"><p>Khi bắt đầu, máy sẽ <b>đọc câu hỏi bằng tiếng Anh</b> (mở loa/tai nghe), câu hỏi cũng hiện trên màn hình. Mỗi câu có đồng hồ đếm ngược; nói xong có thể bấm <b>Câu tiếp →</b>. Toàn bộ bài được ghi âm liên tục.</p>' +
+    '<button class="btn accent big" id="spGo">▶ Bắt đầu bài thi nói</button></div></div>';
+  document.getElementById('micBtn').onclick = function () {
+    var btn = this; btn.disabled = true;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) { document.getElementById('micMsg').textContent = 'Trình duyệt này không hỗ trợ ghi âm. Hãy dùng Chrome (Android, máy tính) hoặc Safari mới (iPhone/iPad).'; return; }
+    navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }).then(function (st) {
+      sp.stream = st; btn.classList.add('hidden');
+      document.getElementById('meterWrap').classList.remove('hidden'); document.getElementById('goWrap').classList.remove('hidden');
+      try {
+        var AC = window.AudioContext || window.webkitAudioContext, ac = new AC(), an = ac.createAnalyser(); an.fftSize = 512;
+        ac.createMediaStreamSource(st).connect(an); sp.ac = ac;
+        var buf = new Uint8Array(an.fftSize), loop = function () {
+          if (!sp.stream) return; an.getByteTimeDomainData(buf);
+          var m = 0; for (var i = 0; i < buf.length; i++) m = Math.max(m, Math.abs(buf[i] - 128));
+          var el = document.getElementById('meter'); if (el) el.style.width = Math.min(100, m / 64 * 100) + '%';
+          requestAnimationFrame(loop);
+        }; loop();
+      } catch (e) {}
+      document.getElementById('spGo').onclick = spStart;
+    }).catch(function () { btn.disabled = false; document.getElementById('micMsg').innerHTML = 'Chưa dùng được micro. Hãy bấm biểu tượng 🔒 cạnh thanh địa chỉ → cho phép <b>Micro</b>, rồi bấm lại.'; });
+  };
+}
+function spStart() {
+  var types = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus'];
+  sp.mime = types.filter(function (x) { try { return MediaRecorder.isTypeSupported(x); } catch (e) { return false; } })[0] || '';
+  try { sp.rec = new MediaRecorder(sp.stream, sp.mime ? { mimeType: sp.mime, audioBitsPerSecond: 32000 } : undefined); }
+  catch (e) { sp.rec = new MediaRecorder(sp.stream); }
+  sp.mime = sp.rec.mimeType || sp.mime || 'audio/webm';
+  sp.rec.ondataavailable = function (e) { if (e.data && e.data.size) sp.chunks.push(e.data); };
+  sp.rec.start(5000);
+  sp.recStart = Date.now(); sess.start = Date.now();
+  goFull(); monitor(true);
+  clearInterval(timerId); timerId = setInterval(prodTick, 1000);
+  spNext();
+}
+function spNext() {
+  clearInterval(sp.timer);
+  if (sp.cur && sp.cur.notes) { var nt = document.getElementById('spNotes'); if (nt) sess.notes = nt.value; }
+  sp.i++;
+  var s = sp.steps[sp.i]; if (!s) return spFinish();
+  sp.cur = s;
+  [].forEach.call(document.querySelectorAll('#spParts button'), function (b) { b.classList.toggle('on', b.getAttribute('data-p') === s.part); });
+  sess.timeline.push(fmtTime((Date.now() - sp.recStart) / 1000) + ' ' + s.part + (s.q ? ': ' + s.q.slice(0, 70) : s.card ? ': ' + s.card[0] : ''));
+  var box = document.getElementById('spBox');
+  box.innerHTML = '<div class="sp-card"><span class="eyebrow">' + esc(s.part) + '</span><h3 style="margin-top:10px">' + esc(s.head) + '</h3>' +
+    (s.card ? '<div class="cuecard">' + s.card.map(function (l, i) { return '<p' + (i === 0 ? ' class="cc-h"' : '') + '>' + esc(l) + '</p>'; }).join('') + '</div>' : (s.q ? '<p class="sp-q">' + esc(s.q) + '</p>' : '')) +
+    (s.notes ? '<label class="notes">📝 Ghi chú nháp (chỉ mình bạn thấy)<textarea id="spNotes" spellcheck="false"></textarea></label>' : '') +
+    '<div class="sp-state" id="spState">🔊 Đang đọc câu hỏi…</div><div class="a-bar"><i id="spBar"></i></div>' +
+    '<div class="row" style="margin-top:12px"><button class="btn ghost" id="spReplay">🔁 Nghe lại câu hỏi</button><button class="btn primary" id="spSkip" disabled>Câu tiếp →</button></div></div>';
+  document.getElementById('spReplay').onclick = function () { spSay(s.q || s.say); };
+  if (s.end) { document.getElementById('spReplay').classList.add('hidden'); document.getElementById('spSkip').classList.add('hidden'); }
+  spSay(s.say).then(function () {
+    if (sp.steps[sp.i] !== s) return;
+    if (s.end) return spFinish();
+    if (!s.rec) return spNext();
+    var phase = s.prep ? 'prep' : 'rec', left = s.prep || s.rec, total = left, started = Date.now();
+    var st = document.getElementById('spState'), bar = document.getElementById('spBar'), skip = document.getElementById('spSkip');
+    var draw = function () {
+      st.innerHTML = phase === 'prep' ? '📝 ' + (s.prepLabel || 'Chuẩn bị') + ': <b>' + left + 's</b>' : '🔴 Bạn nói đi! Còn <b>' + fmtTime(left) + '</b>';
+      st.className = 'sp-state ' + phase; bar.style.width = ((total - left) / total * 100) + '%';
+      skip.textContent = phase === 'prep' ? 'Bắt đầu nói →' : 'Câu tiếp →';
+      skip.disabled = phase === 'rec' && Date.now() - started < (s.minRec || 5) * 1000;
+    };
+    var go = function () {
+      if (phase === 'prep') {
+        phase = 'rec'; left = total = s.rec; clearInterval(sp.timer);
+        sess.timeline.push(fmtTime((Date.now() - sp.recStart) / 1000) + '   bắt đầu nói (long turn)');
+        st.innerHTML = '🔊 …'; skip.disabled = true;
+        spSay(s.recSay || '').then(function () { if (sp.cur !== s) return; started = Date.now(); draw(); sp.timer = setInterval(tickF, 1000); });
+      } else spNext();
+    };
+    var tickF = function () { left--; if (left <= 0) go(); else draw(); };
+    skip.onclick = go;
+    draw();
+    sp.timer = setInterval(tickF, 1000);
+  });
+}
+function spFinish(reason) {
+  if (submitting || sp.finishing) return; sp.finishing = true;
+  clearInterval(sp.timer); clearInterval(timerId);
+  try { window.speechSynthesis && speechSynthesis.cancel(); } catch (e) {}
+  monitor(false);
+  var dur = Math.round((Date.now() - sp.recStart) / 1000);
+  var stopAll = function () { if (sp.stream) sp.stream.getTracks().forEach(function (x) { x.stop(); }); sp.stream = null; try { sp.ac && sp.ac.close(); } catch (e) {} };
+  var after = function () {
+    stopAll();
+    var blob = new Blob(sp.chunks, { type: sp.mime.split(';')[0] }), url = URL.createObjectURL(blob);
+    var box = document.getElementById('spBox');
+    if (box) box.innerHTML = '<div class="sp-card"><h3>' + (reason ? esc(reason) + ' ' : '') + '🎉 Bạn đã hoàn thành bài nói (' + fmtTime(dur) + ')</h3><audio controls src="' + url + '" style="width:100%"></audio><p class="inst">Bài sẽ tự gửi cho giáo viên…</p></div>';
+    spUpload(blob, url, dur);
+  };
+  if (sp.rec && sp.rec.state !== 'inactive') { sp.rec.onstop = after; sp.rec.stop(); } else after();
+}
+function spUpload(blob, url, dur) {
+  submitting = true; overlay(true, 'Đang gửi bài nói (' + Math.round(blob.size / 1024) + ' KB)…');
+  var rd = new FileReader();
+  rd.onload = function () {
+    var b64 = String(rd.result).split(',')[1] || '';
+    api('submit_speaking', { id: current.id, title: current.title + ' (' + (current.set || '') + ')', student: student, audio: b64, mime: blob.type || 'audio/webm', duration: dur, timeline: sess.timeline.join('\n') + (sess.notes ? '\nGhi chú Part 2: ' + sess.notes : ''), viol: sess.viol || [] }).then(function () {
+      submitting = false; overlay(false);
+      var h = LS.get('ken_hist', {}); h[current.id] = { done: true }; LS.set('ken_hist', h);
+      prodResult(dur, 0, 0, url);
+    }).catch(function (e) {
+      submitting = false; overlay(false);
+      modal('Chưa gửi được bài nói', esc(e.message) + '<br>Đừng tắt trang. Kiểm tra mạng rồi bấm <b>Gửi lại</b>.', 'Gửi lại', false).then(function () { spUpload(blob, url, dur); });
+    });
+  };
+  rd.readAsDataURL(blob);
+}
+/* ---------- giáo viên: bài Viết & Nói ---------- */
+var adminSubsData = [];
+function adminSubs() {
+  app.onclick = null;
+  app.innerHTML = adminShell('subs', '<div class="card"><div id="sbox"><div class="loading">Đang tải bài…</div></div></div>');
+  bindShell();
+  api('subs', { pw: adminPw }).then(function (r) {
+    adminSubsData = r.subs || [];
+    document.getElementById('sbox').innerHTML = '<div class="filters"><select id="sKind"><option value="">Writing + Speaking</option><option>Writing</option><option>Speaking</option></select>' +
+      '<input id="sCls" placeholder="Lọc theo lớp…"><input id="sName" placeholder="Tìm tên / mã SV / đề…"></div>' +
+      '<p style="color:var(--muted);font-size:14px">Chấm band và ghi nhận xét trực tiếp ở cột <b>Band</b> / <b>Nhận xét</b> trong Google Sheet (trang tính “Writing” và “Speaking”). File ghi âm nằm trong thư mục Google Drive “KEN IELTS – Bài nói”.</p><div id="slist"></div>';
+    ['sKind', 'sCls', 'sName'].forEach(function (id) { document.getElementById(id).addEventListener('input', drawSubs); });
+    drawSubs();
+  }).catch(adminErr);
+}
+function drawSubs() {
+  var g = function (id) { return document.getElementById(id).value.trim().toLowerCase(); };
+  var k = g('sKind'), c = g('sCls'), n = g('sName');
+  var rows = adminSubsData.filter(function (x) { return (!k || String(x.kind).toLowerCase() === k) && (!c || String(x.cls).toLowerCase().indexOf(c) > -1) && (!n || (x.name + ' ' + x.sid + ' ' + x.testTitle).toLowerCase().indexOf(n) > -1); });
+  document.getElementById('slist').innerHTML = rows.length ? rows.map(function (x) {
+    var W = x.kind === 'Writing';
+    return '<details class="sub-row"><summary><span class="tag ' + esc(x.kind) + '">' + esc(x.kind) + '</span><b>' + esc(x.name) + '</b><span>' + esc(x.sid) + ' · ' + esc(x.cls) + '</span><span>' + esc(x.testTitle) + '</span><span style="color:var(--muted)">' + esc(x.time) + '</span>' +
+      (+x.violations ? '<span class="viol-chip" style="color:#fff">⚠ ' + esc(x.violations) + '</span>' : '') + (x.score ? '<span class="badge">Band: ' + esc(x.score) + '</span>' : '') + '</summary>' +
+      (W ? (x.p1 ? '<p><b>Task 1</b> (' + esc(x.words1) + ' từ) – <i>' + esc(x.p1) + '</i></p><pre>' + esc(x.t1) + '</pre>' : '') + (x.p2 ? '<p><b>Task 2</b> (' + esc(x.words2) + ' từ) – <i>' + esc(x.p2) + '</i></p><pre>' + esc(x.t2) + '</pre>' : '')
+        : '<p>' + (/^https?:/.test(x.audioUrl) ? '<a class="btn primary sm" href="' + esc(x.audioUrl) + '" target="_blank" rel="noopener">🎧 Mở file ghi âm</a>' : esc(x.audioUrl || '')) + ' · ' + esc(x.duration) + ' phút</p><pre>' + esc(x.timeline) + '</pre>') +
+      (x.violLog ? '<p style="color:var(--bad);font-size:13px">Vi phạm: ' + esc(x.violLog) + '</p>' : '') + (x.comment ? '<p><b>Nhận xét:</b> ' + esc(x.comment) + '</p>' : '') + '</details>';
+  }).join('') : '<div class="empty">Chưa có bài nộp.</div>';
+}
+
 /* ================= GIÁO VIÊN ================= */
 var adminPw = SS.get('ken_pw');
 function renderAdmin() {
@@ -998,12 +1338,12 @@ function renderAdmin() {
 function adminShell(tab, inner) {
   return '<div class="row" style="justify-content:space-between;margin-bottom:12px"><h2 style="margin:0">Khu vực giáo viên</h2>' +
     '<div class="row"><button class="btn ghost sm" id="toStu">Trang học viên</button><button class="btn ghost sm" id="logout">Đăng xuất</button></div></div>' +
-    '<div class="tabs seg"><button data-t="tests" class="' + (tab === 'tests' ? 'on' : '') + '">📚 Đề thi</button><button data-t="results" class="' + (tab === 'results' ? 'on' : '') + '">📊 Kết quả học viên</button></div>' + inner;
+    '<div class="tabs seg"><button data-t="tests" class="' + (tab === 'tests' ? 'on' : '') + '">📚 Đề thi</button><button data-t="results" class="' + (tab === 'results' ? 'on' : '') + '">📊 Kết quả Reading/Listening</button><button data-t="subs" class="' + (tab === 'subs' ? 'on' : '') + '">✍️🎤 Bài Viết &amp; Nói</button></div>' + inner;
 }
 function bindShell() {
   document.getElementById('toStu').onclick = goHome;
   document.getElementById('logout').onclick = function () { adminPw = null; SS.set('ken_pw', ''); renderAdmin(); };
-  document.querySelector('.tabs').onclick = function (e) { var b = e.target.closest('[data-t]'); if (!b) return; b.getAttribute('data-t') === 'tests' ? adminTests() : adminResults(); };
+  document.querySelector('.tabs').onclick = function (e) { var b = e.target.closest('[data-t]'); if (!b) return; var k = b.getAttribute('data-t'); k === 'tests' ? adminTests() : k === 'subs' ? adminSubs() : adminResults(); };
 }
 var adminData = null;
 function adminTests() {

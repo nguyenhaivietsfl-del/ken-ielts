@@ -467,6 +467,7 @@ function demoApi(b) {
     case 'results': return { ok: true, results: results };
     case 'submit_writing': case 'submit_speaking': { var subs = LS.get('ken_demo_subs', []), ss = cleanStudent(b.student); subs.unshift({ kind: b.action === 'submit_writing' ? 'Writing' : 'Speaking', time: new Date().toLocaleString('vi-VN'), name: ss.name, sid: ss.sid, school: ss.school, cls: ss.cls, testId: b.id, testTitle: b.title, p1: b.p1 || '', p2: b.p2 || '', t1: b.t1 || '', t2: b.t2 || '', words1: wordCount(b.t1), words2: wordCount(b.t2), audioUrl: b.audio ? '(dùng thử: không lưu file ghi âm)' : '', duration: Math.round((+b.duration || 0) / 6) / 10, timeline: b.timeline || '', violations: (b.viol || []).length, violLog: violText(b.viol) }); LS.set('ken_demo_subs', subs.slice(0, 50)); return { ok: true }; }
     case 'subs': return { ok: true, subs: LS.get('ken_demo_subs', []) };
+    case 'rescore': return { ok: true, ai: null, aiError: 'Bản dùng thử không chấm AI – cần gắn khóa API trên Apps Script.' };
   }
   throw new Error('Yêu cầu không hợp lệ.');
 }
@@ -1105,11 +1106,27 @@ function prodSubmit(auto, reason) {
   });
 }
 function htmlText(h) { var d = document.createElement('div'); d.innerHTML = String(h || '').replace(/<\/(p|div|h\d)>/g, '\n'); return d.textContent.replace(/\n{2,}/g, '\n').trim(); }
+function aiPrompts(x) { return Promise.resolve({}); }
+function rescoreReq(x, pw) {
+  return aiPrompts(x).then(function (p) { return api('rescore', Object.assign({ pw: pw || '', kind: x.kind, time: x.time, sid: x.sid, testId: x.testId }, p)); });
+}
+function bindAiRetry(res) {
+  var b = document.getElementById('aiRetry'); if (!b || !res || !res.ref) return;
+  b.onclick = function () {
+    overlay(true, 'Đang chấm lại bằng AI (khoảng 20–90 giây)…');
+    var ref = Object.assign({}, res.ref, { choice: sess && sess.answers ? sess.answers.choice : '' });
+    rescoreReq(ref).then(function (r) {
+      overlay(false); r.ref = res.ref;
+      var box = document.getElementById('aiBox'); if (box) box.outerHTML = aiCard(r.ai || r.aiError ? r : { aiError: 'không rõ lỗi', ref: res.ref });
+      bindAiRetry(r);
+    }).catch(function (e) { overlay(false); modal('Chưa chấm lại được', esc(e.message), 'OK', false); });
+  };
+}
 function aiCard(r) {
   if (!r) return '';
-  if (!r.ai) return r.aiError ? '<div class="card review"><h2>🤖 Chấm bằng AI</h2><p style="color:var(--muted)">Chưa chấm tự động được lần này (' + esc(r.aiError) + '). Giáo viên sẽ chấm.</p></div>' : '';
+  if (!r.ai) return r.aiError ? '<div class="card review" id="aiBox"><h2>🤖 Chấm bằng AI</h2><p style="color:var(--muted)">Chưa chấm tự động được lần này (' + esc(r.aiError) + '). Giáo viên sẽ chấm.</p>' + (r.ref ? '<button class="btn primary" id="aiRetry">🔄 Chấm lại bằng AI</button>' : '') + '</div>' : '';
   var a = r.ai, L = function (arr) { return (arr || []).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join(''); };
-  return '<div class="card review ai"><h2>🤖 AI chấm: <span class="ai-score">' + esc(a.overall) + '</span></h2><p class="inst">Điểm do AI chấm theo tiêu chí chính thức, mang tính tham khảo; giáo viên có thể điều chỉnh.</p>' +
+  return '<div class="card review ai" id="aiBox"><h2>🤖 AI chấm: <span class="ai-score">' + esc(a.overall) + '</span></h2><p class="inst">Điểm do AI chấm theo tiêu chí chính thức, mang tính tham khảo; giáo viên có thể điều chỉnh.</p>' +
     '<table class="ai-tbl">' + (a.criteria || []).map(function (c) { return '<tr><th>' + esc(c.name) + '</th><td class="sc">' + esc(c.score) + '</td><td>' + esc(c.comment) + '</td></tr>'; }).join('') + '</table>' +
     (a.strengths && a.strengths.length ? '<h3>👍 Điểm mạnh</h3><ul>' + L(a.strengths) + '</ul>' : '') +
     (a.improvements && a.improvements.length ? '<h3>🎯 Cần cải thiện</h3><ul>' + L(a.improvements) + '</ul>' : '') +
@@ -1133,6 +1150,7 @@ function prodResult(dur, n1, n2, audioUrl, res) {
   app.innerHTML = html + '</section>';
   window.scrollTo(0, 0);
   document.getElementById('backList').onclick = renderList;
+  bindAiRetry(res);
 }
 
 /* ---------- SPEAKING ---------- */
@@ -1336,10 +1354,39 @@ function adminSubs() {
     adminSubsData = r.subs || [];
     document.getElementById('sbox').innerHTML = '<div class="filters"><select id="sKind"><option value="">Writing + Speaking</option><option>Writing</option><option>Speaking</option></select>' +
       '<input id="sCls" placeholder="Lọc theo lớp…"><input id="sName" placeholder="Tìm tên / mã SV / đề…"></div>' +
-      '<p style="color:var(--muted);font-size:14px">Chấm band và ghi nhận xét trực tiếp ở cột <b>Band</b> / <b>Nhận xét</b> trong Google Sheet (trang tính “Writing” và “Speaking”). File ghi âm nằm trong thư mục Google Drive “KEN IELTS – Bài nói”.</p><div id="slist"></div>';
+      '<p style="color:var(--muted);font-size:14px">Chấm band và ghi nhận xét trực tiếp ở cột <b>Band</b> / <b>Nhận xét</b> trong Google Sheet (trang tính “Writing” và “Speaking”). File ghi âm nằm trong thư mục Google Drive “KEN IELTS – Bài nói”.</p><p><button class="btn primary" id="aiAll">🤖 Chấm AI tất cả bài chưa có điểm</button> <span id="aiProg" style="color:var(--muted)"></span></p><div id="slist"></div>';
     ['sKind', 'sCls', 'sName'].forEach(function (id) { document.getElementById(id).addEventListener('input', drawSubs); });
+    document.getElementById('sbox').addEventListener('click', subsAiClick);
     drawSubs();
   }).catch(adminErr);
+}
+var aiBusy = false;
+function rescoreSub(x) {
+  x.aiErr = '';
+  return rescoreReq(x, adminPw).then(function (r) {
+    if (r.ai) { x.score = r.score; x.comment = r.comment; x.aiRes = r; } else x.aiErr = r.aiError || 'không rõ lỗi';
+  }).catch(function (e) { x.aiErr = e.message; });
+}
+function subsAiClick(e) {
+  var b = e.target.closest('[data-ai],#aiAll'); if (!b || aiBusy) return;
+  e.preventDefault();
+  var prog = document.getElementById('aiProg');
+  if (b.id === 'aiAll') {
+    var todo = adminSubsData.filter(function (x) { return !x.score && (x.kind !== 'Speaking' || /^https?:/.test(x.audioUrl)); });
+    if (!todo.length) { prog.textContent = 'Tất cả bài đã có điểm.'; return; }
+    modal('Chấm AI ' + todo.length + ' bài?', 'Máy sẽ chấm lần lượt từng bài (mỗi bài khoảng 20–90 giây). Giữ trang này mở cho tới khi xong.', 'Bắt đầu', 'Huỷ').then(function (ok) {
+      if (!ok) return; aiBusy = true; var i = 0, okN = 0;
+      (function next() {
+        if (i >= todo.length) { aiBusy = false; prog.textContent = '✅ Xong: chấm được ' + okN + '/' + todo.length + ' bài.'; drawSubs(); return; }
+        prog.textContent = '⏳ Đang chấm ' + (i + 1) + '/' + todo.length + ': ' + todo[i].name + '…';
+        rescoreSub(todo[i]).then(function () { if (todo[i].score) okN++; i++; drawSubs(); next(); });
+      })();
+    });
+    return;
+  }
+  var x = adminSubsData[+b.getAttribute('data-ai')]; if (!x) return;
+  aiBusy = true; b.disabled = true; b.textContent = '⏳ Đang chấm…';
+  rescoreSub(x).then(function () { aiBusy = false; drawSubs(); var d = document.querySelector('[data-ai="' + adminSubsData.indexOf(x) + '"]'); if (d) d.closest('details').open = true; });
 }
 function drawSubs() {
   var g = function (id) { return document.getElementById(id).value.trim().toLowerCase(); };
@@ -1351,7 +1398,8 @@ function drawSubs() {
       (+x.violations ? '<span class="viol-chip" style="color:#fff">⚠ ' + esc(x.violations) + '</span>' : '') + (x.score ? '<span class="badge">Band: ' + esc(x.score) + '</span>' : '') + '</summary>' +
       (W ? (x.p1 ? '<p><b>Task 1</b> (' + esc(x.words1) + ' từ) – <i>' + esc(x.p1) + '</i></p><pre>' + esc(x.t1) + '</pre>' : '') + (x.p2 ? '<p><b>Task 2</b> (' + esc(x.words2) + ' từ) – <i>' + esc(x.p2) + '</i></p><pre>' + esc(x.t2) + '</pre>' : '')
         : '<p>' + (/^https?:/.test(x.audioUrl) ? '<a class="btn primary sm" href="' + esc(x.audioUrl) + '" target="_blank" rel="noopener">🎧 Mở file ghi âm</a>' : esc(x.audioUrl || '')) + ' · ' + esc(x.duration) + ' phút</p><pre>' + esc(x.timeline) + '</pre>') +
-      (x.violLog ? '<p style="color:var(--bad);font-size:13px">Vi phạm: ' + esc(x.violLog) + '</p>' : '') + (x.comment ? '<p><b>Nhận xét:</b> ' + esc(x.comment) + '</p>' : '') + '</details>';
+      (x.violLog ? '<p style="color:var(--bad);font-size:13px">Vi phạm: ' + esc(x.violLog) + '</p>' : '') + (x.comment ? '<p><b>Nhận xét:</b> ' + esc(x.comment) + '</p>' : '') + (x.aiRes ? aiCard(x.aiRes).replace(' id="aiBox"', '') : '') + (x.aiErr ? '<p style="color:var(--bad)">AI: ' + esc(x.aiErr) + '</p>' : '') +
+      '<p><button class="btn sm' + (x.score ? '' : ' primary') + '" data-ai="' + adminSubsData.indexOf(x) + '">' + (x.score ? '🔄 Chấm lại bằng AI' : '🤖 Chấm bằng AI') + '</button></p></details>';
   }).join('') : '<div class="empty">Chưa có bài nộp.</div>';
 }
 

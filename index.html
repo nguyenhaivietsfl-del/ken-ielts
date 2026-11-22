@@ -925,13 +925,19 @@ function goFull() {
   var d = document.documentElement, f = d.requestFullscreen || d.webkitRequestFullscreen;
   if (f && !/iPhone|iPod/.test(navigator.userAgent)) { try { var p = f.call(d); if (p && p.then) p.then(function () { mon.full = true; }).catch(function () {}); else mon.full = true; } catch (e) {} }
 }
+function isTyping() { var a = document.activeElement; return !!a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName); }
 function isSplit() {
+  if (/iPhone|iPod/.test(navigator.userAgent)) return false;               /* iPhone không chia đôi màn hình được */
+  if (window.visualViewport && visualViewport.scale > 1.05) return mon.split; /* đang phóng to (zoom) không tính */
+  if (isTyping()) return mon.split;                                          /* bàn phím ảo bật lên khi gõ */
   var land = window.matchMedia && matchMedia('(orientation: landscape)').matches;
   var sw = land ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height);
-  return sw > 0 && window.innerWidth / sw < 0.62;
+  var w = document.documentElement.clientWidth || window.innerWidth;
+  return sw > 0 && w / sw < 0.62;
 }
 function onVis() { if (document.hidden) violation('Rời trang / chuyển tab'); }
-function onBlur() { setTimeout(function () { if (mon.on && !document.hidden && !document.hasFocus()) violation('Chuyển sang cửa sổ / ứng dụng khác'); }, 400); }
+function onBlur() { if (/iPhone|iPad|iPod|Android/.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.userAgent))) return; /* điện thoại/máy tính bảng: chỉ tính khi rời trang (visibilitychange) */
+  setTimeout(function () { if (mon.on && !document.hidden && !document.hasFocus() && !isTyping()) violation('Chuyển sang cửa sổ / ứng dụng khác'); }, 400); }
 function onFs() {
   var fe = document.fullscreenElement || document.webkitFullscreenElement;
   if (fe) { mon.full = true; return; }

@@ -3,9 +3,9 @@
 Cách làm giống hệt web IELTS, chỉ là một dự án mới, tách riêng.
 
 ## Gồm những gì
-- `index.html`, `data/`, `img/`: trang web gồm 23 bài thi.
-  - 12 bài Reading: Succeed 1–8 và B1 Preliminary 1 Test 1–4.
-  - 11 bài Listening: thiếu Succeed Test 3 vì chưa có đáp án.
+- `index.html`, `data/`, `img/`: trang web gồm 12 đề × 4 kỹ năng.
+  - Reading 12 bài, Listening 11 bài (thiếu Succeed Test 3 vì chưa có đáp án): chấm tự động.
+  - Writing 12 bài, Speaking 12 bài (ghi âm): gửi về Google Sheet / Google Drive để giáo viên chấm.
 - `audio/`: 11 file nghe, mỗi đề một file đã ghép đủ 4 part (SC1.mp3 … SC8.mp3, B1T1.mp3 … B1T4.mp3). Giải nén gói audio vào thư mục này.
 - `Code.gs` + `PetKeys.gs`: máy chủ Google Apps Script. Máy chủ chấm điểm và lưu kết quả. Đáp án chỉ nằm trên máy chủ nên học viên không xem được.
 
@@ -46,6 +46,11 @@ Muốn đổi thì sửa `CONFIG` ở đầu phần script của `index.html`.
   - Part 3 tự chuyển thành CHỮ IN HOA.
 - **Giám sát:** các hành vi sau đều bị cảnh báo và ghi lại: rời tab, chuyển ứng dụng/cửa sổ, thoát toàn màn hình, chia đôi màn hình. Đến lần thứ 5 bài tự nộp (`MAX_VIOLATIONS`). Không cho sao chép, dán hay bấm chuột phải.
 - **Kết quả:** quy đổi ra thang điểm Cambridge (ước tính) và trình độ A2 / B1 / B2. Kết quả gửi về trang tính "Results"; khu vực giáo viên có lọc kết quả và tải file Excel.
+
+## Writing và Speaking
+- **Writing:** 45 phút, Part 1 email + Part 2 chọn article hoặc story, đếm từ tự động, cấm dán chữ, giám sát như Reading. Bài nộp nằm ở trang tính **Writing**; giáo viên ghi điểm và nhận xét vào cột **Điểm** / **Nhận xét**.
+- **Speaking:** kiểm tra micro, máy đọc câu hỏi tiếng Anh, ghi âm liên tục khoảng 12–14 phút (Part 1 phỏng vấn, Part 2 tả 2 ảnh, Part 3 tình huống 2 phút, Part 4 câu hỏi mở rộng). File ghi âm lưu trong thư mục Drive **KEN PET – Bài nói**; trang tính **Speaking** có link file và mốc thời gian từng câu.
+- Sau khi thay `Code.gs` mới phải chạy lại hàm `setup` (cấp thêm quyền Google Drive) rồi Triển khai → **Quản lý triển khai** → ✏️ Sửa → Phiên bản: **Phiên bản mới** → Triển khai. Link `/exec` giữ nguyên.
 
 ## Thêm đáp án Listening Succeed Test 3 sau này
 Khi có đáp án, gửi cho Claude để bổ sung bài này vào web.

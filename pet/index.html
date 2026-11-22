@@ -254,6 +254,31 @@ td.v-bad{color:var(--bad);font-weight:700}
 .ctx{color:var(--muted);font-style:italic;margin:16px 0 4px}
 .qwrap .pbox{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px}
 @media(max-width:600px){.opts.pics{gap:6px}.opt{font-size:15px}}
+
+.tcard.Writing::before{background:#7a5cc4}.tcard.Speaking::before{background:#c4473d}
+.tag.Writing{background:#efe9fb;color:#5a3ea8}.tag.Speaking{background:#fbeae8;color:#a3352c}
+.wpart{margin-bottom:30px;scroll-margin-top:10px}
+.wpart>h3{padding:8px 12px;background:var(--brand);color:#fff;border-radius:10px;font-size:16px}
+.wpart h4{margin:14px 0 6px;color:var(--brand)}
+.email{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;margin:10px 0}
+.em-h{padding:8px 14px;border-bottom:1px solid var(--line);background:var(--soft);font-size:15px}.em-h span{color:var(--muted);display:inline-block;width:70px}
+.em-b{padding:10px 14px}.em-l{display:flex;gap:12px;align-items:flex-start;justify-content:space-between}.em-l p{margin:.3em 0;flex:1}
+.note{flex:0 0 auto;background:#fff4dc;color:#7a5200;border:1.5px solid #f0c674;border-radius:999px;padding:2px 10px;font-size:13.5px;font-style:italic;font-weight:600;margin-top:4px;max-width:40%}
+.notice{background:#fff;border:2px solid var(--brand2);border-radius:14px;padding:10px 16px;margin:10px 0;text-align:center}.notice p{margin:.3em 0}
+.wbox{margin-top:10px}
+textarea.wtext{min-height:260px;font-size:16.5px;line-height:1.65;font-family:'Source Serif 4',Georgia,serif;background:#fffdf8}
+.wc{font-size:13.5px;font-weight:700;margin-top:4px;text-align:right}.wc.low{color:#b26b00}.wc.ok{color:var(--ok)}.wc.high{color:var(--bad)}
+.choice{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.is-writing .ptabs button{cursor:pointer}
+.sp-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:clamp(16px,3vw,26px);margin-top:6px}
+.sp-img{max-width:100%;max-height:46vh;width:auto;margin:10px auto;border-radius:12px;display:block}
+.sp-q{font-size:20px;font-weight:700;line-height:1.4;margin:14px 0}
+.sp-state{font-weight:700;font-size:17px;margin:14px 0 8px}.sp-state.rec{color:var(--bad)}.sp-state.prep{color:var(--brand2)}
+.meter{margin:12px 0}.meter .a-bar i{background:var(--ok);transition:width .08s}
+#spParts button[disabled]{opacity:1;cursor:default}
+.sub-row{border-bottom:1px solid var(--line);padding:12px 0}.sub-row summary{cursor:pointer;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.sub-row pre{white-space:pre-wrap;font-family:'Source Serif 4',Georgia,serif;font-size:15.5px;background:#fffdf8;border:1px solid var(--line);border-radius:10px;padding:12px;margin:8px 0}
+@media(max-width:600px){.note{max-width:45%;font-size:12.5px}.choice{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -264,7 +289,7 @@ td.v-bad{color:var(--bad);font-weight:700}
   <button class="who hidden" id="whoBtn" title="Đổi thông tin"><span id="whoName"></span> ✎</button>
 </header>
 <main id="app"></main>
-<footer>© KEN CLASSES · PET (B1 Preliminary) Reading &amp; Listening Practice · <button id="adminLink">Khu vực giáo viên</button></footer>
+<footer>© KEN CLASSES · PET (B1 Preliminary) Practice – Reading · Listening · Writing · Speaking · <button id="adminLink">Khu vực giáo viên</button></footer>
 
 <script>
 /* ================= CẤU HÌNH ================= */
@@ -453,7 +478,7 @@ function api(action, data) {
 /* chế độ dùng thử: lưu trên máy, chấm bằng DEMO_KEYS nếu có */
 function demoApi(b) {
   var custom = LS.get('kpet_demo_custom', []), settings = LS.get('kpet_demo_settings', {}), results = LS.get('kpet_demo_results', []);
-  if (['login', 'admin_data', 'set_settings', 'save_test', 'delete_test', 'results'].indexOf(b.action) > -1 && b.pw !== CONFIG.DEMO_PASSWORD) throw new Error('Sai mật khẩu giáo viên.');
+  if (['login', 'admin_data', 'set_settings', 'save_test', 'delete_test', 'results', 'subs'].indexOf(b.action) > -1 && b.pw !== CONFIG.DEMO_PASSWORD) throw new Error('Sai mật khẩu giáo viên.');
   var find = function (id) { return custom.filter(function (t) { return t.id === id; })[0]; };
   var st = function (id) { var s = settings[id] || {}; return { active: s.active !== false, showKey: s.showKey !== false }; };
   switch (b.action) {
@@ -477,6 +502,8 @@ function demoApi(b) {
     case 'save_test': { var nt = cleanCustom(b.test); var i = custom.map(function (x) { return x.id; }).indexOf(nt.id); if (i > -1) custom[i] = nt; else custom.push(nt); LS.set('kpet_demo_custom', custom); return { ok: true }; }
     case 'delete_test': LS.set('kpet_demo_custom', custom.filter(function (t) { return t.id !== b.id; })); return { ok: true };
     case 'results': return { ok: true, results: results };
+    case 'submit_writing': case 'submit_speaking': { var subs = LS.get('kpet_demo_subs', []), ss = cleanStudent(b.student); subs.unshift({ kind: b.action === 'submit_writing' ? 'Writing' : 'Speaking', time: new Date().toLocaleString('vi-VN'), name: ss.name, sid: ss.sid, school: ss.school, cls: ss.cls, testId: b.id, testTitle: b.title, choice: b.choice || '', p1: b.p1 || '', p2: b.p2 || '', words1: wordCount(b.p1), words2: wordCount(b.p2), audioUrl: b.audio ? '(dùng thử: không lưu file ghi âm)' : '', duration: Math.round((+b.duration || 0) / 6) / 10, timeline: b.timeline || '', violations: (b.viol || []).length, violLog: violText(b.viol) }); LS.set('kpet_demo_subs', subs.slice(0, 50)); return { ok: true }; }
+    case 'subs': return { ok: true, subs: LS.get('kpet_demo_subs', []) };
   }
   throw new Error('Yêu cầu không hợp lệ.');
 }
@@ -497,8 +524,8 @@ function renderInfo() {
   app.innerHTML =
     '<section class="hero"><div><span class="eyebrow">PET · B1 Preliminary</span>' +
     '<h1>Luyện đề PET như thi thật,<br>trên mọi thiết bị.</h1>' +
-    '<p class="lead">12 đề Reading &amp; Listening (Succeed in B1 Preliminary + Cambridge B1 Preliminary 1), bấm giờ như thi thật, giám sát chặt chẽ. Kết quả được gửi thẳng tới giáo viên.</p>' +
-    '<div class="hero-points"><span>📱 Điện thoại</span><span>📲 iPad</span><span>💻 Laptop</span><span>⏱ 45 phút Reading</span><span>🎧 Audio phát 1 lần</span><span>🎯 Thang điểm Cambridge</span></div></div>' +
+    '<p class="lead">12 đề PET đủ 4 kỹ năng (Succeed in B1 Preliminary + Cambridge B1 Preliminary 1): Reading, Listening chấm tự động; Writing và Speaking (ghi âm) gửi thẳng tới giáo viên chấm.</p>' +
+    '<div class="hero-points"><span>📱 Điện thoại</span><span>📲 iPad</span><span>💻 Laptop</span><span>⏱ 45 phút Reading</span><span>🎧 Audio phát 1 lần</span><span>✍️ Writing</span><span>🎤 Speaking ghi âm</span><span>🎯 Thang điểm Cambridge</span></div></div>' +
     '<form class="card" id="infoForm" novalidate><h2>Thông tin học viên</h2>' +
     '<label>Họ và tên SV/HS<input name="name" autocomplete="name" value="' + esc(s.name || '') + '" placeholder="VD: Nguyễn Văn An"></label>' +
     '<label>Mã SV/HS<input name="sid" value="' + esc(s.sid || '') + '" placeholder="VD: 2257220201"></label>' +
@@ -530,7 +557,7 @@ function loadCatalog() {
 function renderList() {
   setTesting(false); updateWho();
   app.innerHTML = '<div class="list-head"><div><span class="eyebrow">Xin chào, ' + esc(student.name.split(' ').pop()) + '</span><h2 style="margin-top:10px">Chọn đề để luyện</h2></div>' +
-    '<div class="seg" id="seg"><button data-f="all">Tất cả</button><button data-f="Reading">📖 Reading</button><button data-f="Listening">🎧 Listening</button></div></div>' +
+    '<div class="seg" id="seg"><button data-f="all">Tất cả</button><button data-f="Reading">📖 Reading</button><button data-f="Listening">🎧 Listening</button><button data-f="Writing">✍️ Writing</button><button data-f="Speaking">🎤 Speaking</button></div></div>' +
     '<div class="toolbar"><input id="q" placeholder="🔍 Tìm đề (VD: Test 3, Succeed…)" value="' + esc(filt.q) + '"><select id="vol"><option value="">Tất cả bộ đề</option></select></div>' +
     '<div id="tests"><div class="loading">Đang tải đề…</div></div>';
   document.getElementById('seg').onclick = function (e) { var b = e.target.closest('button'); if (b) { filt.type = b.getAttribute('data-f'); drawTests(); } };
@@ -557,10 +584,10 @@ function drawTests() {
   box.innerHTML = order.map(function (v) {
     return '<h3 class="vol-h">' + esc(v) + '</h3><div class="tests">' + groups[v].map(function (t) {
       var h = hist[t.id], inProg = LS.get('kpet_sess_' + t.id, null);
-      var time = t.type === 'Reading' ? (t.minutes || CONFIG.READING_MINUTES) + ' phút' : (t.duration ? Math.ceil(t.duration / 60) + ' phút nghe' : 'Theo audio');
-      return '<div class="tcard ' + t.type + '"><span class="tag ' + t.type + '">' + (t.type === 'Reading' ? '📖 ' : '🎧 ') + t.type + '</span>' +
-        '<h3>' + esc(t.title) + '</h3><div class="meta"><span>' + esc(t.source || '') + '</span><span>📝 ' + t.count + ' câu</span><span>⏱ ' + time + '</span></div>' +
-        (h ? '<span class="badge">Lần gần nhất: ' + h.score + '/' + h.total + ' · ' + bandText(h.band) + ' (' + levelOf(h.band) + ')</span>' : '') +
+      var time = t.type === 'Writing' ? '45 phút' : t.type === 'Speaking' ? '≈ 13 phút' : t.type === 'Reading' ? (t.minutes || CONFIG.READING_MINUTES) + ' phút' : (t.duration ? Math.ceil(t.duration / 60) + ' phút nghe' : 'Theo audio');
+      return '<div class="tcard ' + t.type + '"><span class="tag ' + t.type + '">' + ({ Reading: '📖 ', Listening: '🎧 ', Writing: '✍️ ', Speaking: '🎤 ' }[t.type] || '') + t.type + '</span>' +
+        '<h3>' + esc(t.title) + '</h3><div class="meta"><span>' + esc(t.source || '') + '</span><span>📝 ' + (t.type === 'Writing' ? '2 bài viết' : t.type === 'Speaking' ? '4 phần, ghi âm' : t.count + ' câu') + '</span><span>⏱ ' + time + '</span></div>' +
+        (h && h.done ? '<span class="badge">✅ Đã nộp – chờ giáo viên chấm</span>' : h ? '<span class="badge">Lần gần nhất: ' + h.score + '/' + h.total + ' · ' + bandText(h.band) + ' (' + levelOf(h.band) + ')</span>' : '') +
         '<button class="btn ' + (inProg ? 'accent' : 'primary') + '" data-start="' + esc(t.id) + '">' + (inProg ? 'Làm tiếp ▶' : (h ? 'Làm lại' : 'Bắt đầu làm bài')) + '</button></div>';
     }).join('') + '</div>';
   }).join('');
@@ -574,6 +601,7 @@ function startTest(id) {
     overlay(true, 'Đang mở đề…');
     (card.custom ? api('get', { id: id }).then(function (r) { return r.test; }) : getJSON('data/tests/' + id + '.json')).then(function (t) {
       overlay(false);
+      if (IS_PROD(t)) return startProd(t, key);
       current = t;
       sess = LS.get(key, null);
       var limit = t.type === 'Reading' ? (t.minutes || CONFIG.READING_MINUTES) * 60 : 0;
@@ -587,6 +615,7 @@ function startTest(id) {
   };
   if (old) return go();
   var rd = card.type === 'Reading';
+  if (IS_PROD(card)) return modal('Quy chế làm bài', prodRules(card), 'Tôi đã hiểu, vào thi', 'Để sau').then(function (ok) { if (ok) go(); });
   modal('Quy chế làm bài', '<b>' + esc(card.title || '') + '</b> · ' + esc(card.source || '') + '<br>' +
     (rd ? '⏱ Thời gian <b>' + (card.minutes || CONFIG.READING_MINUTES) + ' phút</b> (6 phần, 32 câu), chỉ được nộp sớm sau ' + CONFIG.READING_LOCK_MIN + ' phút. Hết giờ bài tự nộp.<br>👆 Câu trắc nghiệm: bấm chọn đáp án. Part 6: gõ <b>một từ</b> bằng <b>chữ thường</b>.'
       : '🎧 Audio (4 phần, 25 câu) chỉ phát <b>MỘT LẦN DUY NHẤT</b>, không tua, không dừng, không nghe lại. Mỗi đoạn trong audio đã được đọc 2 lần như thi thật. Đeo tai nghe và kiểm tra âm lượng trước khi bấm nghe.<br>⚠️ Tải lại trang hay thoát ra, audio vẫn chạy theo giờ thật – phần đã lỡ sẽ không nghe lại được.<br>👆 Câu trắc nghiệm: bấm chọn. Part 3: gõ đáp án bằng <b>CHỮ IN HOA</b>.') +
@@ -990,6 +1019,7 @@ function showViol() { var c = document.getElementById('violChip'); if (!c) retur
 
 /* ---- nộp bài ---- */
 function doSubmit(auto, reason) {
+  if (IS_PROD(current)) return prodSubmit(auto, reason);
   if (submitting) return;
   var nums = [].concat.apply([], current.parts.map(function (p) { return p.nums; }));
   var un = nums.filter(function (n) { return !String(sess.answers[n] || '').trim(); }).length;
@@ -1034,6 +1064,310 @@ function renderResult(r, dur) {
   document.getElementById('backList').onclick = renderList;
 }
 
+/* ================= WRITING & SPEAKING ================= */
+var IS_PROD = function (t) { return t && (t.type === 'Writing' || t.type === 'Speaking'); };
+function wordCount(s) { var m = String(s || '').trim().match(/[A-Za-zÀ-ỹ0-9’'-]+/g); return m ? m.length : 0; }
+function startProd(t, key) {
+  current = t;
+  sess = LS.get(key, null);
+  if (sess && sess.end && sess.end < Date.now() && t.type === 'Writing') { /* hết giờ khi đang tắt máy: nộp luôn phần đã viết */ }
+  if (t.type === 'Writing') {
+    if (!sess) sess = { answers: { p1: '', p2: '', choice: '' }, viol: [], start: Date.now(), end: Date.now() + (t.minutes || 45) * 60000 };
+    LS.set(key, sess); renderWriting(); goFull();
+  } else {
+    sess = { answers: {}, viol: [], start: 0, end: 0, timeline: [] };
+    renderSpeaking();
+  }
+}
+
+/* ---------- WRITING ---------- */
+function renderWriting() {
+  setTesting(true);
+  var t = current, a = sess.answers, key = 'kpet_sess_' + t.id;
+  var box = function (id, val, ph) { return '<div class="wbox"><textarea class="wtext" id="' + id + '" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="sentences" placeholder="' + ph + '">' + esc(val || '') + '</textarea><div class="wc" id="' + id + 'c"></div></div>'; };
+  app.innerHTML = '<div class="test is-writing" id="testRoot">' +
+    '<div class="test-bar"><div class="tb-title"><b>' + esc(t.title) + '</b><small>' + esc(student.name) + ' · ' + esc(student.sid) + ' · ' + esc(t.source || '') + '</small></div>' +
+    '<span class="viol-chip hidden" id="violChip"></span><div class="timer" id="timer">--:--</div><button class="btn" id="submitBtn">Nộp bài</button></div>' +
+    '<div class="rule">✍️ Làm <b>cả 2 phần</b> · mỗi bài khoảng <b>100 từ</b> · 🚫 Không dán chữ, không rời trang</div>' +
+    '<div class="test-body"><section class="pane questions" id="qpane"><div class="qwrap">' +
+    '<section class="wpart" id="wp1"><h3>Part 1 · Question 1 <small>(bắt buộc)</small></h3>' + t.q1 + box('w1', a.p1, 'Viết email của bạn ở đây…') + '</section>' +
+    '<section class="wpart" id="wp2"><h3>Part 2 · Chọn <b>một</b> trong hai câu</h3>' +
+    '<div class="choice"><button type="button" class="opt' + (a.choice === 'Q2' ? ' sel' : '') + '" data-c="Q2"><b>2</b><span>Article – bài báo</span></button><button type="button" class="opt' + (a.choice === 'Q3' ? ' sel' : '') + '" data-c="Q3"><b>3</b><span>Story – câu chuyện</span></button></div>' +
+    '<div class="wq ' + (a.choice === 'Q2' ? '' : 'hidden') + '" id="wq2"><h4>Question 2</h4>' + t.q2 + '</div>' +
+    '<div class="wq ' + (a.choice === 'Q3' ? '' : 'hidden') + '" id="wq3"><h4>Question 3</h4>' + t.q3 + '</div>' +
+    '<div id="w2wrap" class="' + (a.choice ? '' : 'hidden') + '">' + box('w2', a.p2, 'Viết bài của bạn ở đây…') + '</div>' +
+    '<p class="inst" id="w2hint">' + (a.choice ? '' : '👆 Bấm chọn Question 2 hoặc Question 3 để bắt đầu viết.') + '</p></section>' +
+    '</div></section></div>' +
+    '<div class="bottom"><div class="ptabs"><button data-go="wp1">Part 1 <small id="t1c"></small></button><button data-go="wp2">Part 2 <small id="t2c"></small></button></div></div></div>';
+  var root = document.getElementById('testRoot');
+  var upd = function () {
+    [['w1', 'p1', 't1c'], ['w2', 'p2', 't2c']].forEach(function (x) {
+      var n = wordCount(a[x[1]]), el = document.getElementById(x[0] + 'c');
+      if (el) { el.textContent = n + ' từ' + (n < 80 ? ' · cần khoảng 100 từ' : n > 140 ? ' · hơi dài, khoảng 100 từ là đủ' : ' ✓'); el.className = 'wc ' + (n < 80 ? 'low' : n > 140 ? 'high' : 'ok'); }
+      document.getElementById(x[2]).textContent = '(' + n + ' từ)';
+    });
+  };
+  root.addEventListener('input', function (e) {
+    if (e.target.id === 'w1') a.p1 = e.target.value; else if (e.target.id === 'w2') a.p2 = e.target.value; else return;
+    LS.set(key, sess); upd();
+  });
+  ['paste', 'drop', 'copy', 'cut', 'contextmenu'].forEach(function (ev) { root.addEventListener(ev, function (e) { e.preventDefault(); if (ev === 'paste' || ev === 'drop') toast('Không được dán chữ vào bài viết.'); }); });
+  root.addEventListener('click', function (e) {
+    var c = e.target.closest('[data-c]');
+    if (c) {
+      var v = c.getAttribute('data-c'), go = function () {
+        a.choice = v; LS.set(key, sess);
+        [].forEach.call(root.querySelectorAll('[data-c]'), function (b) { b.classList.toggle('sel', b === c); });
+        document.getElementById('wq2').classList.toggle('hidden', v !== 'Q2'); document.getElementById('wq3').classList.toggle('hidden', v !== 'Q3');
+        document.getElementById('w2wrap').classList.remove('hidden'); document.getElementById('w2hint').textContent = '';
+        if (v === 'Q3' && !a.p2.trim()) { a.p2 = current.first + ' '; document.getElementById('w2').value = a.p2; LS.set(key, sess); upd(); }
+      };
+      if (a.choice && a.choice !== v && a.p2.trim() && a.p2.trim() !== current.first) modal('Đổi câu hỏi?', 'Bạn đã viết cho ' + a.choice + '. Đổi sang ' + v + ' thì phần đã viết vẫn giữ trong ô, hãy sửa lại cho phù hợp.', 'Đổi', 'Thôi').then(function (ok) { if (ok) go(); });
+      else go();
+      return;
+    }
+    var g = e.target.closest('[data-go]'); if (g) document.getElementById(g.getAttribute('data-go')).scrollIntoView({ behavior: 'smooth' });
+  });
+  document.getElementById('submitBtn').onclick = function () { prodSubmit(false); };
+  upd(); monitor(true); showViol();
+  clearInterval(timerId); prodTick(); timerId = setInterval(prodTick, 1000);
+}
+function prodTick() {
+  var el = document.getElementById('timer'); if (!el || !sess) return;
+  if (current.type === 'Writing') {
+    var left = (sess.end - Date.now()) / 1000;
+    el.textContent = '⏱ ' + fmtTime(left); el.classList.toggle('warn', left < 300);
+    if (left <= 0) { clearInterval(timerId); prodSubmit(true, 'Hết giờ!'); }
+  } else if (sp.recStart) {
+    el.textContent = '🎙 ' + fmtTime((Date.now() - sp.recStart) / 1000);
+  }
+}
+function prodSubmit(auto, reason) {
+  if (submitting) return;
+  if (current.type === 'Speaking') { if (auto) spFinish(reason); else toast('Hãy làm hết các phần, bài sẽ tự nộp khi kết thúc.'); return; }
+  var a = sess.answers, n1 = wordCount(a.p1), n2 = wordCount(a.p2);
+  var warn = [];
+  if (n1 < 20) warn.push('Part 1 mới có ' + n1 + ' từ');
+  if (!a.choice || n2 < 20) warn.push('Part 2 ' + (a.choice ? 'mới có ' + n2 + ' từ' : 'chưa chọn câu hỏi'));
+  var p = auto ? Promise.resolve(true) : modal('Nộp bài Writing?', (warn.length ? '⚠️ ' + warn.join('; ') + '.<br>' : '') + 'Part 1: <b>' + n1 + '</b> từ · Part 2: <b>' + n2 + '</b> từ. Nộp xong không sửa được nữa.', 'Nộp bài', 'Viết tiếp');
+  p.then(function (ok) {
+    if (!ok) return;
+    submitting = true; clearInterval(timerId);
+    overlay(true, (reason ? reason + ' ' : '') + 'Đang nộp bài…');
+    var dur = Math.round((Math.min(Date.now(), sess.end) - sess.start) / 1000);
+    api('submit_writing', { id: current.id, title: current.title, student: student, p1: a.p1, p2: a.p2, choice: a.choice, duration: dur, viol: sess.viol || [] }).then(function () {
+      submitting = false; overlay(false); monitor(false);
+      LS.del('kpet_sess_' + current.id);
+      var h = LS.get('kpet_hist', {}); h[current.id] = { done: true }; LS.set('kpet_hist', h);
+      prodResult(dur, n1, n2);
+    }).catch(function (e) {
+      submitting = false; overlay(false);
+      modal('Chưa nộp được bài', esc(e.message) + '<br>Bài viết vẫn được lưu trên máy. Kiểm tra mạng rồi bấm <b>Nộp lại</b>.', 'Nộp lại', false).then(function () { prodSubmit(true); });
+    });
+  });
+}
+function prodResult(dur, n1, n2, audioUrl) {
+  setTesting(false); updateWho();
+  var t = current, nv = (sess.viol || []).length, W = t.type === 'Writing';
+  var html = '<section class="result"><div class="card"><span class="eyebrow">' + t.type + '</span><h2 style="margin-top:10px">✅ Đã nộp: ' + esc(t.title) + '</h2>' +
+    '<p>' + (W ? 'Bài viết đã gửi tới giáo viên. Giáo viên sẽ chấm và nhận xét.' : 'Bài nói (file ghi âm) đã gửi tới giáo viên. Giáo viên sẽ nghe, chấm và nhận xét.') + '</p>' +
+    '<div class="info-grid"><span>Học viên</span><span>' + esc(student.name) + ' (' + esc(student.sid) + ')</span><span>Lớp</span><span>' + esc(student.cls) + ' · ' + esc(student.school) + '</span>' +
+    '<span>Thời gian</span><span>' + fmtTime(dur) + '</span>' + (W ? '<span>Số từ</span><span>Part 1: ' + n1 + ' · Part 2: ' + n2 + '</span>' : '') +
+    '<span>Vi phạm</span><span>' + (nv ? '<b style="color:var(--bad)">' + nv + ' lần</b>' : 'Không') + '</span></div>' +
+    (audioUrl ? '<p style="margin-top:14px"><b>Nghe lại bài của bạn:</b></p><audio controls src="' + audioUrl + '" style="width:100%"></audio>' : '') +
+    '<div class="row" style="margin-top:18px"><button class="btn primary" id="backList">← Về danh sách đề</button></div></div>';
+  if (W && (t.notes.q1 || t.notes.q2)) html += '<div class="card review"><h2>Tự kiểm tra: bài của bạn đã có đủ các ý này chưa?</h2><p><b>Part 1 (email):</b> ' + esc(t.notes.q1) + '</p>' + (sess.answers.choice === 'Q2' && t.notes.q2 ? '<p><b>Part 2 (article):</b> ' + esc(t.notes.q2) + '</p>' : '') +
+    '<p style="color:var(--muted);font-size:14px">Tiêu chí chấm PET: Content (đủ ý), Communicative Achievement (đúng thể loại, giọng văn), Organisation (bố cục, từ nối), Language (từ vựng, ngữ pháp).</p></div>';
+  app.innerHTML = html + '</section>';
+  window.scrollTo(0, 0);
+  document.getElementById('backList').onclick = renderList;
+}
+
+/* ---------- SPEAKING ---------- */
+var sp = {};
+function spSay(text) {
+  return new Promise(function (res) {
+    var S = window.speechSynthesis; if (!S || !window.SpeechSynthesisUtterance) return res();
+    try {
+      S.cancel();
+      var u = new SpeechSynthesisUtterance(text), vs = S.getVoices();
+      var v = vs.filter(function (x) { return /en-GB/i.test(x.lang); })[0] || vs.filter(function (x) { return /^en/i.test(x.lang); })[0];
+      if (v) u.voice = v; u.lang = v ? v.lang : 'en-GB'; u.rate = 0.92;
+      var done = false, fin = function () { if (!done) { done = true; clearTimeout(tm); res(); } };
+      var tm = setTimeout(fin, 2500 + text.length * 90);
+      u.onend = fin; u.onerror = fin; S.speak(u);
+    } catch (e) { res(); }
+  });
+}
+function spSteps(t) {
+  var s = [], P1 = ['What’s your name?', 'Where do you live?', 'Do you work or are you a student?'].concat(t.p1);
+  s.push({ part: 'Part 1', head: 'Phase 1 – Interview', say: 'Good morning. Let’s begin. I’m going to ask you some questions about yourself.', rec: 0 });
+  P1.forEach(function (q, i) { s.push({ part: 'Part 1', head: 'Question ' + (i + 1) + ' / ' + P1.length, q: q, say: q, rec: i < 3 ? 12 : 25 }); });
+  t.p2.forEach(function (ph, i) {
+    s.push({ part: 'Part 2', head: 'Photograph ' + (i + 1) + ' / 2 – Talk on your own (about 1 minute)', img: ph.img,
+      q: 'It shows ' + ph.desc + '. Please tell me what you can see in the photograph.',
+      say: (i ? 'Here is another photograph. ' : 'Now, I’d like you to talk on your own about something. I’m going to give you a photograph and I’d like you to talk about it. Here is your photograph. ') + 'It shows ' + ph.desc + '. Please tell me what you can see in the photograph.', rec: 60 });
+  });
+  s.push({ part: 'Part 3', head: 'Part 3 – ' + t.p3.title + ' (about 2 minutes)', img: t.p3.img, task: t.p3.task,
+    q: t.p3.task.join(' '), say: 'Now, in this part of the test you’re going to talk about something for about two minutes. I’m going to describe a situation to you. ' + t.p3.task.join(' ') + ' All right? Now, talk about it.', prep: 20, rec: 120,
+    tip: 'Thi thật bạn thảo luận với một thí sinh khác. Ở đây bạn tự nói: lần lượt nêu ưu/nhược điểm của từng lựa chọn, rồi chốt lựa chọn tốt nhất và giải thích vì sao.' });
+  t.p4.forEach(function (q, i) { s.push({ part: 'Part 4', head: 'Part 4 – Question ' + (i + 1) + ' / ' + t.p4.length, q: q, say: (i ? '' : 'Now, some more questions about this topic. ') + q, rec: 30 }); });
+  s.push({ part: 'End', head: 'Kết thúc', say: 'Thank you. That is the end of the test.', rec: 0, end: true });
+  return s;
+}
+function renderSpeaking() {
+  setTesting(true);
+  var t = current;
+  sp = { steps: spSteps(t), i: -1, chunks: [], rec: null, stream: null, recStart: 0, timer: null, mime: '' };
+  app.innerHTML = '<div class="test is-speaking" id="testRoot">' +
+    '<div class="test-bar"><div class="tb-title"><b>' + esc(t.title) + '</b><small>' + esc(student.name) + ' · ' + esc(student.sid) + ' · ' + esc(t.source || '') + '</small></div>' +
+    '<span class="viol-chip hidden" id="violChip"></span><div class="timer" id="timer">🎙 00:00</div></div>' +
+    '<div class="rule">🎙 Bài nói được <b>ghi âm liên tục</b> và gửi cho giáo viên · Nói to, rõ · 🚫 Không rời trang</div>' +
+    '<div class="test-body"><section class="pane questions"><div class="qwrap" id="spBox"></div></section></div>' +
+    '<div class="bottom"><div class="ptabs" id="spParts">' + ['Part 1', 'Part 2', 'Part 3', 'Part 4'].map(function (p) { return '<button disabled data-p="' + p + '">' + p + '</button>'; }).join('') + '</div></div></div>';
+  ['copy', 'cut', 'contextmenu'].forEach(function (ev) { document.getElementById('testRoot').addEventListener(ev, function (e) { e.preventDefault(); }); });
+  spMicCheck();
+}
+function spMicCheck() {
+  var box = document.getElementById('spBox');
+  box.innerHTML = '<div class="sp-card"><h3>🎧 Bước 1: Kiểm tra micro</h3>' +
+    '<p>Đeo tai nghe có micro (hoặc dùng micro của máy), ngồi nơi yên tĩnh. Bấm nút bên dưới và <b>cho phép dùng micro</b> khi trình duyệt hỏi.</p>' +
+    '<button class="btn primary big" id="micBtn">🎙 Bật micro</button><div class="meter hidden" id="meterWrap"><p>Hãy nói thử “Hello, my name is…” – thanh xanh phải nhảy lên:</p><div class="a-bar"><i id="meter"></i></div></div>' +
+    '<div id="micMsg" class="err-text"></div>' +
+    '<div id="goWrap" class="hidden"><p>Khi bắt đầu, máy sẽ <b>đọc câu hỏi bằng tiếng Anh</b> (mở loa/tai nghe), câu hỏi cũng hiện trên màn hình. Mỗi câu có đồng hồ đếm ngược; nói xong có thể bấm <b>Câu tiếp →</b>. Toàn bộ bài nói khoảng <b>12–14 phút</b>, được ghi âm liên tục.</p>' +
+    '<button class="btn accent big" id="spGo">▶ Bắt đầu bài thi nói</button></div></div>';
+  document.getElementById('micBtn').onclick = function () {
+    var btn = this; btn.disabled = true;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) { document.getElementById('micMsg').textContent = 'Trình duyệt này không hỗ trợ ghi âm. Hãy dùng Chrome (Android, máy tính) hoặc Safari mới (iPhone/iPad).'; return; }
+    navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }).then(function (st) {
+      sp.stream = st; btn.classList.add('hidden');
+      document.getElementById('meterWrap').classList.remove('hidden'); document.getElementById('goWrap').classList.remove('hidden');
+      try {
+        var AC = window.AudioContext || window.webkitAudioContext, ac = new AC(), an = ac.createAnalyser(); an.fftSize = 512;
+        ac.createMediaStreamSource(st).connect(an); sp.ac = ac;
+        var buf = new Uint8Array(an.fftSize), loop = function () {
+          if (!sp.stream) return; an.getByteTimeDomainData(buf);
+          var m = 0; for (var i = 0; i < buf.length; i++) m = Math.max(m, Math.abs(buf[i] - 128));
+          var el = document.getElementById('meter'); if (el) el.style.width = Math.min(100, m / 64 * 100) + '%';
+          requestAnimationFrame(loop);
+        }; loop();
+      } catch (e) {}
+      document.getElementById('spGo').onclick = spStart;
+    }).catch(function () { btn.disabled = false; document.getElementById('micMsg').innerHTML = 'Chưa dùng được micro. Hãy bấm biểu tượng 🔒 cạnh thanh địa chỉ → cho phép <b>Micro</b>, rồi bấm lại.'; });
+  };
+}
+function spStart() {
+  var types = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus'];
+  sp.mime = types.filter(function (x) { try { return MediaRecorder.isTypeSupported(x); } catch (e) { return false; } })[0] || '';
+  try { sp.rec = new MediaRecorder(sp.stream, sp.mime ? { mimeType: sp.mime, audioBitsPerSecond: 32000 } : undefined); }
+  catch (e) { sp.rec = new MediaRecorder(sp.stream); }
+  sp.mime = sp.rec.mimeType || sp.mime || 'audio/webm';
+  sp.rec.ondataavailable = function (e) { if (e.data && e.data.size) sp.chunks.push(e.data); };
+  sp.rec.start(5000);
+  sp.recStart = Date.now(); sess.start = Date.now();
+  goFull(); monitor(true);
+  clearInterval(timerId); timerId = setInterval(prodTick, 1000);
+  spNext();
+}
+function spNext() {
+  clearInterval(sp.timer);
+  sp.i++;
+  var s = sp.steps[sp.i]; if (!s) return spFinish();
+  [].forEach.call(document.querySelectorAll('#spParts button'), function (b) { b.classList.toggle('on', b.getAttribute('data-p') === s.part); });
+  sess.timeline.push(fmtTime((Date.now() - sp.recStart) / 1000) + ' ' + s.part + (s.q ? ': ' + s.q.slice(0, 60) : ''));
+  var box = document.getElementById('spBox');
+  box.innerHTML = '<div class="sp-card"><span class="eyebrow">' + esc(s.part) + '</span><h3 style="margin-top:10px">' + esc(s.head) + '</h3>' +
+    (s.img ? '<img class="sp-img" src="' + esc(s.img) + '" alt="">' : '') +
+    (s.task ? '<div class="notice">' + s.task.map(function (l) { return '<p>' + esc(l) + '</p>'; }).join('') + '</div>' : (s.q ? '<p class="sp-q">' + esc(s.q) + '</p>' : '')) +
+    (s.tip ? '<p class="inst">💡 ' + esc(s.tip) + '</p>' : '') +
+    '<div class="sp-state" id="spState">🔊 Đang đọc câu hỏi…</div><div class="a-bar"><i id="spBar"></i></div>' +
+    '<div class="row" style="margin-top:12px"><button class="btn ghost" id="spReplay">🔁 Nghe lại câu hỏi</button><button class="btn primary" id="spSkip" disabled>Câu tiếp →</button></div></div>';
+  document.getElementById('spReplay').onclick = function () { spSay(s.say); };
+  if (s.end) { document.getElementById('spReplay').classList.add('hidden'); document.getElementById('spSkip').classList.add('hidden'); }
+  spSay(s.say).then(function () {
+    if (sp.steps[sp.i] !== s) return;
+    if (s.end) return spFinish();
+    if (!s.rec) return spNext();
+    var phase = s.prep ? 'prep' : 'rec', left = s.prep || s.rec, total = left, started = Date.now();
+    var st = document.getElementById('spState'), bar = document.getElementById('spBar'), skip = document.getElementById('spSkip');
+    var draw = function () {
+      st.innerHTML = phase === 'prep' ? '📝 Đọc đề và suy nghĩ: <b>' + left + 's</b>' : '🔴 Bạn nói đi! Còn <b>' + left + 's</b>';
+      st.className = 'sp-state ' + phase; bar.style.width = ((total - left) / total * 100) + '%';
+      skip.textContent = phase === 'prep' ? 'Bắt đầu nói →' : 'Câu tiếp →';
+      skip.disabled = phase === 'rec' && Date.now() - started < 5000;
+    };
+    var nextPhase = function () { if (phase === 'prep') { phase = 'rec'; left = total = s.rec; started = Date.now(); sess.timeline.push(fmtTime((Date.now() - sp.recStart) / 1000) + '   bắt đầu nói'); draw(); } else spNext(); };
+    skip.onclick = nextPhase;
+    draw();
+    sp.timer = setInterval(function () { left--; if (left <= 0) nextPhase(); else draw(); }, 1000);
+  });
+}
+function spFinish(reason) {
+  if (submitting || sp.finishing) return; sp.finishing = true;
+  clearInterval(sp.timer); clearInterval(timerId);
+  try { window.speechSynthesis && speechSynthesis.cancel(); } catch (e) {}
+  monitor(false);
+  var dur = Math.round((Date.now() - sp.recStart) / 1000);
+  var stopAll = function () { if (sp.stream) sp.stream.getTracks().forEach(function (x) { x.stop(); }); sp.stream = null; try { sp.ac && sp.ac.close(); } catch (e) {} };
+  var after = function () {
+    stopAll();
+    var blob = new Blob(sp.chunks, { type: sp.mime.split(';')[0] }), url = URL.createObjectURL(blob);
+    var box = document.getElementById('spBox');
+    if (box) box.innerHTML = '<div class="sp-card"><h3>' + (reason ? esc(reason) + ' ' : '') + '🎉 Bạn đã hoàn thành bài nói (' + fmtTime(dur) + ')</h3><audio controls src="' + url + '" style="width:100%"></audio><p class="inst">Bài sẽ tự gửi cho giáo viên…</p></div>';
+    spUpload(blob, url, dur);
+  };
+  if (sp.rec && sp.rec.state !== 'inactive') { sp.rec.onstop = after; sp.rec.stop(); } else after();
+}
+function spUpload(blob, url, dur) {
+  submitting = true; overlay(true, 'Đang gửi bài nói (' + Math.round(blob.size / 1024) + ' KB)…');
+  var rd = new FileReader();
+  rd.onload = function () {
+    var b64 = String(rd.result).split(',')[1] || '';
+    api('submit_speaking', { id: current.id, title: current.title, student: student, audio: b64, mime: blob.type || 'audio/webm', duration: dur, timeline: sess.timeline.join('\n'), viol: sess.viol || [] }).then(function () {
+      submitting = false; overlay(false);
+      var h = LS.get('kpet_hist', {}); h[current.id] = { done: true }; LS.set('kpet_hist', h);
+      prodResult(dur, 0, 0, url);
+    }).catch(function (e) {
+      submitting = false; overlay(false);
+      modal('Chưa gửi được bài nói', esc(e.message) + '<br>Đừng tắt trang. Kiểm tra mạng rồi bấm <b>Gửi lại</b>.', 'Gửi lại', false).then(function () { spUpload(blob, url, dur); });
+    });
+  };
+  rd.readAsDataURL(blob);
+}
+
+function prodRules(card) {
+  if (card.type === 'Writing') return '<b>' + esc(card.title) + '</b> · ' + esc(card.source || '') + '<br>⏱ Thời gian <b>45 phút</b>, hết giờ bài tự nộp.<br>✍️ Làm <b>cả hai phần</b>: Part 1 (email, bắt buộc) và Part 2 (chọn <b>article</b> hoặc <b>story</b>), mỗi bài khoảng <b>100 từ</b>. Máy tự đếm số từ.<br>🚫 Không được dán chữ, không chuyển tab, không mở ứng dụng khác hay chia đôi màn hình. Mọi lần vi phạm đều được ghi lại, đến lần thứ ' + CONFIG.MAX_VIOLATIONS + ' bài sẽ tự nộp.<br>📝 Bài làm được gửi cho giáo viên chấm.';
+  return '<b>' + esc(card.title) + '</b> · ' + esc(card.source || '') + '<br>🎙 Bài nói được <b>ghi âm liên tục</b> (khoảng 12–14 phút) và gửi cho giáo viên chấm. Cần <b>micro</b> và nơi yên tĩnh; nên đeo tai nghe.<br>🔊 Máy đọc câu hỏi bằng tiếng Anh; câu hỏi cũng hiện trên màn hình. Mỗi câu có đồng hồ đếm ngược, hết giờ tự chuyển câu.<br>🗂 Part 1: trả lời câu hỏi về bản thân · Part 2: tả 2 bức ảnh, mỗi ảnh 1 phút · Part 3: nói về tình huống 2 phút · Part 4: trả lời câu hỏi mở rộng.<br>⚠️ Làm một lần từ đầu đến cuối, không dừng hay làm lại giữa chừng. Không tải lại trang.<br>🚫 Không chuyển tab hay mở ứng dụng khác; đến lần vi phạm thứ ' + CONFIG.MAX_VIOLATIONS + ' bài sẽ tự kết thúc và nộp.';
+}
+var adminSubsData = [];
+function adminSubs() {
+  app.onclick = null;
+  app.innerHTML = adminShell('subs', '<div class="card"><div id="sbox"><div class="loading">Đang tải bài…</div></div></div>');
+  bindShell();
+  api('subs', { pw: adminPw }).then(function (r) {
+    adminSubsData = r.subs || [];
+    document.getElementById('sbox').innerHTML = '<div class="filters"><select id="sKind"><option value="">Writing + Speaking</option><option>Writing</option><option>Speaking</option></select>' +
+      '<input id="sCls" placeholder="Lọc theo lớp…"><input id="sName" placeholder="Tìm tên / mã SV / đề…"></div>' +
+      '<p style="color:var(--muted);font-size:14px">Chấm điểm và ghi nhận xét trực tiếp ở cột <b>Điểm</b> / <b>Nhận xét</b> trong Google Sheet (trang tính “Writing” và “Speaking”). File ghi âm nằm trong thư mục Google Drive “KEN PET – Bài nói”.</p>' +
+      '<div id="slist"></div>';
+    ['sKind', 'sCls', 'sName'].forEach(function (id) { document.getElementById(id).addEventListener('input', drawSubs); });
+    drawSubs();
+  }).catch(adminErr);
+}
+function drawSubs() {
+  var g = function (id) { return document.getElementById(id).value.trim().toLowerCase(); };
+  var k = g('sKind'), c = g('sCls'), n = g('sName');
+  var rows = adminSubsData.filter(function (x) { return (!k || String(x.kind).toLowerCase() === k) && (!c || String(x.cls).toLowerCase().indexOf(c) > -1) && (!n || (x.name + ' ' + x.sid + ' ' + x.testTitle).toLowerCase().indexOf(n) > -1); });
+  document.getElementById('slist').innerHTML = rows.length ? rows.map(function (x) {
+    var W = x.kind === 'Writing';
+    return '<details class="sub-row"><summary><span class="tag ' + esc(x.kind) + '">' + esc(x.kind) + '</span><b>' + esc(x.name) + '</b><span>' + esc(x.sid) + ' · ' + esc(x.cls) + '</span><span>' + esc(x.testTitle) + '</span><span style="color:var(--muted)">' + esc(x.time) + '</span>' +
+      (+x.violations ? '<span class="viol-chip" style="color:#fff">⚠ ' + esc(x.violations) + '</span>' : '') + (x.score ? '<span class="badge">Điểm: ' + esc(x.score) + '</span>' : '') + '</summary>' +
+      (W ? '<p><b>Part 1 – email</b> (' + esc(x.words1) + ' từ)</p><pre>' + esc(x.p1) + '</pre><p><b>Part 2 – ' + (x.choice === 'Q3' ? 'story' : 'article') + '</b> (' + esc(x.words2) + ' từ)</p><pre>' + esc(x.p2) + '</pre>'
+        : '<p>' + (/^https?:/.test(x.audioUrl) ? '<a class="btn primary sm" href="' + esc(x.audioUrl) + '" target="_blank" rel="noopener">🎧 Mở file ghi âm</a>' : esc(x.audioUrl || '')) + ' · ' + esc(x.duration) + ' phút</p><pre>' + esc(x.timeline) + '</pre>') +
+      (x.violLog ? '<p style="color:var(--bad);font-size:13px">Vi phạm: ' + esc(x.violLog) + '</p>' : '') + (x.comment ? '<p><b>Nhận xét:</b> ' + esc(x.comment) + '</p>' : '') + '</details>';
+  }).join('') : '<div class="empty">Chưa có bài nộp.</div>';
+}
+
 /* ================= GIÁO VIÊN ================= */
 var adminPw = SS.get('kpet_pw');
 function renderAdmin() {
@@ -1056,12 +1390,12 @@ function renderAdmin() {
 function adminShell(tab, inner) {
   return '<div class="row" style="justify-content:space-between;margin-bottom:12px"><h2 style="margin:0">Khu vực giáo viên</h2>' +
     '<div class="row"><button class="btn ghost sm" id="toStu">Trang học viên</button><button class="btn ghost sm" id="logout">Đăng xuất</button></div></div>' +
-    '<div class="tabs seg"><button data-t="tests" class="' + (tab === 'tests' ? 'on' : '') + '">📚 Đề thi</button><button data-t="results" class="' + (tab === 'results' ? 'on' : '') + '">📊 Kết quả học viên</button></div>' + inner;
+    '<div class="tabs seg"><button data-t="tests" class="' + (tab === 'tests' ? 'on' : '') + '">📚 Đề thi</button><button data-t="results" class="' + (tab === 'results' ? 'on' : '') + '">📊 Kết quả Reading/Listening</button><button data-t="subs" class="' + (tab === 'subs' ? 'on' : '') + '">✍️🎤 Bài Viết &amp; Nói</button></div>' + inner;
 }
 function bindShell() {
   document.getElementById('toStu').onclick = goHome;
   document.getElementById('logout').onclick = function () { adminPw = null; SS.set('kpet_pw', ''); renderAdmin(); };
-  document.querySelector('.tabs').onclick = function (e) { var b = e.target.closest('[data-t]'); if (!b) return; b.getAttribute('data-t') === 'tests' ? adminTests() : adminResults(); };
+  document.querySelector('.tabs').onclick = function (e) { var b = e.target.closest('[data-t]'); if (!b) return; var k = b.getAttribute('data-t'); k === 'tests' ? adminTests() : k === 'subs' ? adminSubs() : adminResults(); };
 }
 var adminData = null;
 function adminTests() {

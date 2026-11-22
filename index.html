@@ -238,6 +238,11 @@ label.notes{margin-top:10px}label.notes textarea{min-height:110px}
 #spParts button[disabled]{opacity:1;cursor:default}
 .sub-row{border-bottom:1px solid var(--line);padding:12px 0}.sub-row summary{cursor:pointer;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .sub-row pre{white-space:pre-wrap;font-family:'Source Serif 4',Georgia,serif;font-size:15.5px;background:#fffdf8;border:1px solid var(--line);border-radius:10px;padding:12px;margin:8px 0}
+
+.review.ai{border-top:5px solid #7a5cc4}.ai-score{background:#efe9fb;color:#5a3ea8;border-radius:10px;padding:2px 10px}
+table.ai-tbl{border-collapse:collapse;width:100%;font-size:14.5px;margin:8px 0}table.ai-tbl th,table.ai-tbl td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}
+table.ai-tbl th{width:34%;font-weight:600}table.ai-tbl td.sc{font-weight:800;white-space:nowrap;color:#5a3ea8;width:70px}
+.ai-fix div{padding:7px 10px;border-radius:8px;background:#fffdf8;border:1px solid var(--line);margin:6px 0}.ai-fix s{color:var(--bad)}.ai-fix b{color:var(--ok)}.ai-fix small{display:block;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -1080,20 +1085,31 @@ function prodSubmit(auto, reason) {
   p.then(function (ok) {
     if (!ok) return;
     submitting = true; clearInterval(timerId);
-    overlay(true, (reason ? reason + ' ' : '') + 'Đang nộp bài…');
+    overlay(true, (reason ? reason + ' ' : '') + 'Đang nộp bài và chấm bằng AI (khoảng 20–60 giây)…');
     var dur = Math.round((Math.min(Date.now(), sess.end) - sess.start) / 1000);
-    api('submit_writing', { id: t.id, title: t.title + ' (' + (t.set || '') + ')', student: student, t1: a.t1 || '', t2: a.t2 || '', p1: t.t1 ? t.t1.p : '', p2: t.t2 ? t.t2.p : '', duration: dur, viol: sess.viol || [] }).then(function () {
+    api('submit_writing', { id: t.id, title: t.title + ' (' + (t.set || '') + ')', student: student, t1: a.t1 || '', t2: a.t2 || '', p1: t.t1 ? t.t1.p : '', p2: t.t2 ? t.t2.p : '', duration: dur, viol: sess.viol || [] }).then(function (r) {
       submitting = false; overlay(false); monitor(false);
       LS.del('ken_sess_' + t.id);
       var h = LS.get('ken_hist', {}); h[t.id] = { done: true }; LS.set('ken_hist', h);
-      prodResult(dur, n1, n2);
+      prodResult(dur, n1, n2, null, r);
     }).catch(function (e) {
       submitting = false; overlay(false);
       modal('Chưa nộp được bài', esc(e.message) + '<br>Bài viết vẫn được lưu trên máy. Kiểm tra mạng rồi bấm <b>Nộp lại</b>.', 'Nộp lại', false).then(function () { prodSubmit(true); });
     });
   });
 }
-function prodResult(dur, n1, n2, audioUrl) {
+function htmlText(h) { var d = document.createElement('div'); d.innerHTML = String(h || '').replace(/<\/(p|div|h\d)>/g, '\n'); return d.textContent.replace(/\n{2,}/g, '\n').trim(); }
+function aiCard(r) {
+  if (!r) return '';
+  if (!r.ai) return r.aiError ? '<div class="card review"><h2>🤖 Chấm bằng AI</h2><p style="color:var(--muted)">Chưa chấm tự động được lần này (' + esc(r.aiError) + '). Giáo viên sẽ chấm.</p></div>' : '';
+  var a = r.ai, L = function (arr) { return (arr || []).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join(''); };
+  return '<div class="card review ai"><h2>🤖 AI chấm: <span class="ai-score">' + esc(a.overall) + '</span></h2><p class="inst">Điểm do AI chấm theo tiêu chí chính thức, mang tính tham khảo; giáo viên có thể điều chỉnh.</p>' +
+    '<table class="ai-tbl">' + (a.criteria || []).map(function (c) { return '<tr><th>' + esc(c.name) + '</th><td class="sc">' + esc(c.score) + '</td><td>' + esc(c.comment) + '</td></tr>'; }).join('') + '</table>' +
+    (a.strengths && a.strengths.length ? '<h3>👍 Điểm mạnh</h3><ul>' + L(a.strengths) + '</ul>' : '') +
+    (a.improvements && a.improvements.length ? '<h3>🎯 Cần cải thiện</h3><ul>' + L(a.improvements) + '</ul>' : '') +
+    (a.corrections && a.corrections.length ? '<h3>✏️ Sửa lỗi</h3><div class="ai-fix">' + a.corrections.map(function (c) { return '<div><s>' + esc(c.original) + '</s> → <b>' + esc(c.corrected) + '</b><small>' + esc(c.why) + '</small></div>'; }).join('') + '</div>' : '') + '</div>';
+}
+function prodResult(dur, n1, n2, audioUrl, res) {
   setTesting(false); updateWho();
   var t = current, nv = (sess.viol || []).length, W = t.type === 'Writing';
   var html = '<section class="result"><div class="card"><span class="eyebrow">' + t.type + '</span><h2 style="margin-top:10px">✅ Đã nộp: ' + esc(t.title) + '</h2>' +
@@ -1106,6 +1122,8 @@ function prodResult(dur, n1, n2, audioUrl) {
     '<div class="card review"><h2>Tiêu chí chấm IELTS ' + (W ? 'Writing' : 'Speaking') + '</h2>' + (W
       ? '<p><b>Task Achievement / Task Response</b> – trả lời đủ yêu cầu đề, (Task 1) có overview rõ, (Task 2) quan điểm rõ ràng xuyên suốt.<br><b>Coherence &amp; Cohesion</b> – bố cục đoạn hợp lý, từ nối đa dạng, dùng đúng.<br><b>Lexical Resource</b> – từ vựng phong phú, chính xác, ít lỗi chính tả.<br><b>Grammatical Range &amp; Accuracy</b> – đa dạng cấu trúc câu, ít lỗi ngữ pháp.</p>'
       : '<p><b>Fluency &amp; Coherence</b> – nói trôi chảy, ít ngập ngừng, ý mạch lạc.<br><b>Lexical Resource</b> – từ vựng đa dạng, dùng collocation và paraphrase.<br><b>Grammatical Range &amp; Accuracy</b> – đa dạng cấu trúc, ít lỗi.<br><b>Pronunciation</b> – phát âm rõ, trọng âm, ngữ điệu tự nhiên.</p>') + '</div>';
+  html = html.replace('<div class="card review">', aiCard(res) + '<div class="card review">');
+  if (res && !html.match(/class="card review ai"|Chấm bằng AI/)) html += aiCard(res);
   app.innerHTML = html + '</section>';
   window.scrollTo(0, 0);
   document.getElementById('backList').onclick = renderList;
@@ -1208,6 +1226,7 @@ function spStart() {
   sp.mime = sp.rec.mimeType || sp.mime || 'audio/webm';
   sp.rec.ondataavailable = function (e) { if (e.data && e.data.size) sp.chunks.push(e.data); };
   sp.rec.start(5000);
+  spRecog();
   sp.recStart = Date.now(); sess.start = Date.now();
   goFull(); monitor(true);
   clearInterval(timerId); timerId = setInterval(prodTick, 1000);
@@ -1220,6 +1239,7 @@ function spNext() {
   var s = sp.steps[sp.i]; if (!s) return spFinish();
   sp.cur = s;
   [].forEach.call(document.querySelectorAll('#spParts button'), function (b) { b.classList.toggle('on', b.getAttribute('data-p') === s.part); });
+  if (s.q || s.card) (sp.tr = sp.tr || []).push({ q: s.part + ': ' + (s.q || (s.card || []).join(' / ')), a: '' });
   sess.timeline.push(fmtTime((Date.now() - sp.recStart) / 1000) + ' ' + s.part + (s.q ? ': ' + s.q.slice(0, 70) : s.card ? ': ' + s.card[0] : ''));
   var box = document.getElementById('spBox');
   box.innerHTML = '<div class="sp-card"><span class="eyebrow">' + esc(s.part) + '</span><h3 style="margin-top:10px">' + esc(s.head) + '</h3>' +
@@ -1255,6 +1275,18 @@ function spNext() {
     sp.timer = setInterval(tickF, 1000);
   });
 }
+function spRecog() {
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR || /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.userAgent))) return; /* iPhone/iPad: không chạy song song với ghi âm */
+  try {
+    var r = new SR(); r.lang = 'en-GB'; r.continuous = true; r.interimResults = false;
+    r.onresult = function (e) { for (var i = e.resultIndex; i < e.results.length; i++) if (e.results[i].isFinal) { var cur = (sp.tr || [])[sp.tr.length - 1]; if (cur) cur.a += (cur.a ? ' ' : '') + e.results[i][0].transcript.trim(); } };
+    r.onend = function () { if (sp.srOn) { try { r.start(); } catch (e) {} } };
+    r.onerror = function (e) { if (e.error === 'not-allowed' || e.error === 'service-not-allowed') sp.srOn = false; };
+    sp.sr = r; sp.srOn = true; r.start();
+  } catch (e) {}
+}
+function spTranscript() { return (sp.tr || []).map(function (x) { return 'Q: ' + x.q + '\nA: ' + (x.a || '(không nhận được lời nói)'); }).join('\n'); }
 function spFinish(reason) {
   if (submitting || sp.finishing) return; sp.finishing = true;
   clearInterval(sp.timer); clearInterval(timerId);
@@ -1269,17 +1301,18 @@ function spFinish(reason) {
     if (box) box.innerHTML = '<div class="sp-card"><h3>' + (reason ? esc(reason) + ' ' : '') + '🎉 Bạn đã hoàn thành bài nói (' + fmtTime(dur) + ')</h3><audio controls src="' + url + '" style="width:100%"></audio><p class="inst">Bài sẽ tự gửi cho giáo viên…</p></div>';
     spUpload(blob, url, dur);
   };
+  sp.srOn = false; try { sp.sr && sp.sr.stop(); } catch (e) {}
   if (sp.rec && sp.rec.state !== 'inactive') { sp.rec.onstop = after; sp.rec.stop(); } else after();
 }
 function spUpload(blob, url, dur) {
-  submitting = true; overlay(true, 'Đang gửi bài nói (' + Math.round(blob.size / 1024) + ' KB)…');
+  submitting = true; overlay(true, 'Đang gửi bài nói (' + Math.round(blob.size / 1024) + ' KB) và chấm bằng AI (khoảng 30–90 giây)…');
   var rd = new FileReader();
   rd.onload = function () {
     var b64 = String(rd.result).split(',')[1] || '';
-    api('submit_speaking', { id: current.id, title: current.title + ' (' + (current.set || '') + ')', student: student, audio: b64, mime: blob.type || 'audio/webm', duration: dur, timeline: sess.timeline.join('\n') + (sess.notes ? '\nGhi chú Part 2: ' + sess.notes : ''), viol: sess.viol || [] }).then(function () {
+    api('submit_speaking', { id: current.id, title: current.title + ' (' + (current.set || '') + ')', student: student, audio: b64, mime: blob.type || 'audio/webm', duration: dur, timeline: sess.timeline.join('\n') + (sess.notes ? '\nGhi chú Part 2: ' + sess.notes : ''), transcript: spTranscript(), viol: sess.viol || [] }).then(function (r) {
       submitting = false; overlay(false);
       var h = LS.get('ken_hist', {}); h[current.id] = { done: true }; LS.set('ken_hist', h);
-      prodResult(dur, 0, 0, url);
+      prodResult(dur, 0, 0, url, r);
     }).catch(function (e) {
       submitting = false; overlay(false);
       modal('Chưa gửi được bài nói', esc(e.message) + '<br>Đừng tắt trang. Kiểm tra mạng rồi bấm <b>Gửi lại</b>.', 'Gửi lại', false).then(function () { spUpload(blob, url, dur); });

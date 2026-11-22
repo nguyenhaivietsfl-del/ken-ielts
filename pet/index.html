@@ -1225,7 +1225,7 @@ function bindAiRetry(res) {
 }
 function aiCard(r) {
   if (!r) return '';
-  if (!r.ai) return r.aiError ? '<div class="card review" id="aiBox"><h2>🤖 Chấm bằng AI</h2><p style="color:var(--muted)">Chưa chấm tự động được lần này (' + esc(r.aiError) + '). Giáo viên sẽ chấm.</p>' + (r.ref ? '<button class="btn primary" id="aiRetry">🔄 Chấm lại bằng AI</button>' : '') + '</div>' : '';
+  if (!r.ai) return r.aiError ? '<div class="card review" id="aiBox"><h2>🤖 Chấm bằng AI</h2><p style="color:var(--muted)">Chưa chấm tự động được lần này (' + esc(r.aiError) + '). Giáo viên sẽ chấm.</p>' + (r.ref && !/chép lời/.test(r.aiError) ? '<button class="btn primary" id="aiRetry">🔄 Chấm lại bằng AI</button>' : '') + '</div>' : '';
   var a = r.ai, L = function (arr) { return (arr || []).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join(''); };
   return '<div class="card review ai" id="aiBox"><h2>🤖 AI chấm: <span class="ai-score">' + esc(a.overall) + '</span></h2><p class="inst">Điểm do AI chấm theo tiêu chí chính thức, mang tính tham khảo; giáo viên có thể điều chỉnh.</p>' +
     '<table class="ai-tbl">' + (a.criteria || []).map(function (c) { return '<tr><th>' + esc(c.name) + '</th><td class="sc">' + esc(c.score) + '</td><td>' + esc(c.comment) + '</td></tr>'; }).join('') + '</table>' +

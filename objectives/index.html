@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f4c5c">
+<title>KEN – Lesson Plan Objectives Practice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#14232b;--muted:#5d6b73;--bg:#f6f2eb;--card:#fff;--line:#e4ddd1;--brand:#0f4c5c;--brand2:#1d6f80;--soft:#e8f1f2;--accent:#f0a53a;--ok:#2b8a57;--okbg:#e6f4ec;--bad:#c4473d;--badbg:#fbeae8;--ai:#5a3ea8;--aibg:#efe9fb}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:'Be Vietnam Pro',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:var(--ink);background:var(--bg);font-size:16px;line-height:1.55;min-height:100vh;display:flex;flex-direction:column}
+a{color:var(--brand2)}
+.hidden{display:none!important}
+.topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;padding:12px clamp(16px,4vw,40px);padding-top:max(12px,env(safe-area-inset-top));background:var(--brand);color:#fff}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;color:#fff;text-decoration:none;font-size:17px}
+.logo-mark{width:34px;height:34px;border-radius:10px;background:var(--accent);color:var(--brand);display:grid;place-items:center;font-weight:800;font-size:15px}
+.spacer{flex:1}
+.who{display:flex;align-items:center;gap:8px;font-size:14px;background:rgba(255,255,255,.12);border:0;color:#fff;padding:6px 12px;border-radius:999px;cursor:pointer;font-family:inherit;max-width:55vw}
+.who span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+main#app{width:100%;max-width:1160px;margin:0 auto;padding:clamp(16px,4vw,40px);flex:1}
+footer{text-align:center;color:var(--muted);font-size:13px;padding:18px 16px calc(18px + env(safe-area-inset-bottom))}
+footer button{background:none;border:0;color:var(--brand2);font:inherit;text-decoration:underline;cursor:pointer}
+.demo-banner{background:#fff4dc;color:#7a5200;font-size:13px;text-align:center;padding:7px 12px;border-bottom:1px solid #f1dfb4}
+h1,h2,h3{line-height:1.2;margin:0 0 .5em}
+h1{font-size:clamp(30px,5.2vw,46px);letter-spacing:-.5px}
+h2{font-size:clamp(20px,3vw,24px)}
+h3{font-size:18px}
+.eyebrow{display:inline-block;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--brand2);background:var(--soft);padding:5px 10px;border-radius:999px}
+.lead{color:var(--muted);font-size:17px;max-width:50ch}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:clamp(18px,3vw,28px);box-shadow:0 10px 30px -18px rgba(15,76,92,.35)}
+.hero{display:grid;gap:30px;align-items:center}
+@media(min-width:860px){.hero{grid-template-columns:1.05fr 1fr;min-height:62vh}}
+.hero-points{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.hero-points span{background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:14px}
+label{display:block;font-weight:600;font-size:14px;margin-bottom:14px}
+label small{font-weight:400;color:var(--muted)}
+input,select,textarea{font:inherit;font-size:16px;width:100%;margin-top:6px;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);-webkit-appearance:none;appearance:none}
+select{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 20px) 55%,calc(100% - 15px) 55%;background-size:5px 5px;background-repeat:no-repeat;padding-right:36px}
+textarea{resize:vertical;line-height:1.5}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--brand2);box-shadow:0 0 0 3px rgba(29,111,128,.16)}
+.err-text{color:var(--bad);font-size:14px;min-height:1.2em;margin:-4px 0 10px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 18px;border-radius:12px;border:1.5px solid transparent;font:inherit;font-weight:600;font-size:15px;cursor:pointer;text-decoration:none;transition:transform .08s,background .15s;white-space:nowrap}
+.btn:active{transform:scale(.98)}
+.btn.primary{background:var(--brand);color:#fff}
+.btn.primary:hover{background:var(--brand2)}
+.btn.accent{background:var(--accent);color:#3a2500}
+.btn.ghost{background:#fff;border-color:var(--line);color:var(--ink)}
+.btn.ai{background:var(--aibg);color:var(--ai);border-color:#d9cdf5}
+.btn.big{width:100%;min-height:52px;font-size:16px}
+.btn.sm{min-height:36px;padding:6px 12px;font-size:14px}
+.btn[disabled]{opacity:.6;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.row.end{justify-content:flex-end}
+.grid2{display:grid;gap:0 14px}
+@media(min-width:600px){.grid2{grid-template-columns:1fr 1fr}}
+.tests{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.tcard{display:flex;flex-direction:column;gap:10px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;position:relative;overflow:hidden}
+.tcard::before{content:"";position:absolute;inset:0 0 auto 0;height:5px;background:var(--brand2)}
+.tcard.c2::before{background:var(--accent)}
+.tcard h3{margin:4px 0 0}
+.tcard img{width:100%;height:150px;object-fit:cover;object-position:top;border-radius:10px;border:1px solid var(--line)}
+.meta{display:flex;gap:10px;color:var(--muted);font-size:13.5px;flex-wrap:wrap}
+.tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:3px 8px;border-radius:6px;background:var(--soft);color:var(--brand)}
+.tcard .btn{margin-top:auto}
+.loading{text-align:center;color:var(--muted);padding:50px 0}
+.loading::before{content:"";display:block;width:32px;height:32px;margin:0 auto 12px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--brand);animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.rules{background:#fff8e6;border:1px solid #f1dfb4;border-radius:14px;padding:14px 16px;color:#5b3f00;font-size:14.5px}
+.rules li{margin:3px 0}
+/* phòng thi */
+body.testing .topbar,body.testing footer,body.testing .demo-banner{display:none}
+body.testing main#app{max-width:none;padding:0}
+.test{position:fixed;inset:0;display:flex;flex-direction:column;background:var(--bg);z-index:30}
+.test-bar{display:flex;align-items:center;gap:10px;padding:8px 12px;padding-top:max(8px,env(safe-area-inset-top));background:var(--brand);color:#fff}
+.tb-title{flex:1;min-width:0;line-height:1.25}
+.tb-title b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb-title small{opacity:.8;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.timer{font-variant-numeric:tabular-nums;font-weight:700;background:rgba(255,255,255,.14);padding:7px 12px;border-radius:999px;white-space:nowrap;font-size:15px}
+.timer.warn{background:var(--bad);animation:pulse 1s infinite alternate}
+@keyframes pulse{to{opacity:.7}}
+.test-bar .btn{background:var(--accent);color:#3a2500;min-height:40px}
+.viol-chip{font-size:12px;background:var(--bad);border-radius:999px;padding:4px 9px;font-weight:700}
+.rule{background:#fff8e6;color:#6b4a00;font-size:13px;padding:6px 14px;border-bottom:1px solid #f1dfb4;text-align:center}
+.mtabs{display:none;background:#fff;border-bottom:1px solid var(--line)}
+.mtabs button{flex:1;border:0;background:none;font:inherit;font-weight:600;padding:11px;color:var(--muted);border-bottom:3px solid transparent;cursor:pointer}
+.mtabs button.on{color:var(--brand);border-bottom-color:var(--brand)}
+.test-body{flex:1;min-height:0;display:flex}
+.pane{min-width:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:clamp(14px,2.4vw,28px);padding-bottom:80px}
+.pane.book{flex:0 0 46%;background:#fffdf8;border-right:1px solid var(--line)}
+.pane.book img{width:100%;max-width:760px;display:block;margin:0 auto 14px;border-radius:8px;border:1px solid var(--line)}
+.pane.work{flex:1}
+@media(max-width:820px){.mtabs{display:flex}.pane.book{flex:1;border:0}.test-body .pane:not(.on){display:none}}
+/* khung giáo án */
+.plan{max-width:820px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:16px;padding:clamp(16px,3vw,30px);font-family:'Times New Roman',Times,serif;font-size:17px}
+.plan .ph{text-align:center;font-weight:700;margin:0}
+.plan .ph2{text-align:center;font-weight:700;margin:2px 0 14px;color:var(--brand)}
+.plan .h1{font-weight:700;margin:16px 0 6px}
+.plan .h2{font-weight:700;margin:12px 0 4px 8px}
+.plan .lbl{font-weight:700;font-style:italic;margin:8px 0 2px 16px}
+.plan .intro{font-style:italic;margin:4px 0 8px}
+.plan .fld{margin:2px 0 8px 16px}
+.plan .fld textarea,.plan .fld input{font-family:'Times New Roman',Times,serif;font-size:17px;margin:0;padding:9px 11px;border-radius:10px;background:#fbfdfd}
+.plan .fld.inl{display:flex;align-items:center;gap:8px}
+.plan .fld.inl span{white-space:nowrap}
+.plan .hint{font-family:'Be Vietnam Pro',sans-serif;font-size:12.5px;color:var(--muted);margin:2px 0 0}
+.plan textarea.filled,.plan input.filled{background:#fff;border-color:#bcd6da}
+.progress{font-family:'Be Vietnam Pro',sans-serif;font-size:13px;color:var(--muted);text-align:right;max-width:820px;margin:0 auto 8px}
+/* kết quả */
+.score-big{display:flex;align-items:baseline;gap:6px;font-weight:800;font-size:48px;color:var(--ai);line-height:1}
+.score-big small{font-size:20px;color:var(--muted);font-weight:600}
+.pill{display:inline-block;border-radius:999px;padding:3px 11px;font-size:13px;font-weight:700;background:var(--soft);color:var(--brand)}
+.pill.ai{background:var(--aibg);color:var(--ai)}
+.pill.gv{background:var(--okbg);color:var(--ok)}
+.pill.warn{background:var(--badbg);color:var(--bad)}
+.review{margin-top:18px}
+.review.ai{border-top:5px solid #7a5cc4}
+.review.gv{border-top:5px solid var(--ok)}
+table.ai-tbl{border-collapse:collapse;width:100%;font-size:14.5px;margin:8px 0}
+table.ai-tbl th,table.ai-tbl td{border-bottom:1px solid var(--line);padding:8px;text-align:left;vertical-align:top}
+table.ai-tbl th{width:30%;font-weight:600}
+table.ai-tbl td.sc{font-weight:800;white-space:nowrap;color:var(--ai);width:80px}
+.ai-fix div{padding:8px 11px;border-radius:9px;background:#fffdf8;border:1px solid var(--line);margin:6px 0;font-size:15px}
+.ai-fix s{color:var(--bad)}.ai-fix b{color:var(--ok)}.ai-fix small{display:block;color:var(--muted)}
+.ai-fix em{font-style:normal;font-size:12px;font-weight:700;color:var(--brand2);text-transform:uppercase;letter-spacing:.4px}
+pre.plain{white-space:pre-wrap;font-family:'Times New Roman',Times,serif;font-size:16.5px;background:#fffdf8;border:1px solid var(--line);border-radius:12px;padding:14px;margin:8px 0;line-height:1.5}
+.diff del{background:var(--badbg);color:var(--bad);text-decoration:line-through}
+.diff ins{background:var(--okbg);color:var(--ok);text-decoration:none;font-weight:600}
+.sec-cmp{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:10px 0;background:#fff}
+.sec-cmp h4{margin:0 0 6px;font-size:14px;color:var(--brand)}
+.sec-cmp textarea{font-family:'Times New Roman',Times,serif;font-size:16px;margin:4px 0}
+.sec-cmp .diff{font-family:'Times New Roman',Times,serif;font-size:16px;white-space:pre-wrap;background:#fffdf8;border-radius:8px;padding:8px 10px;border:1px dashed var(--line)}
+.mini{font-size:12.5px;color:var(--muted)}
+ul.tight{margin:6px 0;padding-left:20px}ul.tight li{margin:3px 0}
+.subs{display:grid;gap:12px}
+.sub-item{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+/* giáo viên */
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 14px}
+.toolbar input,.toolbar select{margin:0;flex:1;min-width:150px}
+.tbl-wrap{overflow:auto;border:1px solid var(--line);border-radius:14px;background:#fff;max-height:70vh}
+table.res{border-collapse:collapse;width:100%;font-size:14px}
+table.res th,table.res td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+table.res th{background:var(--soft);position:sticky;top:0}
+table.res tr.click{cursor:pointer}table.res tr.click:hover td{background:#f7fbfb}
+.adm-grid{display:grid;gap:18px}
+@media(min-width:980px){.adm-grid{grid-template-columns:1.25fr 1fr;align-items:start}.adm-grid .sticky{position:sticky;top:80px}}
+.modal-bg{position:fixed;inset:0;background:rgba(20,35,43,.5);display:grid;place-items:center;z-index:100;padding:16px}
+.modal{max-width:460px;width:100%}
+.modal p{color:var(--muted)}
+.modal.warn{border-top:6px solid var(--bad)}
+.toast{position:fixed;left:50%;bottom:calc(40px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:999px;font-size:14px;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,.2);max-width:90vw;text-align:center}
+.overlay{position:fixed;inset:0;background:rgba(246,242,235,.92);display:grid;place-items:center;z-index:150;padding:20px;text-align:center}
+.nocopy{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.nocopy textarea,.nocopy input{-webkit-user-select:text;user-select:text}
+</style>
+</head>
+<body>
+<div class="demo-banner hidden" id="demoBanner">Chế độ dùng thử: bài làm chỉ lưu trên máy này, chưa chấm AI. Giáo viên dán link Apps Script vào <code>API_URL</code> để chạy thật.</div>
+<header class="topbar">
+  <a class="logo" href="#" id="homeLink"><span class="logo-mark">KEN</span><span>Lesson Plan Objectives</span></a>
+  <div class="spacer"></div>
+  <button class="who hidden" id="whoBtn" title="Đổi thông tin"><span id="whoName"></span> ✎</button>
+</header>
+<main id="app"></main>
+<footer>© KEN CLASSES · Viết mục tiêu bài học (OBJECTIVES) theo KHBD CV 5512 – NLS – NL AI · <button id="myLink">Kết quả của tôi</button> · <button id="adminLink">Khu vực giáo viên</button></footer>
+
+<script>
+/* ================= CẤU HÌNH ================= */
+var CONFIG = {
+  API_URL: '',                 // dán link Web App (…/exec) của Apps Script vào đây; để trống = chế độ dùng thử
+  SCHOOLS: ['Ngoại Ngữ – ĐHTN', 'KEN CLASSES', 'VÕ NGUYÊN GIÁP', 'Lớp luyện tập'],
+  TIME_MIN: 30,                // thời gian làm 1 bài OBJECTIVES
+  MAX_VIOLATIONS: 5,           // số lần rời tab/chia màn hình thì tự nộp (0 = chỉ ghi nhận)
+  MAX_SCORE: 10,
+  DEMO_PASSWORD: 'ken2026'
+};
+
+/* ================= ĐỀ BÀI (khung lấy theo KHBD mẫu Unit 2 – Tiếng Anh 10) ================= */
+function compBlocks(ling) {
+  return [
+    { h1: '2. Competences:' },
+    { h2: '2.1. General competences:' },
+    { f: 'gen', rows: 4, hint: 'Khoảng 2–3 ý; mỗi ý bắt đầu bằng “-”.' },
+    { h2: '2.2. Linguistic competences:' }
+  ].concat(ling).concat([
+    { h2: '2.3. Digital competences:' },
+    { f: 'digIdx', inline: '- Relevant indicators:', ph: 'mã chỉ báo NLS, cách nhau bằng dấu phẩy' },
+    { f: 'dig', rows: 4, hint: 'Mỗi ý bắt đầu bằng “+” và ghi mã ở cuối, VD: (NLS: …).' },
+    { h2: '2.4. AI competences:' },
+    { f: 'aiIdx', inline: '- Relevant indicators (YCCĐ NL AI):', ph: 'mã YCCĐ NL AI' },
+    { f: 'ai', rows: 3, hint: 'Mỗi ý bắt đầu bằng “+” và ghi mã ở cuối, VD: (NL AI: …).' },
+    { h1: '3. Attitudes:' },
+    { f: 'att', rows: 2, hint: '1–2 ý.' }
+  ]);
+}
+var TESTS = [
+  {
+    id: 'U2-WRITING', code: 'Đề 1', cls: 'c1',
+    unit: 'UNIT 2: THE GENERATION GAP',
+    period: 'Period 15. Lesson 6. Writing – An opinion essay about limiting teenagers’ screen time',
+    short: 'Lesson 6 – Writing: An opinion essay about limiting teenagers’ screen time',
+    book: 'Tiếng Anh 11 Global Success – Unit 2, trang 24',
+    imgs: ['img/u2-writing-p24.jpg'],
+    blocks: [
+      { h1: '1. Knowledge:' },
+      { lbl: 'Vocabulary:' },
+      { f: 'k1', rows: 4, hint: 'Khoảng 2 ý: từ vựng của chủ đề + bố cục/từ nối/ngôn ngữ dùng cho bài viết.' }
+    ].concat(compBlocks([
+      { lbl: 'Writing skills:' },
+      { f: 'l1', rows: 5, hint: 'Khoảng 2–3 ý, có tiêu chí đo được (số ý, số từ, bố cục…).' }
+    ]))
+  },
+  {
+    id: 'U2-CLIL', code: 'Đề 2', cls: 'c2',
+    unit: 'UNIT 2: THE GENERATION GAP',
+    period: 'Period 16. Lesson 7. Communication and Culture/ CLIL',
+    short: 'Lesson 7 – Communication and Culture/ CLIL: Asking for and giving permission · The generation gap in Asian American families',
+    book: 'Tiếng Anh 11 Global Success – Unit 2, trang 25–26',
+    imgs: ['img/u2-clil-p25.jpg', 'img/u2-clil-p26.jpg'],
+    blocks: [
+      { h1: '1. Knowledge:' },
+      { lbl: 'Everyday English:' },
+      { f: 'k1', rows: 3, hint: '1 ý.' },
+      { lbl: 'Culture/ CLIL:' },
+      { f: 'k2', rows: 3, hint: '1 ý.' }
+    ].concat(compBlocks([
+      { lbl: 'Speaking skills:' },
+      { f: 'l1', rows: 4, hint: '1–2 ý.' },
+      { lbl: 'Reading skills:' },
+      { f: 'l2', rows: 4, hint: '1–2 ý.' }
+    ]))
+  }
+];
+function testById(id) { return TESTS.filter(function (t) { return t.id === id; })[0]; }
+/* nhãn đầy đủ của từng ô – dùng cho bài chữa và gửi AI */
+function fieldList(t) {
+  var out = [], h1 = '', h2 = '', lbl = '';
+  t.blocks.forEach(function (b) {
+    if (b.h1) { h1 = b.h1; h2 = ''; lbl = ''; }
+    else if (b.h2) { h2 = b.h2; lbl = ''; }
+    else if (b.lbl) lbl = b.lbl;
+    else if (b.f) out.push({ id: b.f, name: [h1, h2, lbl].filter(Boolean).join(' › ').replace(/:/g, '') + (b.inline ? ' › Relevant indicators' : ''), inline: b.inline });
+  });
+  return out;
+}
+function planText(t, ans) {
+  var L = [t.unit, t.period, '', 'I. OBJECTIVES:', 'By the end of this lesson, Ss will be able to:'];
+  t.blocks.forEach(function (b) {
+    if (b.h1) L.push(b.h1); else if (b.h2) L.push(b.h2); else if (b.lbl) L.push(b.lbl);
+    else if (b.f) {
+      var v = String(ans[b.f] || '').replace(/\s+$/, '');
+      L.push(b.inline ? b.inline + ' ' + (v || '…') : (v || '(bỏ trống)'));
+    }
+  });
+  return L.join('\n');
+}
+
+/* ================= TIỆN ÍCH ================= */
+var MODE = CONFIG.API_URL ? 'api' : 'demo';
+var app = document.getElementById('app');
+var LS = {
+  get: function (k, d) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set: function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+  del: function (k) { try { localStorage.removeItem(k); } catch (e) {} }
+};
+var SS = { get: function (k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }, set: function (k, v) { try { sessionStorage.setItem(k, v); } catch (e) {} } };
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function toast(msg) { var t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(function () { t.remove(); }, 2800); }
+function modal(title, body, ok, cancel, cls) {
+  return new Promise(function (res) {
+    var d = document.createElement('div'); d.className = 'modal-bg';
+    d.innerHTML = '<div class="modal card ' + (cls || '') + '"><h3>' + title + '</h3><p>' + body + '</p><div class="row end">' +
+      (cancel === false ? '' : '<button class="btn ghost" data-r="0">' + (cancel || 'Hủy') + '</button>') +
+      '<button class="btn primary" data-r="1">' + (ok || 'Đồng ý') + '</button></div></div>';
+    d.addEventListener('click', function (e) { var b = e.target.closest('[data-r]'); if (b) { d.remove(); res(b.getAttribute('data-r') === '1'); } });
+    document.body.appendChild(d);
+  });
+}
+function overlay(on, text) {
+  var o = document.getElementById('ovl');
+  if (!on) { if (o) o.remove(); return; }
+  if (!o) { o = document.createElement('div'); o.id = 'ovl'; o.className = 'overlay'; document.body.appendChild(o); }
+  o.innerHTML = '<div class="loading" style="padding:0">' + esc(text || 'Đang xử lý…') + '</div>';
+}
+function fmtScore(x) { if (x === '' || x == null || isNaN(+x)) return '–'; var v = Math.round(+x * 100) / 100; return String(v).replace('.', ','); }
+function fmtTime(iso) { try { var d = new Date(iso); return d.toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' }); } catch (e) { return iso; } }
+function finalScore(s) { return s.teacher && s.teacher.score !== '' && s.teacher.score != null ? +s.teacher.score : (s.ai ? s.ai.score : null); }
+
+/* ================= MÁY CHỦ ================= */
+function api(action, data) {
+  var body = Object.assign({ action: action }, data || {});
+  if (MODE === 'demo') return new Promise(function (res, rej) { setTimeout(function () { try { res(demoApi(body)); } catch (e) { rej(e); } }, 200); });
+  return fetch(CONFIG.API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
+    .then(function (r) { return r.json(); })
+    .then(function (r) { if (!r.ok) throw new Error(r.error || 'Lỗi máy chủ'); return r; });
+}
+function demoApi(b) {
+  var subs = LS.get('obj_demo_subs', []);
+  var admin = ['admin_list', 'admin_save', 'rescore', 'login'].indexOf(b.action) > -1;
+  if (admin && b.pw !== CONFIG.DEMO_PASSWORD) throw new Error('Sai mật khẩu giáo viên.');
+  var find = function (id) { return subs.filter(function (s) { return s.id === id; })[0]; };
+  switch (b.action) {
+    case 'login': return { ok: true };
+    case 'submit':
+      var s = { id: 'd' + Date.now(), time: new Date().toISOString(), student: b.student, testId: b.testId, title: b.title, answers: b.answers, text: b.text, duration: b.duration, viol: b.viol, ai: null, aiError: 'Bản dùng thử không chấm AI – cần gắn khóa Claude/OpenAI trên Apps Script.', teacher: null };
+      subs.push(s); LS.set('obj_demo_subs', subs); return Object.assign({ ok: true }, s);
+    case 'my': return { ok: true, subs: subs.filter(function (s) { return s.student.sid === b.sid; }).reverse() };
+    case 'admin_list': return { ok: true, subs: subs.slice().reverse() };
+    case 'admin_save': var x = find(b.id); if (!x) throw new Error('Không tìm thấy bài'); x.teacher = { score: b.score, comment: b.comment, fixes: b.fixes, time: new Date().toISOString() }; LS.set('obj_demo_subs', subs); return { ok: true, teacher: x.teacher };
+    case 'rescore': return { ok: true, ai: null, aiError: 'Bản dùng thử không chấm AI.' };
+  }
+  throw new Error('Lệnh không hợp lệ');
+}
+
+/* ================= HỌC VIÊN ================= */
+var student = LS.get('ken_student', null);
+function updateWho() {
+  var b = document.getElementById('whoBtn');
+  if (student && location.hash.indexOf('#admin') !== 0) { b.classList.remove('hidden'); document.getElementById('whoName').textContent = student.name + ' · ' + student.cls; }
+  else b.classList.add('hidden');
+}
+function renderInfo(next) {
+  setTesting(false);
+  var s = student || {}, isOther = s.school && CONFIG.SCHOOLS.indexOf(s.school) < 0;
+  app.innerHTML =
+    '<section class="hero"><div><span class="eyebrow">Phương pháp giảng dạy · KHBD</span>' +
+    '<h1>Viết mục tiêu bài học<br>như soạn giáo án thật.</h1>' +
+    '<p class="lead">Chọn 1 trong 2 đề (Tiếng Anh 11 Global Success – Unit 2), điền phần <b>I. OBJECTIVES</b> theo khung KHBD mẫu (Knowledge – Competences – NLS – NL AI – Attitudes) trong ' + CONFIG.TIME_MIN + ' phút. Nộp xong có điểm AI ngay, giáo viên xem và chữa lại bài sau.</p>' +
+    '<div class="hero-points"><span>⏱ ' + CONFIG.TIME_MIN + ' phút</span><span>📝 Khung đề mục có sẵn</span><span>🤖 Claude + OpenAI chấm</span><span>🎯 Thang điểm 10</span><span>👩‍🏫 GV chữa bài</span></div></div>' +
+    '<form class="card" id="infoForm" novalidate><h2>Thông tin sinh viên</h2>' +
+    '<label>Họ và tên SV/HS<input name="name" autocomplete="name" value="' + esc(s.name || '') + '" placeholder="VD: Nguyễn Văn An"></label>' +
+    '<label>Mã SV/HS<input name="sid" value="' + esc(s.sid || '') + '" placeholder="VD: 2257220201"></label>' +
+    '<label>Trường<select name="school">' + CONFIG.SCHOOLS.map(function (x) { return '<option value="' + esc(x) + '"' + (s.school === x ? ' selected' : '') + '>' + esc(x) + '</option>'; }).join('') +
+    '<option value="__other"' + (isOther ? ' selected' : '') + '>Trường khác (tự điền)</option></select></label>' +
+    '<label id="otherWrap" class="' + (isOther ? '' : 'hidden') + '">Tên trường<input name="otherSchool" value="' + (isOther ? esc(s.school) : '') + '" placeholder="Nhập tên trường của bạn"></label>' +
+    '<label>Lớp <small>(Lớp + Khóa)</small><input name="cls" value="' + esc(s.cls || '') + '" placeholder="VD: Anh 2A – K22"></label>' +
+    '<div class="err-text" id="infoErr"></div><button class="btn primary big" type="submit">Tiếp tục →</button></form></section>';
+  var f = document.getElementById('infoForm');
+  f.school.addEventListener('change', function () { document.getElementById('otherWrap').classList.toggle('hidden', f.school.value !== '__other'); if (f.school.value === '__other') f.otherSchool.focus(); });
+  f.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var school = f.school.value === '__other' ? f.otherSchool.value.trim() : f.school.value;
+    var o = { name: f.name.value.trim().replace(/\s+/g, ' '), sid: f.sid.value.trim(), school: school, cls: f.cls.value.trim() };
+    var miss = !o.name ? 'họ tên' : !o.sid ? 'mã SV/HS' : !o.school ? 'tên trường' : !o.cls ? 'lớp' : '';
+    if (miss) { document.getElementById('infoErr').textContent = 'Bạn chưa điền ' + miss + '.'; return; }
+    student = o; LS.set('ken_student', o); updateWho();
+    if (next) next(); else go('#list');
+  });
+}
+function renderList() {
+  setTesting(false);
+  app.innerHTML = '<span class="eyebrow">Chọn 1 trong 2 đề</span><h1 style="font-size:clamp(26px,4vw,36px);margin-top:10px">Viết OBJECTIVES cho một tiết dạy</h1>' +
+    '<div class="rules" style="margin:12px 0 22px"><b>Yêu cầu:</b><ul class="tight">' +
+    '<li>Đọc trang sách giáo khoa của tiết học (hiện ở bên trái màn hình làm bài).</li>' +
+    '<li>Viết bằng <b>tiếng Anh</b> phần <b>I. OBJECTIVES</b> theo khung có sẵn: 1. Knowledge → 2. Competences (2.1 General, 2.2 Linguistic, 2.3 Digital – NLS, 2.4 AI – NL AI) → 3. Attitudes.</li>' +
+    '<li>Mỗi ý tiếp nối câu <i>“By the end of this lesson, Ss will be able to: …”</i>, bắt đầu bằng <b>động từ đo được</b> (identify, use, complete, write, act out…), gắn đúng nội dung tiết học.</li>' +
+    '<li>Thời gian: <b>' + CONFIG.TIME_MIN + ' phút</b>. Hết giờ bài tự nộp. Không dán chữ, không rời trang' + (CONFIG.MAX_VIOLATIONS ? ' (lần vi phạm thứ ' + CONFIG.MAX_VIOLATIONS + ' bài tự nộp)' : '') + '.</li>' +
+    '<li>Điểm tối đa <b>' + CONFIG.MAX_SCORE + '</b>. AI (Claude + OpenAI) chấm ngay sau khi nộp; giáo viên xem lại, chữa bài và chốt điểm.</li></ul></div>' +
+    '<div class="tests">' + TESTS.map(function (t) {
+      var done = LS.get('obj_done_' + t.id + '_' + student.sid, null);
+      return '<div class="tcard ' + t.cls + '"><span class="tag">' + t.code + '</span><img src="' + t.imgs[0] + '" alt="">' +
+        '<h3>' + esc(t.short) + '</h3><div class="meta"><span>📘 ' + esc(t.book) + '</span><span>⏱ ' + CONFIG.TIME_MIN + ' phút</span></div>' +
+        (done ? '<span class="pill gv" style="align-self:flex-start">Đã nộp ' + fmtTime(done) + '</span>' : '') +
+        '<button class="btn primary" data-go="' + t.id + '">' + (done ? 'Làm lại đề này' : 'Làm đề này') + ' →</button></div>';
+    }).join('') + '</div>' +
+    '<p style="margin-top:22px"><button class="btn ghost" id="toMy">📋 Xem kết quả & bài chữa của tôi</button></p>';
+  app.querySelectorAll('[data-go]').forEach(function (b) { b.addEventListener('click', function () { startTest(b.getAttribute('data-go')); }); });
+  document.getElementById('toMy').addEventListener('click', function () { go('#my'); });
+}
+
+/* ================= PHÒNG THI ================= */
+var current = null, sess = null, timerId = null, submitting = false, mon = { on: false, last: 0, full: false, split: false };
+function sessKey() { return 'obj_sess_' + current.id + '_' + student.sid; }
+function setTesting(on) { document.body.classList.toggle('testing', on); document.body.classList.toggle('nocopy', on); if (!on) monitor(false); }
+function startTest(id) {
+  var t = testById(id); if (!t) return;
+  current = t;
+  var old = LS.get('obj_sess_' + id + '_' + student.sid, null);
+  if (old && old.start && (Date.now() - old.start) < CONFIG.TIME_MIN * 60000 + 60000) { sess = old; return openRoom(); }
+  modal(t.code + ' – bắt đầu làm bài?', '<b>' + esc(t.short) + '</b><br><br>⏱ ' + CONFIG.TIME_MIN + ' phút, tính từ lúc bấm Bắt đầu (tải lại trang giờ vẫn chạy).<br>🚫 Không chuyển tab, không mở ứng dụng khác, không chia đôi màn hình, không dán chữ. Mọi lần vi phạm đều được ghi lại.<br>💾 Bài được lưu tạm trên máy liên tục.', 'Bắt đầu', 'Chưa')
+    .then(function (ok) { if (!ok) return; sess = { start: Date.now(), answers: {}, viol: [] }; LS.set(sessKey(), sess); goFull(); openRoom(); });
+}
+function openRoom() {
+  submitting = false; setTesting(true);
+  var t = current, filled = 0, total = 0;
+  var plan = '<div class="progress" id="prog"></div><div class="plan"><p class="ph">' + esc(t.unit) + '</p><p class="ph2">' + esc(t.period) + '</p>' +
+    '<div class="h1">I. OBJECTIVES:</div><div class="intro">By the end of this lesson, Ss will be able to:</div>' +
+    t.blocks.map(function (b) {
+      if (b.h1) return '<div class="h1">' + esc(b.h1) + '</div>';
+      if (b.h2) return '<div class="h2">' + esc(b.h2) + '</div>';
+      if (b.lbl) return '<div class="lbl">' + esc(b.lbl) + '</div>';
+      var v = sess.answers[b.f] || '';
+      if (b.inline) return '<div class="fld inl"><span>' + esc(b.inline) + '</span><input data-f="' + b.f + '" value="' + esc(v) + '" placeholder="' + esc(b.ph || '') + '" autocomplete="off" autocapitalize="off" spellcheck="false"></div>';
+      return '<div class="fld"><textarea data-f="' + b.f + '" rows="' + (b.rows || 3) + '" placeholder="- …" autocapitalize="off" spellcheck="false">' + esc(v) + '</textarea>' + (b.hint ? '<p class="hint">' + esc(b.hint) + '</p>' : '') + '</div>';
+    }).join('') + '</div>' +
+    '<p style="text-align:center;margin-top:18px"><button class="btn primary" id="subBtn2">Nộp bài</button></p>';
+  app.innerHTML = '<div class="test"><div class="test-bar"><div class="tb-title"><b>' + esc(t.code + ' · ' + t.short) + '</b><small>' + esc(student.name + ' · ' + student.sid + ' · ' + student.cls) + '</small></div>' +
+    '<span class="viol-chip hidden" id="violChip"></span><span class="timer" id="timer">--:--</span><button class="btn" id="subBtn">Nộp bài</button></div>' +
+    '<div class="rule">Viết bằng tiếng Anh · mỗi ý một dòng, bắt đầu bằng “-” (NLS/NL AI dùng “+”) · Enter để xuống dòng có sẵn gạch đầu dòng</div>' +
+    '<div class="mtabs"><button data-tab="book">📘 Sách (SGK)</button><button data-tab="work" class="on">📝 Bài làm</button></div>' +
+    '<div class="test-body"><div class="pane book" id="paneBook">' + t.imgs.map(function (s) { return '<img src="' + s + '" alt="Trang sách giáo khoa">'; }).join('') + '<p class="mini" style="text-align:center">' + esc(t.book) + '</p></div>' +
+    '<div class="pane work on" id="paneWork">' + plan + '</div></div></div>';
+  app.querySelectorAll('.mtabs button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      app.querySelectorAll('.mtabs button').forEach(function (x) { x.classList.toggle('on', x === b); });
+      document.getElementById('paneBook').classList.toggle('on', b.getAttribute('data-tab') === 'book');
+      document.getElementById('paneWork').classList.toggle('on', b.getAttribute('data-tab') === 'work');
+    });
+  });
+  var fields = app.querySelectorAll('[data-f]');
+  fields.forEach(function (el) {
+    el.addEventListener('input', function () { sess.answers[el.getAttribute('data-f')] = el.value; LS.set(sessKey(), sess); prog(); });
+    el.addEventListener('paste', function (e) { e.preventDefault(); toast('Không được dán chữ trong khi làm bài.'); });
+    el.addEventListener('drop', function (e) { e.preventDefault(); });
+    if (el.tagName === 'TEXTAREA') {
+      el.addEventListener('focus', function () { if (!el.value) { var f = el.getAttribute('data-f'); el.value = (f === 'dig' || f === 'ai') ? '+ ' : '- '; } });
+      el.addEventListener('blur', function () { if (/^[-+]\s*$/.test(el.value)) el.value = ''; });
+      el.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter' || e.shiftKey || e.isComposing) return;
+        var pos = el.selectionStart, before = el.value.slice(0, pos), line = before.split('\n').pop(), m = line.match(/^\s*([-+•])\s+/);
+        if (!m) return;
+        e.preventDefault();
+        if (/^\s*[-+•]\s*$/.test(line)) { el.value = before.slice(0, before.length - line.length) + el.value.slice(pos); el.selectionStart = el.selectionEnd = pos - line.length; }
+        else { var ins = '\n' + m[1] + ' '; el.value = before + ins + el.value.slice(pos); el.selectionStart = el.selectionEnd = pos + ins.length; }
+        el.dispatchEvent(new Event('input'));
+      });
+    }
+  });
+  function prog() {
+    var n = 0; fields.forEach(function (el) { var on = !!el.value.replace(/^[-+•\s]+$/, '').trim(); el.classList.toggle('filled', on); if (on) n++; });
+    document.getElementById('prog').textContent = 'Đã điền ' + n + '/' + fields.length + ' mục';
+  }
+  prog();
+  document.getElementById('subBtn').addEventListener('click', function () { doSubmit(false); });
+  document.getElementById('subBtn2').addEventListener('click', function () { doSubmit(false); });
+  app.addEventListener('contextmenu', blockEv); app.addEventListener('copy', blockEv); app.addEventListener('cut', blockEv);
+  clearInterval(timerId); timerId = setInterval(tick, 500); tick();
+  monitor(true);
+}
+function blockEv(e) { if (document.body.classList.contains('testing')) e.preventDefault(); }
+function leftSec() { return Math.max(0, Math.round((sess.start + CONFIG.TIME_MIN * 60000 - Date.now()) / 1000)); }
+function tick() {
+  var el = document.getElementById('timer'); if (!el || !sess) return;
+  var s = leftSec(); el.textContent = String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+  el.classList.toggle('warn', s <= 300);
+  if (s === 300 && !sess.w5) { sess.w5 = 1; toast('Còn 5 phút!'); }
+  if (s <= 0) doSubmit(true, 'Hết giờ – bài tự nộp.');
+}
+/* ---- giám sát ---- */
+function goFull() {
+  var d = document.documentElement, f = d.requestFullscreen || d.webkitRequestFullscreen;
+  if (f && !/iPhone|iPod/.test(navigator.userAgent)) { try { var p = f.call(d); if (p && p.then) p.then(function () { mon.full = true; }).catch(function () {}); else mon.full = true; } catch (e) {} }
+}
+function isTyping() { var a = document.activeElement; return !!a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName); }
+function isSplit() {
+  if (/iPhone|iPod/.test(navigator.userAgent)) return false;
+  if (window.visualViewport && visualViewport.scale > 1.05) return mon.split;
+  if (isTyping()) return mon.split;
+  var land = window.matchMedia && matchMedia('(orientation: landscape)').matches;
+  var sw = land ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height);
+  var w = document.documentElement.clientWidth || window.innerWidth;
+  return sw > 0 && w / sw < 0.62;
+}
+function onVis() { if (document.hidden) violation('Rời trang / chuyển tab'); }
+function onBlur() { if (/iPhone|iPad|iPod|Android/.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.userAgent))) return;
+  setTimeout(function () { if (mon.on && !document.hidden && !document.hasFocus() && !isTyping()) violation('Chuyển sang cửa sổ / ứng dụng khác'); }, 400); }
+function onFs() {
+  var fe = document.fullscreenElement || document.webkitFullscreenElement;
+  if (fe) { mon.full = true; return; }
+  if (mon.full && mon.on) { mon.full = false; violation('Thoát chế độ toàn màn hình'); }
+}
+function checkSplit() { var s = isSplit(); if (s && !mon.split) violation('Chia đôi / thu nhỏ màn hình'); mon.split = s; }
+function monitor(on) {
+  if (on === mon.on) return;
+  mon.on = on;
+  var f = on ? 'addEventListener' : 'removeEventListener';
+  document[f]('visibilitychange', onVis); window[f]('blur', onBlur); window[f]('resize', checkSplit);
+  document[f]('fullscreenchange', onFs); document[f]('webkitfullscreenchange', onFs);
+  clearInterval(mon.iv);
+  if (on) { mon.split = isSplit(); if (mon.split) setTimeout(function () { violation('Chia đôi / thu nhỏ màn hình'); }, 800); mon.iv = setInterval(checkSplit, 3000); showViol(); }
+  else if (document.fullscreenElement && document.exitFullscreen) { mon.full = false; document.exitFullscreen().catch(function () {}); }
+}
+function violation(kind) {
+  if (!mon.on || !sess || submitting) return;
+  var now = Date.now(); if (now - mon.last < 2000) return; mon.last = now;
+  sess.viol = sess.viol || [];
+  sess.viol.push({ k: kind, t: Math.round((now - sess.start) / 1000) });
+  LS.set(sessKey(), sess); showViol();
+  var n = sess.viol.length, max = CONFIG.MAX_VIOLATIONS;
+  if (max && n >= max) { doSubmit(true, 'Vi phạm quy chế ' + n + ' lần – bài tự nộp.'); return; }
+  modal('⚠️ Cảnh báo vi phạm (' + n + (max ? '/' + max : '') + ')', '<b>' + esc(kind) + '</b><br>Lần vi phạm đã được ghi lại và gửi cho giáo viên.' + (max ? ' Đến lần thứ ' + max + ' bài sẽ tự nộp.' : ''), 'Quay lại làm bài', false, 'warn').then(goFull);
+}
+function showViol() { var c = document.getElementById('violChip'); if (!c) return; var n = (sess.viol || []).length; c.classList.toggle('hidden', !n); c.textContent = '⚠ ' + n; }
+/* ---- nộp bài ---- */
+function doSubmit(auto, reason) {
+  if (submitting) return;
+  var flds = fieldList(current), empty = flds.filter(function (f) { return !String(sess.answers[f.id] || '').replace(/^[-+•\s]+$/, '').trim(); }).length;
+  var p = auto ? Promise.resolve(true) : modal('Nộp bài?', (empty ? 'Bạn còn <b>' + empty + ' mục</b> bỏ trống. ' : 'Bạn đã điền đủ các mục. ') + 'Còn ' + Math.ceil(leftSec() / 60) + ' phút. Nộp bài ngay?', 'Nộp bài', 'Làm tiếp');
+  p.then(function (ok) {
+    if (!ok) return;
+    submitting = true; clearInterval(timerId); monitor(false);
+    var dur = Math.min(CONFIG.TIME_MIN * 60, Math.round((Date.now() - sess.start) / 1000));
+    overlay(true, (reason ? reason + ' ' : '') + 'Đang nộp bài và chấm bằng AI – Claude + OpenAI (khoảng 20–60 giây)…');
+    var payload = { testId: current.id, title: current.code + ' · ' + current.short, student: student, answers: sess.answers, text: planText(current, sess.answers), duration: dur, viol: sess.viol || [], auto: !!auto };
+    var send = function (tries) {
+      return api('submit', payload).catch(function (e) { if (tries > 0) return new Promise(function (r) { setTimeout(r, 2500); }).then(function () { return send(tries - 1); }); throw e; });
+    };
+    send(2).then(function (r) {
+      overlay(false); LS.del(sessKey()); LS.set('obj_done_' + current.id + '_' + student.sid, new Date().toISOString());
+      setTesting(false); renderResult(r, true);
+    }).catch(function (e) {
+      overlay(false); submitting = false;
+      modal('Chưa nộp được bài', esc(e.message) + '<br>Bài làm vẫn được lưu trên máy. Kiểm tra mạng rồi bấm Thử lại.', 'Thử lại', false).then(function () { doSubmit(true); });
+    });
+  });
+}
+
+/* ================= KẾT QUẢ ================= */
+function aiCard(r, opts) {
+  opts = opts || {};
+  if (!r.ai) return '<div class="card review ai" id="aiBox"><h2>🤖 Chấm bằng AI</h2><p style="color:var(--muted)">Chưa chấm tự động được (' + esc(r.aiError || 'chưa có kết quả') + '). Giáo viên sẽ chấm.</p>' + (opts.retry ? '<button class="btn ai" id="aiRetry">🔄 Chấm lại bằng AI</button>' : '') + '</div>';
+  var a = r.ai, L = function (arr) { return (arr || []).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join(''); };
+  var eng = a.engines || {};
+  return '<div class="card review ai" id="aiBox"><h2>🤖 AI chấm: <span class="pill ai" style="font-size:18px">' + fmtScore(a.score) + ' / ' + CONFIG.MAX_SCORE + '</span></h2>' +
+    '<p class="mini">' + (eng.claude != null ? 'Claude: <b>' + fmtScore(eng.claude) + '</b>' : 'Claude: –') + ' · ' + (eng.openai != null ? 'OpenAI: <b>' + fmtScore(eng.openai) + '</b>' : 'OpenAI: –') +
+    (eng.claude != null && eng.openai != null ? ' · điểm AI = trung bình hai bên' : '') + '. Điểm AI mang tính tham khảo; giáo viên chốt điểm cuối cùng.</p>' +
+    (a.summary ? '<p>' + esc(a.summary) + '</p>' : '') +
+    '<table class="ai-tbl">' + (a.criteria || []).map(function (c) { return '<tr><th>' + esc(c.name) + '</th><td class="sc">' + fmtScore(c.score) + ' / ' + fmtScore(c.max) + '</td><td>' + esc(c.comment) + '</td></tr>'; }).join('') + '</table>' +
+    (a.strengths && a.strengths.length ? '<h3>👍 Điểm tốt</h3><ul class="tight">' + L(a.strengths) + '</ul>' : '') +
+    (a.improvements && a.improvements.length ? '<h3>🛠 Cần cải thiện</h3><ul class="tight">' + L(a.improvements) + '</ul>' : '') +
+    (a.corrections && a.corrections.length ? '<h3>✏️ Sửa lỗi</h3><div class="ai-fix">' + a.corrections.map(function (c) { return '<div>' + (c.section ? '<em>' + esc(c.section) + '</em><br>' : '') + '<s>' + esc(c.original) + '</s> → <b>' + esc(c.corrected) + '</b><small>' + esc(c.why) + '</small></div>'; }).join('') + '</div>' : '') +
+    (a.revised ? '<details style="margin-top:10px"><summary><b>📄 Phiên bản gợi ý (AI viết lại)</b></summary><pre class="plain">' + esc(a.revised) + '</pre></details>' : '') +
+    (opts.retry ? '<p style="margin-top:12px"><button class="btn ai sm" id="aiRetry">🔄 Chấm lại bằng AI</button></p>' : '') + '</div>';
+}
+function teacherCard(s) {
+  var t = s.teacher, test = testById(s.testId);
+  if (!t || (t.score === '' && !t.comment && !t.fixes)) return '<div class="card review gv"><h2>👩‍🏫 Giáo viên</h2><p style="color:var(--muted)">Giáo viên chưa chữa bài này. Quay lại xem sau nhé.</p></div>';
+  var secs = '';
+  if (t.fixes && test) fieldList(test).forEach(function (f) {
+    var a = String((s.answers || {})[f.id] || ''), b = t.fixes[f.id];
+    if (b == null || b === a) return;
+    secs += '<div class="sec-cmp"><h4>' + esc(f.name) + '</h4><div class="diff">' + diffHtml(a, b) + '</div></div>';
+  });
+  return '<div class="card review gv"><h2>👩‍🏫 Giáo viên chấm: <span class="pill gv" style="font-size:18px">' + fmtScore(t.score) + ' / ' + CONFIG.MAX_SCORE + '</span></h2>' +
+    (t.comment ? '<p style="white-space:pre-wrap">' + esc(t.comment) + '</p>' : '') +
+    (secs ? '<h3>✏️ Bài chữa của giáo viên</h3><p class="mini"><del style="background:var(--badbg);color:var(--bad)">gạch đỏ</del> = bỏ · <ins style="background:var(--okbg);color:var(--ok);text-decoration:none;font-weight:600">xanh</ins> = giáo viên thêm/sửa</p>' + secs : '') + '</div>';
+}
+function renderResult(s, fresh) {
+  setTesting(false);
+  var fs = finalScore(s);
+  app.innerHTML = '<div class="card"><span class="eyebrow">' + esc((testById(s.testId) || {}).code || '') + '</span><h2 style="margin-top:10px">' + esc(s.title) + '</h2>' +
+    '<p class="mini">' + esc(s.student.name + ' · ' + s.student.sid + ' · ' + s.student.cls) + ' · nộp ' + fmtTime(s.time) + ' · ' + Math.round((s.duration || 0) / 60) + ' phút' + ((s.viol || []).length ? ' · <span class="pill warn">' + s.viol.length + ' lần vi phạm</span>' : '') + '</p>' +
+    '<div class="row" style="gap:20px;margin-top:10px"><div><div class="mini">' + (s.teacher && s.teacher.score !== '' && s.teacher.score != null ? 'Điểm (giáo viên chốt)' : 'Điểm hiện tại (AI)') + '</div><div class="score-big">' + fmtScore(fs) + '<small>/ ' + CONFIG.MAX_SCORE + '</small></div></div>' +
+    (fresh ? '<p style="flex:1;min-width:220px;margin:0">' + (fs == null ? 'Bài đã nộp thành công. ' : fs >= 8 ? 'Rất tốt! Mục tiêu rõ ràng, sát bài học 🎉 ' : fs >= 6.5 ? 'Khá tốt! Xem nhận xét để hoàn thiện thêm 💪 ' : 'Đọc kỹ phần sửa lỗi và phiên bản gợi ý bên dưới nhé. ') + 'Giáo viên sẽ xem lại và chữa bài; xem ở mục <b>Kết quả của tôi</b>.</p>' : '') + '</div></div>' +
+    teacherCard(s) + aiCard(s) +
+    '<div class="card review"><h2>📝 Bài làm của bạn</h2><pre class="plain">' + esc(s.text || '') + '</pre></div>' +
+    '<p class="row" style="margin-top:18px"><button class="btn primary" id="backList">← Về danh sách đề</button><button class="btn ghost" id="backMy">📋 Kết quả của tôi</button></p>';
+  document.getElementById('backList').addEventListener('click', function () { go('#list'); });
+  document.getElementById('backMy').addEventListener('click', function () { go('#my'); });
+  window.scrollTo(0, 0);
+}
+var mySubs = [];
+function renderMy() {
+  setTesting(false);
+  app.innerHTML = '<h1 style="font-size:clamp(26px,4vw,36px)">Kết quả của tôi</h1><p class="mini">' + esc(student.name + ' · ' + student.sid) + '</p><div class="loading">Đang tải…</div>';
+  api('my', { sid: student.sid, name: student.name }).then(function (r) {
+    mySubs = r.subs || [];
+    var h = '<h1 style="font-size:clamp(26px,4vw,36px)">Kết quả của tôi</h1><p class="mini">' + esc(student.name + ' · ' + student.sid) + '</p>';
+    h += mySubs.length ? '<div class="subs">' + mySubs.map(function (s, i) {
+      var gv = s.teacher && s.teacher.score !== '' && s.teacher.score != null;
+      return '<div class="card sub-item"><div><b>' + esc(s.title) + '</b><div class="mini">' + fmtTime(s.time) + '</div></div><div class="row">' +
+        '<span class="pill ai">AI ' + fmtScore(s.ai ? s.ai.score : null) + '</span>' + (gv ? '<span class="pill gv">GV ' + fmtScore(s.teacher.score) + '</span>' : '<span class="pill">GV chưa chữa</span>') +
+        '<button class="btn sm primary" data-i="' + i + '">Xem</button></div></div>';
+    }).join('') + '</div>' : '<div class="card"><p>Chưa có bài nộp nào với mã SV này.</p></div>';
+    h += '<p style="margin-top:18px"><button class="btn ghost" id="backList">← Về danh sách đề</button></p>';
+    app.innerHTML = h;
+    app.querySelectorAll('[data-i]').forEach(function (b) { b.addEventListener('click', function () { renderResult(mySubs[+b.getAttribute('data-i')]); }); });
+    document.getElementById('backList').addEventListener('click', function () { go('#list'); });
+  }).catch(function (e) { app.innerHTML = '<div class="card"><p>' + esc(e.message) + '</p><button class="btn ghost" onclick="go(\'#list\')">← Quay lại</button></div>'; });
+}
+
+/* ---- so sánh từng từ (bài SV ↔ bài GV chữa) ---- */
+function diffHtml(a, b) {
+  var A = String(a || '').split(/(\s+)/), B = String(b || '').split(/(\s+)/), n = A.length, m = B.length;
+  if (n * m > 400000) return '<del>' + esc(a) + '</del>\n<ins>' + esc(b) + '</ins>';
+  var dp = []; for (var i = 0; i <= n; i++) { dp.push(new Int32Array(m + 1)); }
+  for (i = n - 1; i >= 0; i--) for (var j = m - 1; j >= 0; j--) dp[i][j] = A[i] === B[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+  var out = '', del = '', ins = '';
+  var flush = function () { if (del) out += /\S/.test(del) ? '<del>' + esc(del) + '</del>' : esc(del); if (ins) out += /\S/.test(ins) ? '<ins>' + esc(ins) + '</ins>' : esc(ins); del = ins = ''; };
+  i = 0; j = 0;
+  while (i < n && j < m) {
+    if (A[i] === B[j]) { flush(); out += esc(A[i]); i++; j++; }
+    else if (dp[i + 1][j] >= dp[i][j + 1]) del += A[i++];
+    else ins += B[j++];
+  }
+  while (i < n) del += A[i++]; while (j < m) ins += B[j++];
+  flush(); return out;
+}
+
+/* ================= GIÁO VIÊN ================= */
+var adminPw = SS.get('obj_pw') || '', adminSubs = [], adminFilter = { q: '', test: '', cls: '', st: '' };
+function renderAdmin() {
+  setTesting(false);
+  if (!adminPw) {
+    app.innerHTML = '<form class="card" id="pwForm" style="max-width:420px;margin:0 auto"><h2>Khu vực giáo viên</h2><label>Mật khẩu<input type="password" name="pw" autocomplete="current-password"></label><div class="err-text" id="pwErr"></div><button class="btn primary big">Đăng nhập</button></form>';
+    var f = document.getElementById('pwForm');
+    f.addEventListener('submit', function (e) {
+      e.preventDefault();
+      api('login', { pw: f.pw.value }).then(function () { adminPw = f.pw.value; SS.set('obj_pw', adminPw); renderAdmin(); })
+        .catch(function (er) { document.getElementById('pwErr').textContent = er.message; });
+    });
+    return;
+  }
+  app.innerHTML = '<h1 style="font-size:clamp(26px,4vw,36px)">Bài nộp – OBJECTIVES</h1><div class="loading">Đang tải…</div>';
+  api('admin_list', { pw: adminPw }).then(function (r) { adminSubs = r.subs || []; drawAdminList(); })
+    .catch(function (e) { if (/mật khẩu/i.test(e.message)) { adminPw = ''; SS.set('obj_pw', ''); } app.innerHTML = '<div class="card"><p>' + esc(e.message) + '</p><button class="btn ghost" onclick="renderAdmin()">Thử lại</button></div>'; });
+}
+function filteredSubs() {
+  var q = adminFilter.q.toLowerCase();
+  return adminSubs.filter(function (s) {
+    if (adminFilter.test && s.testId !== adminFilter.test) return false;
+    if (adminFilter.cls && s.student.cls !== adminFilter.cls) return false;
+    var gv = s.teacher && s.teacher.score !== '' && s.teacher.score != null;
+    if (adminFilter.st === 'todo' && gv) return false;
+    if (adminFilter.st === 'done' && !gv) return false;
+    return !q || (s.student.name + ' ' + s.student.sid + ' ' + s.student.school).toLowerCase().indexOf(q) > -1;
+  });
+}
+function drawAdminList() {
+  var classes = adminSubs.map(function (s) { return s.student.cls; }).filter(function (c, i, a) { return c && a.indexOf(c) === i; }).sort();
+  app.innerHTML = '<div class="row" style="justify-content:space-between"><h1 style="font-size:clamp(26px,4vw,36px);margin:0">Bài nộp – OBJECTIVES</h1><div class="row"><button class="btn ghost sm" id="reload">↻ Tải lại</button><button class="btn ghost sm" id="csv">⬇ Tải Excel</button><button class="btn ghost sm" id="logout">Đăng xuất</button></div></div>' +
+    '<div class="toolbar"><input id="fq" placeholder="Tìm tên, mã SV, trường…" value="' + esc(adminFilter.q) + '">' +
+    '<select id="ft"><option value="">Tất cả đề</option>' + TESTS.map(function (t) { return '<option value="' + t.id + '"' + (adminFilter.test === t.id ? ' selected' : '') + '>' + t.code + ' – ' + (t.id === 'U2-WRITING' ? 'Writing' : 'Communication & Culture/CLIL') + '</option>'; }).join('') + '</select>' +
+    '<select id="fc"><option value="">Tất cả lớp</option>' + classes.map(function (c) { return '<option' + (adminFilter.cls === c ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('') + '</select>' +
+    '<select id="fs"><option value="">Tất cả</option><option value="todo"' + (adminFilter.st === 'todo' ? ' selected' : '') + '>GV chưa chấm</option><option value="done"' + (adminFilter.st === 'done' ? ' selected' : '') + '>GV đã chấm</option></select></div>' +
+    '<p class="mini" id="cnt"></p><div class="tbl-wrap"><table class="res"><thead><tr><th>Thời gian</th><th>Họ tên</th><th>Mã SV</th><th>Lớp</th><th>Đề</th><th>Phút</th><th>Vi phạm</th><th>AI</th><th>GV</th><th>Điểm cuối</th></tr></thead><tbody id="tb"></tbody></table></div>';
+  var draw = function () {
+    var list = filteredSubs();
+    document.getElementById('cnt').textContent = list.length + ' bài · bấm vào một dòng để xem, chữa bài và chấm điểm';
+    document.getElementById('tb').innerHTML = list.map(function (s) {
+      var gv = s.teacher && s.teacher.score !== '' && s.teacher.score != null;
+      return '<tr class="click" data-id="' + esc(s.id) + '"><td>' + fmtTime(s.time) + '</td><td><b>' + esc(s.student.name) + '</b></td><td>' + esc(s.student.sid) + '</td><td>' + esc(s.student.cls) + '</td><td>' + esc((testById(s.testId) || {}).code || s.testId) + '</td><td>' + Math.round((s.duration || 0) / 60) + '</td><td>' + ((s.viol || []).length ? '<span class="pill warn">' + s.viol.length + '</span>' : '0') + '</td>' +
+        '<td>' + (s.ai ? '<span class="pill ai">' + fmtScore(s.ai.score) + '</span>' : '<span class="mini">chưa</span>') + '</td><td>' + (gv ? '<span class="pill gv">' + fmtScore(s.teacher.score) + '</span>' : '<span class="mini">chưa</span>') + '</td><td><b>' + fmtScore(finalScore(s)) + '</b></td></tr>';
+    }).join('') || '<tr><td colspan="10" class="mini">Chưa có bài nộp.</td></tr>';
+  };
+  draw();
+  document.getElementById('fq').addEventListener('input', function (e) { adminFilter.q = e.target.value; draw(); });
+  document.getElementById('ft').addEventListener('change', function (e) { adminFilter.test = e.target.value; draw(); });
+  document.getElementById('fc').addEventListener('change', function (e) { adminFilter.cls = e.target.value; draw(); });
+  document.getElementById('fs').addEventListener('change', function (e) { adminFilter.st = e.target.value; draw(); });
+  document.getElementById('tb').addEventListener('click', function (e) { var tr = e.target.closest('tr[data-id]'); if (tr) adminDetail(tr.getAttribute('data-id')); });
+  document.getElementById('reload').addEventListener('click', renderAdmin);
+  document.getElementById('logout').addEventListener('click', function () { adminPw = ''; SS.set('obj_pw', ''); renderAdmin(); });
+  document.getElementById('csv').addEventListener('click', exportCsv);
+}
+function adminDetail(id) {
+  var s = adminSubs.filter(function (x) { return x.id === id; })[0]; if (!s) return;
+  var test = testById(s.testId), t = s.teacher || {}, fixes = t.fixes || {};
+  var secs = test ? fieldList(test).map(function (f) {
+    var a = String((s.answers || {})[f.id] || ''), cur = fixes[f.id] != null ? fixes[f.id] : a;
+    return '<div class="sec-cmp"><h4>' + esc(f.name) + '</h4><textarea data-fix="' + f.id + '" rows="' + Math.max(2, cur.split('\n').length + 1) + '">' + esc(cur) + '</textarea><div class="diff' + (a || cur ? '' : ' hidden') + '" data-diff="' + f.id + '">' + diffHtml(a, cur) + '</div></div>';
+  }).join('') : '<pre class="plain">' + esc(s.text) + '</pre>';
+  app.innerHTML = '<p><button class="btn ghost sm" id="back">← Danh sách bài nộp</button></p>' +
+    '<div class="card"><h2 style="margin-bottom:4px">' + esc(s.student.name) + ' <span class="mini">· ' + esc(s.student.sid) + ' · ' + esc(s.student.school) + ' · ' + esc(s.student.cls) + '</span></h2>' +
+    '<p class="mini">' + esc(s.title) + ' · nộp ' + fmtTime(s.time) + ' · ' + Math.round((s.duration || 0) / 60) + ' phút' + (s.auto ? ' · tự nộp' : '') + '</p>' +
+    ((s.viol || []).length ? '<p class="mini"><span class="pill warn">' + s.viol.length + ' lần vi phạm</span> ' + esc(s.viol.map(function (v) { return v.k + ' (phút ' + Math.floor(v.t / 60) + ')'; }).join('; ')) + '</p>' : '') + '</div>' +
+    '<div class="adm-grid" style="margin-top:18px"><div><div class="card"><h2>✏️ Chữa bài</h2><p class="mini">Sửa trực tiếp trong từng ô (ô đã điền sẵn bài của SV). Phần đổi khác hiện ngay bên dưới: đỏ = bỏ, xanh = thêm. SV sẽ thấy bản chữa này.</p>' + secs + '</div></div>' +
+    '<div class="sticky"><div class="card review gv" style="margin-top:0"><h2>👩‍🏫 Chấm điểm</h2>' +
+    '<label>Điểm giáo viên <small>(0 – ' + CONFIG.MAX_SCORE + ', bước 0,25)</small><input id="gvScore" type="number" inputmode="decimal" min="0" max="' + CONFIG.MAX_SCORE + '" step="0.25" value="' + esc(t.score != null ? t.score : '') + '" placeholder="' + (s.ai ? 'AI: ' + s.ai.score : '') + '"></label>' +
+    '<label>Nhận xét chung<textarea id="gvCmt" rows="5" placeholder="Nhận xét cho sinh viên…">' + esc(t.comment || '') + '</textarea></label>' +
+    '<div class="row"><button class="btn primary" id="gvSave">💾 Lưu điểm & bài chữa</button>' + (s.ai ? '<button class="btn ghost sm" id="useAi">Lấy điểm AI</button><button class="btn ghost sm" id="useRev">Chép bản gợi ý của AI vào ô chữa</button>' : '') + '</div>' +
+    (t.time ? '<p class="mini">Lưu lần cuối: ' + fmtTime(t.time) + '</p>' : '') + '</div>' +
+    '<div class="card" style="margin-top:14px"><div class="row"><b>Chấm lại bằng AI:</b><select id="eng" style="width:auto;margin:0"><option value="both">Claude + OpenAI</option><option value="claude">Chỉ Claude</option><option value="openai">Chỉ OpenAI</option></select><button class="btn ai sm" id="reAi">🤖 Chấm lại</button></div></div>' +
+    aiCard(s) + '</div></div>';
+  document.getElementById('back').addEventListener('click', drawAdminList);
+  app.querySelectorAll('[data-fix]').forEach(function (ta) {
+    ta.addEventListener('input', function () { var f = ta.getAttribute('data-fix'); var d = app.querySelector('[data-diff="' + f + '"]'), o = String((s.answers || {})[f] || ''); d.innerHTML = diffHtml(o, ta.value); d.classList.toggle('hidden', !o && !ta.value); });
+  });
+  var ua = document.getElementById('useAi'); if (ua) ua.addEventListener('click', function () { document.getElementById('gvScore').value = s.ai.score; });
+  var ur = document.getElementById('useRev'); if (ur) ur.addEventListener('click', function () {
+    var parts = splitRevised(test, s.ai.revised || ''); var n = 0;
+    Object.keys(parts).forEach(function (k) { var ta = app.querySelector('[data-fix="' + k + '"]'); if (ta && parts[k]) { ta.value = parts[k]; ta.dispatchEvent(new Event('input')); n++; } });
+    toast(n ? 'Đã chép ' + n + ' mục – sửa lại tùy ý trước khi lưu.' : 'Không tách được bản gợi ý theo mục.');
+  });
+  document.getElementById('gvSave').addEventListener('click', function () {
+    var v = document.getElementById('gvScore').value.trim().replace(',', '.');
+    if (v !== '' && (isNaN(+v) || +v < 0 || +v > CONFIG.MAX_SCORE)) { toast('Điểm phải từ 0 đến ' + CONFIG.MAX_SCORE); return; }
+    var fx = {}; app.querySelectorAll('[data-fix]').forEach(function (ta) { var f = ta.getAttribute('data-fix'); if (ta.value !== String((s.answers || {})[f] || '')) fx[f] = ta.value; });
+    var btn = this; btn.disabled = true;
+    api('admin_save', { pw: adminPw, id: s.id, score: v === '' ? '' : +v, comment: document.getElementById('gvCmt').value, fixes: Object.keys(fx).length ? fx : null })
+      .then(function (r) { s.teacher = r.teacher; toast('Đã lưu ✓'); adminDetail(s.id); })
+      .catch(function (e) { btn.disabled = false; toast(e.message); });
+  });
+  document.getElementById('reAi').addEventListener('click', function () {
+    var eng = document.getElementById('eng').value;
+    overlay(true, 'Đang chấm lại bằng AI (khoảng 20–60 giây)…');
+    api('rescore', { pw: adminPw, id: s.id, engine: eng }).then(function (r) {
+      overlay(false);
+      if (r.ai) { s.ai = r.ai; toast('Đã chấm lại ✓'); adminDetail(s.id); } else toast('AI lỗi: ' + (r.aiError || 'không rõ'));
+    }).catch(function (e) { overlay(false); toast(e.message); });
+  });
+  window.scrollTo(0, 0);
+}
+/* tách bản gợi ý của AI theo đúng các ô của khung */
+function splitRevised(test, txt) {
+  var out = {}; if (!test) return out;
+  var lines = String(txt).split(/\r?\n/), cur = null, sub = null;
+  var lblMap = {}; var h2 = '';
+  test.blocks.forEach(function (b, i) {
+    if (b.h2) h2 = b.h2;
+    if (b.lbl) { var nx = test.blocks[i + 1]; if (nx && nx.f) lblMap[b.lbl.toLowerCase()] = nx.f; }
+  });
+  lines.forEach(function (l) {
+    var s = l.trim(), low = s.toLowerCase();
+    if (!s) return;
+    if (/^2\.1\.?\s*general/.test(low)) { cur = 'gen'; return; }
+    if (/^2\.2\.?\s*linguistic/.test(low)) { cur = null; return; }
+    if (/^2\.3\.?\s*digital/.test(low)) { cur = 'dig'; sub = 'dig'; return; }
+    if (/^2\.4\.?\s*ai/.test(low)) { cur = 'ai'; sub = 'ai'; return; }
+    if (/^3\.?\s*attitude/.test(low)) { cur = 'att'; return; }
+    if (/^(1\.?\s*knowledge|2\.?\s*competences|i\.\s*objectives|by the end|unit|period)/.test(low)) { cur = null; return; }
+    if (lblMap[low]) { cur = lblMap[low]; return; }
+    var ri = s.match(/^-?\s*relevant indicators[^:]*:\s*(.*)$/i);
+    if (ri && (sub === 'dig' || sub === 'ai')) { out[sub === 'dig' ? 'digIdx' : 'aiIdx'] = ri[1].trim(); return; }
+    if (cur) out[cur] = (out[cur] ? out[cur] + '\n' : '') + s;
+  });
+  return out;
+}
+function exportCsv() {
+  var list = filteredSubs(), head = ['Thời gian', 'Họ tên', 'Mã SV', 'Trường', 'Lớp', 'Đề', 'Phút', 'Số lần vi phạm', 'Điểm AI', 'Claude', 'OpenAI', 'Điểm GV', 'Điểm cuối', 'Nhận xét GV', 'Bài làm'];
+  var q = function (v) { v = String(v == null ? '' : v); return '"' + v.replace(/"/g, '""') + '"'; };
+  var rows = list.map(function (s) {
+    var e = (s.ai && s.ai.engines) || {};
+    return [fmtTime(s.time), s.student.name, s.student.sid, s.student.school, s.student.cls, (testById(s.testId) || {}).code || s.testId, Math.round((s.duration || 0) / 60), (s.viol || []).length,
+      s.ai ? s.ai.score : '', e.claude != null ? e.claude : '', e.openai != null ? e.openai : '', s.teacher ? s.teacher.score : '', finalScore(s), s.teacher ? s.teacher.comment : '', s.text].map(q).join(',');
+  });
+  var blob = new Blob(['﻿' + [head.map(q).join(',')].concat(rows).join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'KEN Objectives - Ket qua - ' + new Date().toLocaleDateString('vi-VN').replace(/\//g, '.') + '.csv'; a.click();
+}
+
+/* ================= ĐIỀU HƯỚNG ================= */
+function go(h) { if (location.hash === h) route(); else location.hash = h; }
+function route() {
+  var h = location.hash || '';
+  updateWho();
+  if (document.body.classList.contains('testing') && sess && !submitting) return;
+  if (h.indexOf('#admin') === 0) return renderAdmin();
+  if (!student) return renderInfo(function () { route(); });
+  if (h === '#my') return renderMy();
+  if (h === '#info') return renderInfo();
+  renderList();
+}
+document.getElementById('homeLink').addEventListener('click', function (e) { e.preventDefault(); go('#list'); });
+document.getElementById('whoBtn').addEventListener('click', function () { go('#info'); });
+document.getElementById('adminLink').addEventListener('click', function () { go('#admin'); });
+document.getElementById('myLink').addEventListener('click', function () { go('#my'); });
+window.addEventListener('hashchange', route);
+if (MODE === 'demo') document.getElementById('demoBanner').classList.remove('hidden');
+/* bài đang làm dở (tải lại trang) → vào lại phòng thi */
+(function () {
+  if (student && location.hash.indexOf('#admin') !== 0) {
+    for (var i = 0; i < TESTS.length; i++) {
+      var s = LS.get('obj_sess_' + TESTS[i].id + '_' + student.sid, null);
+      if (s && s.start) { current = TESTS[i]; sess = s; if (leftSec() > 0) { openRoom(); return; } openRoom(); return; }
+    }
+  }
+  route();
+})();
+</script>
+</body>
+</html>

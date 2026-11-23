@@ -105,7 +105,7 @@ function today(d) { d = d || new Date(); return d.getFullYear() + '-' + ('0' + (
 function addDays(s, k) { var p = s.split('-'), d = new Date(+p[0], +p[1] - 1, +p[2]); d.setDate(d.getDate() + k); return today(d); }
 function dayDiff(a, b) { var p = a.split('-'), q = b.split('-'); return Math.round((new Date(+q[0], +q[1] - 1, +q[2]) - new Date(+p[0], +p[1] - 1, +p[2])) / 864e5); }
 function norm(s) { return String(s || '').toLowerCase().replace(/[’‘`]/g, "'").replace(/[.!?;:,]+$/, '').replace(/\s+/g, ' ').trim(); }
-function sentHTML(o, mode) { return esc(o.ex).replace(/\{([^}]+)\}/, mode === 'gap' ? '<span class="gap">&nbsp;</span>' : '<b>$1</b>'); }
+function sentHTML(o, mode) { return esc(o.ex).replace(/\{([^}]+)\}/, mode === 'gap' ? '<span class="gap">&nbsp;</span>' : '<b>$1</b>').replace(/\{([^}]+)\}/g, '<b>$1</b>'); }
 function plainEx(o) { return o.ex.replace(/[{}]/g, ''); }
 function LSget(k, d) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
 function LSset(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }

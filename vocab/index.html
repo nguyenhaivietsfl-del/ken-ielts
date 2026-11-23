@@ -577,6 +577,7 @@ function copyReport() {
   var lines = ['KEN VOCAB – BÁO CÁO TIẾN ĐỘ', 'Học viên: ' + student.name + ' (' + student.sid + ') – ' + student.cls + ' – ' + student.school, 'Ngày: ' + today(),
     'Mục tiêu: ' + S.data.goal + ' từ/ngày · Chuỗi ngày đạt mục tiêu: ' + streak() + ' · Tổng từ đã học: ' + learnedCount() + '/' + W.length];
   LEVELS.forEach(function (lv) { var ls = LISTS[lv]; lines.push(lv + ': ' + learnedCount(lv) + ' từ · ' + ls.filter(function (l) { return (S.data.lists[l.key] || {}).passed; }).length + '/' + ls.length + ' bài'); });
+  var vv = 0; for (var kk = 6; kk >= 0; kk--) { var dd = S.data.days[addDays(today(), -kk)]; if (dd && dd.viol) vv += dd.viol; } lines.push('⚠️ Vi phạm rời tab/chuyển ứng dụng khi đang học: ' + vv + ' lần trong 7 ngày (tổng ' + (S.data.violTotal || 0) + ' lần)');
   lines.push('7 ngày gần nhất:');
   for (var k = 6; k >= 0; k--) { var d = addDays(today(), -k), x = S.data.days[d]; lines.push('  ' + d + ': ' + (x ? x.learned + ' từ mới, ' + x.rev + ' lượt ôn, đúng ' + (x.q ? Math.round(x.ok / x.q * 100) : 0) + '%' : 'không học')); }
   var tests = (S.data.tests || []).filter(function (t) { return t.test; }).slice(0, 5);
@@ -602,6 +603,27 @@ document.addEventListener('click', function (e) { var b = e.target.closest('[dat
 if (!W.length) app.innerHTML = '<div class="card">Không tải được dữ liệu từ vựng.</div>';
 else if (student) { loadState(); renderHome(); }
 else renderLogin();
+/* ===== GIÁM SÁT: không được rời tab / chuyển ứng dụng khi đang học (chỉ cảnh báo, ghi vào báo cáo) ===== */
+(function () {
+  var away = false, isTouch = /iPhone|iPad|iPod|Android/.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.userAgent));
+  function active() { return !!(student && S && document.querySelector('#quit')); }
+  function typing() { var a = document.activeElement; return !!a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName); }
+  function warn(kind) {
+    if (!S) return; var d = day(); d.viol = (d.viol || 0) + 1; S.data.violTotal = (S.data.violTotal || 0) + 1; S.save();
+    var old = document.querySelector('.modal.vw'); if (old) old.remove();
+    var m = document.createElement('div'); m.className = 'modal vw';
+    m.innerHTML = '<div class="card" style="border:3px solid #d64545"><h2 style="color:#d64545">⚠️ Cảnh báo vi phạm</h2><p>Bạn vừa <b>' + kind + '</b> trong lúc đang học.</p><p>Khi đang học và làm bài, <b>không được thoát tab, chuyển sang ứng dụng khác hay mở cửa sổ khác</b>.</p><p>Số lần vi phạm hôm nay: <b style="color:#d64545">' + d.viol + '</b>. Số lần này được ghi vào báo cáo gửi giáo viên.</p><div class="row" style="justify-content:flex-end"><button class="btn pri">Tôi đã hiểu, học tiếp</button></div></div>';
+    m.querySelector('button').onclick = function () { m.remove(); }; document.body.appendChild(m);
+  }
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) { if (active()) away = true; }
+    else if (away) { away = false; warn('rời khỏi trang / chuyển tab / chuyển ứng dụng'); }
+  });
+  window.addEventListener('blur', function () {
+    if (isTouch) return;
+    setTimeout(function () { if (!document.hidden && !document.hasFocus() && !typing() && active()) warn('chuyển sang cửa sổ khác'); }, 400);
+  });
+})();
 </script>
 </body>
 </html>

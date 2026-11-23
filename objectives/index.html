@@ -193,7 +193,7 @@ var CONFIG = {
   API_URL: 'https://script.google.com/macros/s/AKfycbyFvqN3m_uCTWffOwQCQoyEpt08ZgfxHukee1pSoYmMhSfcqJZA1AWHIsa2AMNaYw83/exec',                 // dán link Web App (…/exec) của Apps Script vào đây; để trống = chế độ dùng thử
   SCHOOLS: ['Ngoại Ngữ – ĐHTN', 'KEN CLASSES', 'VÕ NGUYÊN GIÁP', 'Lớp luyện tập'],
   TIME_MIN: 60,                // thời gian làm bài (phút)
-  MAX_VIOLATIONS: 5,           // số lần rời tab/chia màn hình thì tự nộp (0 = chỉ ghi nhận)
+  MAX_VIOLATIONS: 2,           // vi phạm (rời tab/chia màn hình…) đến lần này: bài tự nộp và bị 0 điểm
   MAX_SCORE: 10,
   DEMO_PASSWORD: 'ken2026'
 };
@@ -290,6 +290,7 @@ function overlay(on, text) {
 function fmtScore(x) { if (x === '' || x == null || isNaN(+x)) return '–'; var v = Math.round(+x * 100) / 100; return String(v).replace('.', ','); }
 function fmtTime(iso) { try { return new Date(iso).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' }); } catch (e) { return iso; } }
 function hasGv(s) { return !!(s.teacher && s.teacher.score !== '' && s.teacher.score != null); }
+function penaltyAi(viol) { return { score: 0, penalty: true, engines: {}, criteria: [], summary: 'Bài bị thu và chấm 0 điểm do vi phạm quy chế thi ' + (viol || []).length + ' lần (rời trang / chuyển tab / chia màn hình…).' }; }
 function finalScore(s) { return hasGv(s) ? +s.teacher.score : (s.ai ? s.ai.score : null); }
 
 /* ---- làm sạch HTML (chỉ giữ định dạng kiểu Word đơn giản) ---- */
@@ -359,7 +360,7 @@ function demoApi(b) {
   switch (b.action) {
     case 'login': return { ok: true };
     case 'submit':
-      var s = { id: 'd' + Date.now(), time: new Date().toISOString(), student: b.student, testId: b.testId, title: b.title, activity: b.activity, html: b.html, text: b.text, duration: b.duration, viol: b.viol, auto: b.auto, ai: null, aiError: 'Bản dùng thử không chấm AI – cần gắn khóa Claude/OpenAI trên Apps Script.', teacher: null };
+      var s = { id: 'd' + Date.now(), time: new Date().toISOString(), student: b.student, testId: b.testId, title: b.title, activity: b.activity, html: b.html, text: b.text, duration: b.duration, viol: b.viol, auto: b.auto, ai: b.penalty ? penaltyAi(b.viol) : null, aiError: b.penalty ? '' : 'Bản dùng thử không chấm AI – cần gắn khóa Claude/OpenAI trên Apps Script.', teacher: null };
       subs.push(s); LS.set('obj_demo_subs2', subs); return Object.assign({ ok: true }, s);
     case 'my': return { ok: true, subs: subs.filter(function (s) { return s.student.sid === b.sid; }).reverse() };
     case 'admin_list': return { ok: true, subs: subs.slice().reverse() };
@@ -526,7 +527,7 @@ function renderList() {
     '<li>Mục tiêu viết ngắn gọn: động từ + nội dung (VD: <i>read for specific information about …</i>). <b>Không</b> ghi tiêu chí hay điều kiện vào mục tiêu như “at least 80%”, “4 out of 5 questions correctly”, “within the given time”, “in 1–2 minutes” – những tiêu chí này đưa vào <i>Expected products</i>.</li>' +
     '<li>Ở <b>B. NEW LESSON</b>: chọn <b>MỘT hoạt động</b> của tiết học và soạn đầy đủ Aim(s), Content(s), Expected products, Teaching steps (bảng 2 cột), trong đó <b>ứng dụng ít nhất một công cụ ICT</b> (Wordwall, Quizlet, Padlet, Google Docs/Forms, Kahoot, Mentimeter, Canva, chatbot AI…) một cách hợp lý. Ghi rõ [NLS]/[NL AI] và mã chỉ báo.</li>' +
     '<li>Thanh công cụ như Word: in đậm, nghiêng, gạch đầu dòng, <b>chèn/kẻ bảng, thêm hàng/cột</b> (Tab ở ô cuối để thêm hàng).</li>' +
-    '<li>Thời gian <b>' + CONFIG.TIME_MIN + ' phút</b>. Hết giờ bài tự nộp. Không dán chữ, không rời trang' + (CONFIG.MAX_VIOLATIONS ? ' (lần vi phạm thứ ' + CONFIG.MAX_VIOLATIONS + ' bài tự nộp)' : '') + '.</li>' +
+    '<li>Thời gian <b>' + CONFIG.TIME_MIN + ' phút</b>. Hết giờ bài tự nộp. Không dán chữ, không rời trang, không chuyển tab/ứng dụng, không chia đôi màn hình. <b style="color:#c4473d">Vi phạm lần 1: cảnh báo. Vi phạm lần ' + CONFIG.MAX_VIOLATIONS + ': bài tự nộp và bị 0 điểm.</b></li>' +
     '<li>Điểm tối đa <b>' + CONFIG.MAX_SCORE + '</b>. AI (Claude + OpenAI) chấm ngay sau khi nộp; giáo viên xem lại, chữa bài và chốt điểm.</li></ul></div>' +
     '<div class="tests">' + TESTS.map(function (t) {
       var done = LS.get('obj_done_' + t.id + '_' + student.sid, null);
@@ -549,7 +550,7 @@ function startTest(id) {
   current = t;
   var old = LS.get('obj_sess2_' + id + '_' + student.sid, null);
   if (old && old.start && (Date.now() - old.start) < CONFIG.TIME_MIN * 60000 + 60000) { sess = old; return openRoom(); }
-  modal(t.code + ' – bắt đầu làm bài?', '<b>' + esc(t.short) + '</b><br><br>⏱ ' + CONFIG.TIME_MIN + ' phút, tính từ lúc bấm Bắt đầu (tải lại trang giờ vẫn chạy).<br>📝 Soạn trên khung giáo án; ở B. NEW LESSON chỉ soạn <b>một hoạt động có ứng dụng ICT</b>.<br>🚫 Không chuyển tab, không mở ứng dụng khác, không chia đôi màn hình, không dán chữ. Mọi lần vi phạm đều được ghi lại.<br>💾 Bài được lưu tạm trên máy liên tục.', 'Bắt đầu', 'Chưa')
+  modal(t.code + ' – bắt đầu làm bài?', '<b>' + esc(t.short) + '</b><br><br>⏱ ' + CONFIG.TIME_MIN + ' phút, tính từ lúc bấm Bắt đầu (tải lại trang giờ vẫn chạy).<br>📝 Soạn trên khung giáo án; ở B. NEW LESSON chỉ soạn <b>một hoạt động có ứng dụng ICT</b>.<br>🚫 Không chuyển tab, không mở ứng dụng khác, không chia đôi màn hình, không dán chữ. <b>Vi phạm lần 1: cảnh báo. Vi phạm lần ' + CONFIG.MAX_VIOLATIONS + ': bài tự nộp và bị 0 điểm.</b><br>💾 Bài được lưu tạm trên máy liên tục.', 'Bắt đầu', 'Chưa')
     .then(function (ok) { if (!ok) return; sess = { start: Date.now(), html: templateHtml(t), act: '', viol: [] }; LS.set(sessKey(), sess); goFull(); openRoom(); });
 }
 function openRoom() {
@@ -637,8 +638,8 @@ function violation(kind) {
   sess.viol.push({ k: kind, t: Math.round((now - sess.start) / 1000) });
   LS.set(sessKey(), sess); showViol();
   var n = sess.viol.length, max = CONFIG.MAX_VIOLATIONS;
-  if (max && n >= max) { doSubmit(true, 'Vi phạm quy chế ' + n + ' lần – bài tự nộp.'); return; }
-  modal('⚠️ Cảnh báo vi phạm (' + n + (max ? '/' + max : '') + ')', '<b>' + esc(kind) + '</b><br>Lần vi phạm đã được ghi lại và gửi cho giáo viên.' + (max ? ' Đến lần thứ ' + max + ' bài sẽ tự nộp.' : ''), 'Quay lại làm bài', false, 'warn').then(goFull);
+  if (max && n >= max) { sess.penalty = true; LS.set(sessKey(), sess); doSubmit(true, 'Vi phạm quy chế ' + n + ' lần – bài bị thu và 0 điểm.'); return; }
+  modal('⚠️ Cảnh báo vi phạm (' + n + (max ? '/' + max : '') + ')', '<b>' + esc(kind) + '</b><br>Lần vi phạm đã được ghi lại và gửi cho giáo viên.' + (max ? '<br><b style="color:#c4473d">' + (max - n === 1 ? 'Vi phạm thêm 1 lần nữa' : 'Đến lần vi phạm thứ ' + max) + ' bài sẽ tự nộp và bị 0 điểm.</b>' : ''), 'Quay lại làm bài', false, 'warn').then(goFull);
 }
 function showViol() { var c = document.getElementById('violChip'); if (!c) return; var n = (sess.viol || []).length; c.classList.toggle('hidden', !n); c.textContent = '⚠ ' + n; }
 /* ---- nộp bài ---- */
@@ -650,9 +651,10 @@ function doSubmit(auto, reason) {
     if (!ok) return;
     submitting = true; clearInterval(timerId); monitor(false);
     var dur = Math.min(CONFIG.TIME_MIN * 60, Math.round((Date.now() - sess.start) / 1000));
-    overlay(true, (reason ? reason + ' ' : '') + 'Đang nộp bài và chấm bằng AI – Claude + OpenAI (khoảng 30–90 giây)…');
+    var pen = !!(sess.penalty || (CONFIG.MAX_VIOLATIONS && (sess.viol || []).length >= CONFIG.MAX_VIOLATIONS));
+    overlay(true, (reason ? reason + ' ' : '') + (pen ? 'Đang nộp bài…' : 'Đang nộp bài và chấm bằng AI – Claude + OpenAI (khoảng 30–90 giây)…'));
     var html = clean(sess.html);
-    var payload = { testId: current.id, title: current.code + ' · ' + current.short, activity: sess.act || '', student: student, html: html, text: htmlToText(html), duration: dur, viol: sess.viol || [], auto: !!auto };
+    var payload = { testId: current.id, title: current.code + ' · ' + current.short, activity: sess.act || '', student: student, html: html, text: htmlToText(html), duration: dur, viol: sess.viol || [], auto: !!auto, penalty: pen };
     var send = function (tries) {
       return api('submit', payload).catch(function (e) { if (tries > 0) return new Promise(function (r) { setTimeout(r, 2500); }).then(function () { return send(tries - 1); }); throw e; });
     };
@@ -669,6 +671,7 @@ function doSubmit(auto, reason) {
 /* ================= KẾT QUẢ ================= */
 function aiCard(r) {
   if (!r.ai) return '<div class="card review ai"><h2>🤖 Chấm bằng AI</h2><p style="color:var(--muted)">Chưa chấm tự động được (' + esc(r.aiError || 'chưa có kết quả') + '). Giáo viên sẽ chấm.</p></div>';
+  if (r.ai.penalty) return '<div class="card review ai"><h2>⛔ Vi phạm quy chế: <span class="pill warn" style="font-size:18px">0 / ' + CONFIG.MAX_SCORE + '</span></h2><p>' + esc(r.ai.summary || '') + '</p></div>';
   var a = r.ai, L = function (arr) { return (arr || []).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join(''); }, eng = a.engines || {};
   return '<div class="card review ai"><h2>🤖 AI chấm: <span class="pill ai" style="font-size:18px">' + fmtScore(a.score) + ' / ' + CONFIG.MAX_SCORE + '</span></h2>' +
     '<p class="mini">' + (eng.claude != null ? 'Claude: <b>' + fmtScore(eng.claude) + '</b>' : 'Claude: –') + ' · ' + (eng.openai != null ? 'OpenAI: <b>' + fmtScore(eng.openai) + '</b>' : 'OpenAI: –') +
@@ -711,8 +714,9 @@ function renderResult(s, fresh) {
   app.innerHTML = '<div class="card"><span class="eyebrow">' + esc((testById(s.testId) || {}).code || '') + '</span><h2 style="margin-top:10px">' + esc(s.title) + '</h2>' +
     (s.activity ? '<p><b>Hoạt động chọn soạn:</b> ' + esc(s.activity) + '</p>' : '') +
     '<p class="mini">' + esc(s.student.name + ' · ' + s.student.sid + ' · ' + s.student.cls) + ' · nộp ' + fmtTime(s.time) + ' · ' + Math.round((s.duration || 0) / 60) + ' phút' + ((s.viol || []).length ? ' · <span class="pill warn">' + s.viol.length + ' lần vi phạm</span>' : '') + '</p>' +
-    '<div class="row" style="gap:20px;margin-top:10px"><div><div class="mini">' + (hasGv(s) ? 'Điểm (giáo viên chốt)' : 'Điểm hiện tại (AI)') + '</div><div class="score-big">' + fmtScore(fs) + '<small>/ ' + CONFIG.MAX_SCORE + '</small></div></div>' +
-    (fresh ? '<p style="flex:1;min-width:220px;margin:0">' + (fs == null ? 'Bài đã nộp thành công. ' : fs >= 8 ? 'Rất tốt! Giáo án rõ ràng, ứng dụng ICT hợp lý 🎉 ' : fs >= 6.5 ? 'Khá tốt! Xem nhận xét để hoàn thiện thêm 💪 ' : 'Đọc kỹ phần nhận xét và sửa lỗi bên dưới nhé. ') + 'Giáo viên sẽ xem lại và chữa bài; xem ở mục <b>Kết quả của tôi</b>.</p>' : '') + '</div></div>' +
+    '<div class="row" style="gap:20px;margin-top:10px"><div><div class="mini">' + (hasGv(s) ? 'Điểm (giáo viên chốt)' : s.ai && s.ai.penalty ? 'Điểm (vi phạm quy chế)' : 'Điểm hiện tại (AI)') + '</div><div class="score-big">' + fmtScore(fs) + '<small>/ ' + CONFIG.MAX_SCORE + '</small></div></div>' +
+    (s.ai && s.ai.penalty ? '<p style="flex:1;min-width:220px;margin:0;color:#c4473d"><b>Bài bị thu và 0 điểm do vi phạm quy chế ' + (s.viol || []).length + ' lần.</b></p>' : '') +
+    (fresh && !(s.ai && s.ai.penalty) ? '<p style="flex:1;min-width:220px;margin:0">' + (fs == null ? 'Bài đã nộp thành công. ' : fs >= 8 ? 'Rất tốt! Giáo án rõ ràng, ứng dụng ICT hợp lý 🎉 ' : fs >= 6.5 ? 'Khá tốt! Xem nhận xét để hoàn thiện thêm 💪 ' : 'Đọc kỹ phần nhận xét và sửa lỗi bên dưới nhé. ') + 'Giáo viên sẽ xem lại và chữa bài; xem ở mục <b>Kết quả của tôi</b>.</p>' : '') + '</div></div>' +
     teacherCard(s) + aiCard(s) + docViewer(s) +
     '<p class="row" style="margin-top:18px"><button class="btn primary" id="backList">← Về danh sách đề</button><button class="btn ghost" id="backMy">📋 Kết quả của tôi</button></p>';
   bindDocViewer(s);

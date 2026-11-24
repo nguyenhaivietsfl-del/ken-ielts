@@ -53,11 +53,11 @@ h3{margin:16px 0 8px}
 </style>
 </head>
 <body>
-<header><div>👩‍🏫 <b>KEN – Khu vực giáo viên</b><small>Theo dõi học viên: KEN SCHOOL · Oxford 3000 · Cambridge IELTS · Tiếng Pháp</small></div><div class="sp"></div><a id="sheetLink" target="_blank" rel="noopener" style="display:none">📊 Google Sheet</a><button id="logout" style="display:none">Đăng xuất</button></header>
+<header><div>👩‍🏫 <b>KEN – Khu vực giáo viên</b><small>Theo dõi học viên: KEN SCHOOL · Oxford 3000 · Cambridge IELTS · Destination · Tiếng Pháp</small></div><div class="sp"></div><a id="sheetLink" target="_blank" rel="noopener" style="display:none">📊 Google Sheet</a><button id="logout" style="display:none">Đăng xuất</button></header>
 <main id="app"></main>
 <script src="../shared/ken-config.js"></script>
 <script>
-var URL_ = window.KEN_TRACK_URL || '', APPS = [['school', '🎒 KEN SCHOOL (THCS–THPT)', '../school/'], ['vocab', '📘 Oxford 3000', '../vocab/'], ['cam', '📗 Cambridge IELTS', '../cam/'], ['french', '🇫🇷 Tiếng Pháp', '../french/']];
+var URL_ = window.KEN_TRACK_URL || '', APPS = [['school', '🎒 KEN SCHOOL (THCS–THPT)', '../school/'], ['vocab', '📘 Oxford 3000', '../vocab/'], ['cam', '📗 Cambridge IELTS', '../cam/'], ['dest', '🧭 Destination (HSG)', '../destination/'], ['french', '🇫🇷 Tiếng Pháp', '../french/']];
 var app = document.getElementById('app'), pw = sessionStorage.getItem('ken_t_pw') || '', cur = (new URLSearchParams(location.search).get('app')) || 'school';
 if (!APPS.some(function (a) { return a[0] === cur; })) cur = 'school';
 var DATA = {}, F = { q: '', teacher: '', school: '', cls: '', level: '', st: 'all', sort: 'last', up: false };
@@ -101,7 +101,7 @@ function status(s) { var d = daysAgo(s.last); return d === 0 ? 'today' : d >= 3 
 function render() {
   saveF(); var list = base();
   var cnt = { all: list.length, today: list.filter(function (s) { return status(s) === 'today'; }).length, idle: list.filter(function (s) { return status(s) === 'idle'; }).length, viol: list.filter(function (s) { return +s.viol7 > 0; }).length, low: list.filter(function (s) { return s.acc7 !== '' && +s.acc7 < 60; }).length };
-  var lvLabel = cur === 'school' ? 'Lớp học' : 'Trình độ';
+  var lvLabel = cur === 'school' ? 'Lớp học' : cur === 'dest' ? 'Cuốn' : 'Trình độ';
   app.innerHTML = '<div class="tabs">' + APPS.map(function (a) { return '<button data-a="' + a[0] + '" class="' + (a[0] === cur ? 'on' : '') + '">' + a[1] + ' <span class="pill p-mut">' + (DATA[a[0]] || []).length + '</span></button>'; }).join('') + '</div>' +
     '<div class="stats">' + [['all', 'Học viên (theo bộ lọc)', ''], ['today', 'Học hôm nay', 'color:var(--ok)'], ['idle', 'Không học ≥ 3 ngày', 'color:var(--warn)'], ['low', 'Đúng dưới 60% (7 ngày)', 'color:var(--warn)'], ['viol', 'Có vi phạm (7 ngày)', 'color:var(--bad)']].map(function (x) { return '<div class="stat' + (F.st === x[0] ? ' on' : '') + '" data-st="' + x[0] + '"><b style="' + x[2] + '">' + cnt[x[0]] + '</b><span>' + x[1] + '</span></div>'; }).join('') + '</div>' +
     '<div class="card"><div class="filters fl"><label>👩‍🏫 Giáo viên<select data-f="teacher">' + opts(base('teacher'), 'teacher', F.teacher, 'Tất cả giáo viên') + '</select></label>' +
@@ -151,7 +151,7 @@ function detail(sid) {
   var s = (DATA[cur] || []).filter(function (x) { return x.key === sid; })[0]; if (!s) return;
   var d = document.createElement('div'); d.className = 'drawer';
   d.innerHTML = '<div class="in"><div class="hd"><div><h2>' + esc(s.name) + '</h2><div class="small" style="opacity:.9">' + esc(s.sid) + ' · ' + esc(s.cls) + (s.school ? ' · ' + esc(s.school) : '') + (s.teacher ? ' · GV: ' + esc(s.teacher) : '') + ' · ' + esc(APPS.filter(function (a) { return a[0] === cur; })[0][1]) + '</div></div><div class="sp"></div><button class="btn" id="x">✕ Đóng</button></div><div class="bd">' +
-    '<div class="kv"><div><span>' + (cur === 'school' ? 'Lớp học' : 'Trình độ') + '</span><b>' + esc(s.level || '—') + '</b></div><div><span>Tiến độ</span><b>' + esc(s.progress || '—') + '</b></div><div><span>Hôm nay</span><b>' + (status(s) === 'today' ? esc(s.today) : 'chưa học') + '</b></div><div><span>Chuỗi ngày đạt mục tiêu</span><b>🔥 ' + (s.streak || 0) + '</b></div>' +
+    '<div class="kv"><div><span>' + (cur === 'school' ? 'Lớp học' : cur === 'dest' ? 'Cuốn' : 'Trình độ') + '</span><b>' + esc(s.level || '—') + '</b></div><div><span>Tiến độ</span><b>' + esc(s.progress || '—') + '</b></div><div><span>Hôm nay</span><b>' + (status(s) === 'today' ? esc(s.today) : 'chưa học') + '</b></div><div><span>Chuỗi ngày đạt mục tiêu</span><b>🔥 ' + (s.streak || 0) + '</b></div>' +
     '<div><span>% đúng 7 ngày</span><b>' + (s.acc7 === '' ? '—' : s.acc7 + '%') + '</b> <span class="small">(' + (s.q7 || 0) + ' câu, ' + (s.days7 || 0) + '/7 ngày có học)</span></div><div><span>Vi phạm rời tab</span><b style="color:' + (+s.viol7 ? 'var(--bad)' : 'inherit') + '">' + (s.viol7 || 0) + ' lần / 7 ngày</b> <span class="small">(tổng ' + (s.violTotal || 0) + ')</span></div><div><span>Bắt đầu dùng</span><b>' + esc(String(s.first).slice(0, 16)) + '</b></div><div><span>Lần cuối</span><b>' + esc(String(s.last).slice(0, 16)) + '</b></div></div>' +
     '<h3>📋 Báo cáo tổng hợp</h3><pre>' + esc(s.report || '—') + '</pre><h3>🕘 Nhật ký làm bài</h3><div class="filters"><select id="kf"><option value="">Tất cả</option><option value="lesson">Bài học</option><option value="result">Ôn tập / kiểm tra</option><option value="viol">Vi phạm</option></select></div><div id="evs"><div class="empty">⏳ Đang tải…</div></div></div></div>';
   document.body.appendChild(d); document.body.style.overflow = 'hidden';
@@ -174,7 +174,7 @@ function detail(sid) {
 }
 function kindOf(e) { var k = String(e.kind || ''); return /Vi phạm/.test(k) ? 'viol' : /bài học/.test(k) ? 'lesson' : 'result'; }
 function csv() {
-  var head = ['Họ tên', 'Mã', 'Lớp', 'Trường', 'Giáo viên', cur === 'school' ? 'Lớp học' : 'Trình độ', 'Tiến độ', 'Hôm nay', 'Chuỗi ngày', '% đúng 7 ngày', 'Số câu 7 ngày', 'Vi phạm 7 ngày', 'Tổng vi phạm', 'Lần cuối'];
+  var head = ['Họ tên', 'Mã', 'Lớp', 'Trường', 'Giáo viên', cur === 'school' ? 'Lớp học' : cur === 'dest' ? 'Cuốn' : 'Trình độ', 'Tiến độ', 'Hôm nay', 'Chuỗi ngày', '% đúng 7 ngày', 'Số câu 7 ngày', 'Vi phạm 7 ngày', 'Tổng vi phạm', 'Lần cuối'];
   var lines = [head].concat(filtered().map(function (s) { return [s.name, s.sid, s.cls, s.school, s.teacher, s.level, s.progress, status(s) === 'today' ? s.today : '', s.streak, s.acc7, s.q7, s.viol7, s.violTotal, s.last]; }))
     .map(function (r) { return r.map(function (v) { v = String(v == null ? '' : v); return /[",\n;]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(','); }).join('\r\n');
   var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + lines], { type: 'text/csv;charset=utf-8' })); a.download = 'KEN-' + cur + '-hoc-vien-' + today() + '.csv'; a.click();

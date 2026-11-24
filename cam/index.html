@@ -59,7 +59,7 @@ input.in:focus,textarea.in:focus,select.in:focus{outline:none;border-color:var(-
 .say{border:0;background:var(--bg);border-radius:999px;width:40px;height:40px;cursor:pointer;font-size:18px}
 /* exercise */
 .exhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.steps{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0 2px}.steps i{width:26px;height:8px;border-radius:4px;background:#e8edf4}.steps i.d{background:var(--ok)}.steps i.c{background:var(--pri2)}
+.steps{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0 2px}.steps i{width:18px;height:8px;border-radius:4px;background:#e8edf4}.steps i.d{background:var(--ok)}.steps i.c{background:var(--pri2)}
 .qbar{height:6px;background:#e8edf4;border-radius:4px;overflow:hidden;margin:10px 0 14px}.qbar>i{display:block;height:100%;background:var(--pri2)}
 .q{font-size:20px;font-weight:700;margin:6px 0 4px}.q .big{font-size:32px;color:var(--pri)}
 .sent{font-size:19px;background:var(--bg);border-radius:12px;padding:14px;margin:8px 0}.sent .gap{display:inline-block;min-width:90px;border-bottom:2.5px solid var(--pri2);text-align:center}.sent b{color:var(--pri2)}
@@ -82,6 +82,7 @@ table.t{width:100%;border-collapse:collapse;font-size:15px}table.t td,table.t th
 .seg{display:flex;gap:6px;flex-wrap:wrap}.seg button{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:8px 12px;cursor:pointer;font-weight:600}.seg button.on{border-color:var(--pri2);background:#eaf2fc;color:var(--pri)}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1c2433;color:#fff;padding:10px 16px;border-radius:12px;z-index:60;font-size:15px}
 @media (max-width:560px){h1{font-size:21px}.fc .w{font-size:32px}.q .big{font-size:28px}main{padding:12px 10px 80px}.card{padding:14px}}
+@media (max-width:430px){.brand small{display:none}}
 </style>
 </head>
 <body>
@@ -185,7 +186,7 @@ function updateWho() {
 function renderLogin() {
   var st = student || {};
   app.innerHTML = '<div class="card" style="max-width:520px;margin:4vh auto">' +
-    '<h1>KEN CAMBRIDGE VOCAB 👋</h1><p class="muted">Từ vựng các bài <b>Reading</b> trong sách <b>Cambridge IELTS 11, 13, 14, 16, 17, 18</b>. Mỗi passage chia làm <b>2 bài học</b> (mỗi bài khoảng 25 từ, mỗi ngày học 1 bài). Mỗi bài có 10 dạng bài tập, cần đạt <b>' + CONFIG.PASS + '%</b> mới được qua.</p>' +
+    '<h1>KEN CAMBRIDGE VOCAB 👋</h1><p class="muted">Từ vựng các bài <b>Reading</b> trong sách <b>Cambridge IELTS 11, 13, 14, 16, 17, 18</b>. Mỗi passage chia làm <b>2 bài học</b> (mỗi bài khoảng 25 từ, mỗi ngày học 1 bài). Mỗi bài có <b>14 dạng bài tập</b> (mỗi từ được luyện nhiều lần, từ nhận biết đến tự viết), cần đạt <b>' + CONFIG.PASS + '%</b> mới được qua.</p>' +
     '<form id="lf"><label class="f">Họ và tên</label><input class="in" name="name" required value="' + esc(st.name || '') + '" autocomplete="name">' +
     '<label class="f">Mã SV/HS</label><input class="in" name="sid" required value="' + esc(st.sid || '') + '">' +
     '<label class="f">Trường</label><select class="in" name="school">' + CONFIG.SCHOOLS.concat(['Khác']).map(function (s) { return '<option' + (st.school === s ? ' selected' : '') + '>' + s + '</option>'; }).join('') + '</select>' +
@@ -223,7 +224,7 @@ function renderHome() {
   var acc = 0, qq = 0; for (var k in S.data.days) { qq += S.data.days[k].q; acc += S.data.days[k].ok; }
   var html = '<div class="card"><div class="goal"><div class="ring" style="--p:' + pct + '"><div><div><b>' + d.learned + '</b><br><span>/ ' + g + ' từ hôm nay</span></div></div></div>' +
     '<div style="flex:1;min-width:240px"><h2>' + (d.learned >= g ? '🎉 Đã đạt mục tiêu hôm nay!' : 'Mục tiêu hôm nay: ' + g + ' từ mới') + '</h2>' +
-    '<p class="muted" style="margin:0 0 10px">' + (d.learned >= g ? 'Tuyệt vời! Bạn có thể học thêm hoặc ôn lại từ cũ.' : 'Còn <b>' + (g - d.learned) + '</b> từ nữa. Mỗi bài (½ passage) gồm 10 bài tập, mỗi bài tập cần đạt ≥ ' + CONFIG.PASS + '%.') + '</p>' +
+    '<p class="muted" style="margin:0 0 10px">' + (d.learned >= g ? 'Tuyệt vời! Bạn có thể học thêm hoặc ôn lại từ cũ.' : 'Còn <b>' + (g - d.learned) + '</b> từ nữa. Mỗi bài (½ passage) gồm 14 bài tập, mỗi bài tập cần đạt ≥ ' + CONFIG.PASS + '%.') + '</p>' +
     '<div class="stats"><div class="stat"><b>🔥 ' + streak() + '</b><span>ngày liên tiếp</span></div><div class="stat"><b>' + learnedCount() + '</b><span>từ đã học / ' + W.length + '</span></div><div class="stat"><b>' + (qq ? Math.round(acc / qq * 100) : 0) + '%</b><span>trả lời đúng</span></div></div></div></div>' +
     '<div class="row" style="margin-top:14px">' + (S.data.lesson ? '<button class="btn ok" id="goResume">⏯ Học tiếp ' + S.data.lesson.key.replace('-', ' · Bài ') + '</button>' : '') +
     '<button class="btn pri" id="goNext">▶ Học bài tiếp theo</button>' +
@@ -237,7 +238,7 @@ function renderHome() {
       '<div class="bar"><i style="width:' + Math.round(lc / tot * 100) + '%"></i></div><div class="small muted">' + lc + '/' + tot + ' từ · ' + done + '/' + ls.length + ' bài đã qua</div>' +
       '<div class="row" style="margin-top:10px"><button class="btn sm pri" data-learn="' + lv + '">Học tiếp</button><button class="btn sm" data-lists="' + lv + '">Danh sách bài</button><button class="btn sm" data-prac="' + lv + '">Luyện tập</button></div></div>';
   }).join('') + '</div>';
-  html += '<div class="card lvl" style="--c:var(--ALL)"><span class="tag">Cam 11→18</span> <b>Luyện tập tổng hợp</b><p class="muted small" style="margin:6px 0 10px">Trộn từ của tất cả các cuốn Cambridge, đủ 10 dạng bài, từ trắc nghiệm đến tự luận và ngữ cảnh.</p><div class="row"><button class="btn sm pri" data-prac="ALL">Luyện tập tổng hợp</button><button class="btn sm" data-test="ALL">📝 Kiểm tra tổng hợp (40 câu)</button><button class="btn sm" id="report">📋 Báo cáo cho giáo viên</button></div></div>';
+  html += '<div class="card lvl" style="--c:var(--ALL)"><span class="tag">Cam 11→18</span> <b>Luyện tập tổng hợp</b><p class="muted small" style="margin:6px 0 10px">Trộn từ của tất cả các cuốn Cambridge, nhiều dạng bài, từ trắc nghiệm đến tự luận và ngữ cảnh.</p><div class="row"><button class="btn sm pri" data-prac="ALL">Luyện tập tổng hợp</button><button class="btn sm" data-test="ALL">📝 Kiểm tra tổng hợp (40 câu)</button><button class="btn sm" id="report">📋 Báo cáo cho giáo viên</button></div></div>';
   app.innerHTML = html;
   $('#goNext').onclick = function () { var l = null; for (var i = 0; i < LEVELS.length && !l; i++) l = nextList(LEVELS[i]); if (l) startLesson(l.key); else toast('Bạn đã học hết toàn bộ từ vựng Cambridge! 🎉'); };
   $('#goReview').onclick = startReview;
@@ -318,15 +319,31 @@ var TYPES = {
     return { prompt: '<div class="q">Từ nào đồng nghĩa với <span class="big">' + esc(o.w) + '</span> trong câu sau?</div><div class="sent">' + sentHTML(o, 'bold') + '</div><div class="muted small">' + esc(o.src) + '</div>',
       opts: idx.map(function (k) { return o.opts[k]; }), ans: idx.indexOf(o.ans) };
   } },
+  matchsyn: { name: 'Ghép từ với từ đồng nghĩa', icon: '🪢', match: true, field: 'syn' },
+  tf: { name: 'Đúng hay sai?', icon: '✔️', mcq: true, make: function (o, pool) {
+    var right = Math.random() < 0.5, d = distract(o, pool, 1, 'vi')[0], shown = right || !d ? o.vi : d.vi;
+    right = shown === o.vi;
+    return { prompt: '<div class="q">Từ <span class="big">' + esc(o.w) + '</span> <button class="say" data-say="' + esc(o.w) + '">🔊</button> có nghĩa là:</div><div class="sent" style="font-size:20px"><b>“' + esc(shown) + '”</b></div><p class="hint">Nhận định trên đúng hay sai?</p>',
+      opts: ['✔️ Đúng', '✖️ Sai'], ans: right ? 0 : 1 };
+  } },
+  synwrite: { name: 'Viết từ đồng nghĩa trong bài', icon: '🖊', typing: true, ok: function (o) { return !!o.syn; }, make: function (o) {
+    var a = o.w.split(/\s*,\s*/)[0];
+    return { prompt: '<div class="q">Viết từ trong bài có nghĩa tương đương với <span class="big">' + esc(o.syn) + '</span></div><div class="muted">Nghĩa: ' + esc(o.vi) + ' · Gợi ý: <b>' + esc(a.charAt(0)) + '</b>' + esc(a.slice(1).replace(/[a-z]/gi, ' _')) + '</div>', accept: answersOf(o) };
+  } },
+  ctxtype: { name: 'Tự điền từ vào câu (ngữ cảnh)', icon: '🧠', typing: true, ok: function (o) { return /\{/.test(o.ex); }, make: function (o) {
+    var f = o.form;
+    return { prompt: '<div class="q">Điền từ còn thiếu vào câu của bài đọc</div><div class="sent">' + sentHTML(o, 'gap') + '</div><div class="muted small">Nghĩa: ' + esc(o.vi) + ' · Gợi ý: <b>' + esc(f.charAt(0)) + '</b>' + esc(f.slice(1).replace(/[a-z]/gi, ' _')) + ' (' + f.length + ' ký tự)</div>', accept: answersOf(o, true) };
+  } },
   synrev: { name: 'Chọn từ có nghĩa tương đương', icon: '🔁', mcq: true, ok: function (o) { return !!o.syn; }, make: function (o, pool) {
     var ds = distract(o, pool, 3, 'w'), opts = shuffle([o].concat(ds));
     return { prompt: '<div class="q">Từ nào trong bài có nghĩa gần với <span class="big">' + esc(o.syn) + '</span>?</div><p class="hint">Gợi ý nghĩa: ' + esc(o.vi) + '</p>', opts: opts.map(function (x) { return x.w; }), ans: opts.indexOf(o) };
   } }
 };
-/* 10 bài tập cho mỗi bài (½ passage) – bài 2 dùng đúng câu hỏi đồng nghĩa của đề Cambridge, làm hết các từ */
+/* 14 bài tập cho mỗi bài (½ passage), đi từ nhận biết → hiểu → ngữ cảnh → tự viết; – bài 2 dùng đúng câu hỏi đồng nghĩa của đề Cambridge, làm hết các từ */
 var LESSON_PLAN = [
-  { t: 'en2vi', n: 15 }, { t: 'syn', n: 60 }, { t: 'match', n: 15 }, { t: 'synrev', n: 15 }, { t: 'ctxmean', n: 12 },
-  { t: 'ctx', n: 15 }, { t: 'listen', n: 10 }, { t: 'scramble', n: 10 }, { t: 'spell', n: 12 }, { t: 'form', n: 12 }
+  { t: 'en2vi', n: 30 }, { t: 'syn', n: 60 }, { t: 'match', n: 30 }, { t: 'tf', n: 25 }, { t: 'matchsyn', n: 30 },
+  { t: 'synrev', n: 25 }, { t: 'vi2en', n: 25 }, { t: 'listen', n: 15 }, { t: 'ctxmean', n: 20 }, { t: 'ctx', n: 20 },
+  { t: 'scramble', n: 15 }, { t: 'synwrite', n: 15 }, { t: 'spell', n: 15 }, { t: 'ctxtype', n: 15 }
 ];
 function buildItems(type, words, n, pool) {
   var T = TYPES[type], cand = words.filter(function (o) { return !T.ok || T.ok(o); });
@@ -370,8 +387,8 @@ function persistLesson() { S.data.lesson = { key: L.key, step: L.step, scores: L
 function runStep() {
   if (L.step >= LESSON_PLAN.length) return finishLesson();
   var p = LESSON_PLAN[L.step], pool = L.words;
-  var items = p.t === 'match' ? null : buildItems(p.t, L.words, p.n, pool);
-  var title = 'Bài tập ' + (L.step + 1) + '/10: ' + TYPES[p.t].icon + ' ' + TYPES[p.t].name;
+  var items = TYPES[p.t].match ? null : buildItems(p.t, L.words, p.n, pool);
+  var title = 'Bài tập ' + (L.step + 1) + '/' + LESSON_PLAN.length + ': ' + TYPES[p.t].icon + ' ' + TYPES[p.t].name;
   var done = function (score, wrongs) {
     L.scores[L.step] = Math.max(L.scores[L.step] || 0, score); persistLesson();
     var pass = score >= CONFIG.PASS;
@@ -382,7 +399,7 @@ function runStep() {
     $('#again').onclick = runStep;
     if (pass) $('#go').onclick = function () { L.step++; persistLesson(); runStep(); };
   };
-  if (p.t === 'match') runMatch(title, L.words, p.n, done); else runQuiz(title, items, { feedback: true }, done);
+  if (TYPES[p.t].match) runMatch(title, TYPES[p.t].field === 'syn' ? L.words.filter(function (o) { return o.syn; }) : L.words, p.n, done, TYPES[p.t].field); else runQuiz(title, items, { feedback: true }, done);
 }
 function wrongTable(ws) {
   var seen = {}, rows = '';
@@ -397,7 +414,7 @@ function finishLesson() {
   L.words.forEach(function (o) { if (!S.data.words[o.n]) { S.data.words[o.n] = { b: 1, due: addDays(t, 1), at: t }; newWords++; } });
   day().learned += newWords; S.data.lesson = null; S.save(); updateWho();
   var d = day(), g = S.data.goal;
-  app.innerHTML = '<div class="card center"><div style="font-size:60px">🏆</div><h1>Hoàn thành ' + L.list.lv + ' · ' + L.list.idx + '!</h1><p>Điểm trung bình 10 bài tập: <b>' + sc + '%</b>' + (newWords ? ' · <b>+' + newWords + '</b> từ mới' : ' (ôn lại bài cũ)') + '</p>' +
+  app.innerHTML = '<div class="card center"><div style="font-size:60px">🏆</div><h1>Hoàn thành ' + L.list.lv + ' · ' + L.list.idx + '!</h1><p>Điểm trung bình ' + LESSON_PLAN.length + ' bài tập: <b>' + sc + '%</b>' + (newWords ? ' · <b>+' + newWords + '</b> từ mới' : ' (ôn lại bài cũ)') + '</p>' +
     '<p class="muted">Hôm nay: ' + d.learned + '/' + g + ' từ ' + (d.learned >= g ? '– 🎉 đã đạt mục tiêu!' : '– còn ' + (g - d.learned) + ' từ nữa.') + '</p>' +
     '<div style="text-align:left;margin-top:16px"><h3>✍️ Bài mở rộng (tự luận, không bắt buộc)</h3><p class="muted small">Chọn 3 từ bất kỳ trong bài và viết 3 câu của riêng bạn. Bài viết được lưu ở mục “Bài viết của tôi”.</p>' +
     '<textarea class="in" id="wr" rows="4" placeholder="1. …&#10;2. …&#10;3. …"></textarea><div class="err" id="wrr"></div><button class="btn sm" id="saveWr">Lưu bài viết</button></div>' +
@@ -475,7 +492,8 @@ function runQuiz(title, items, opt, done) {
   }
   show();
 }
-function runMatch(title, words, n, done) {
+function runMatch(title, words, n, done, field) {
+  field = field || 'vi';
   var all = pick(words, Math.min(n, words.length)), rounds = [], right = 0, wrongs = [], total = all.length;
   for (var i = 0; i < all.length; i += 5) rounds.push(all.slice(i, i + 5));
   var r = 0;
@@ -483,13 +501,13 @@ function runMatch(title, words, n, done) {
     if (r >= rounds.length) return done(Math.round(right / total * 100), wrongs);
     var ws = rounds[r], left = shuffle(ws), rightCol = shuffle(ws), sel = null, missed = {}, matched = 0;
     app.innerHTML = '<div class="card">' + lessonHead(title) + '<div class="small muted" style="margin-top:6px">Lượt ' + (r + 1) + '/' + rounds.length + ' · Chạm một từ rồi chạm nghĩa tương ứng. Ghép sai lần đầu sẽ bị tính sai.</div><div class="qbar"><i style="width:' + (r / rounds.length * 100) + '%"></i></div>' +
-      '<div class="match"><div class="col">' + left.map(function (o) { return '<button class="mt" data-l="' + o.n + '"><b>' + esc(o.w) + '</b></button>'; }).join('') + '</div><div class="col">' + rightCol.map(function (o) { return '<button class="mt" data-r="' + o.n + '">' + esc(o.vi) + '</button>'; }).join('') + '</div></div></div>';
+      '<div class="match"><div class="col">' + left.map(function (o) { return '<button class="mt" data-l="' + o.n + '"><b>' + esc(o.w) + '</b></button>'; }).join('') + '</div><div class="col">' + rightCol.map(function (o) { return '<button class="mt" data-r="' + o.n + '">' + esc(o[field]) + '</button>'; }).join('') + '</div></div></div>';
     bindQuit();
     app.querySelector('.match').onclick = function (e) {
       var b = e.target.closest('.mt'); if (!b || b.classList.contains('done')) return;
       if (b.dataset.l) { app.querySelectorAll('[data-l]').forEach(function (x) { x.classList.remove('sel'); }); b.classList.add('sel'); sel = b; say(BYN[b.dataset.l].w); return; }
       if (!sel) { b.classList.add('shake'); setTimeout(function () { b.classList.remove('shake'); }, 400); return; }
-      var ln = sel.dataset.l, rn = b.dataset.r, ok = ln === rn || BYN[ln].vi === BYN[rn].vi;
+      var ln = sel.dataset.l, rn = b.dataset.r, ok = ln === rn || BYN[ln][field] === BYN[rn][field];
       if (ok) {
         sel.classList.remove('sel'); sel.classList.add('done'); b.classList.add('done'); matched++;
         if (!missed[ln]) { right++; recordAnswer(+ln, true); }
@@ -508,7 +526,7 @@ function runMatch(title, words, n, done) {
 function startReview() {
   var due = shuffle(dueWords()).slice(0, 30).map(function (n) { return BYN[n]; });
   if (!due.length) return toast('Hôm nay không có từ cần ôn.');
-  var types = ['en2vi', 'syn', 'ctx', 'spell', 'synrev', 'form', 'ctxmean', 'vi2en'], pool = W.filter(function (o) { return S.data.words[o.n]; });
+  var types = ['en2vi', 'syn', 'tf', 'ctx', 'synwrite', 'synrev', 'ctxtype', 'ctxmean', 'vi2en', 'spell'], pool = W.filter(function (o) { return S.data.words[o.n]; });
   if (pool.length < 8) pool = W;
   var items = due.map(function (o, k) { var t = types[k % types.length]; if (TYPES[t].ok && !TYPES[t].ok(o)) t = 'en2vi'; var q = TYPES[t].make(o, pool); q.word = o; q.type = t; return q; });
   var head = function () { return '<div class="exhead"><button class="btn sm" id="quit">✕ Thoát</button><b>🔁 Ôn tập theo lịch (lặp lại ngắt quãng)</b></div>'; };
@@ -549,7 +567,7 @@ function practicePool(p) {
 function startPractice(p) {
   var pool = practicePool(p);
   if (pool.length < 10) { if (p.src === 'learned') { toast('Chưa đủ từ đã học, chuyển sang tất cả từ của cấp độ.'); p = Object.assign({}, p, { src: 'all' }); pool = practicePool(p); } }
-  var groups = { mix: ['en2vi', 'syn', 'vi2en', 'synrev', 'listen', 'ctx', 'ctxmean', 'scramble', 'spell', 'form'], mcq: ['en2vi', 'syn', 'vi2en', 'synrev', 'listen', 'ctx', 'ctxmean'], typing: ['scramble', 'spell', 'dict', 'form'], context: ['syn', 'ctx', 'ctxmean', 'form'] };
+  var groups = { mix: ['en2vi', 'syn', 'tf', 'vi2en', 'synrev', 'listen', 'ctx', 'ctxmean', 'scramble', 'spell', 'synwrite', 'ctxtype', 'form'], mcq: ['en2vi', 'syn', 'tf', 'vi2en', 'synrev', 'listen', 'ctx', 'ctxmean'], typing: ['scramble', 'spell', 'synwrite', 'dict', 'ctxtype', 'form'], context: ['syn', 'ctx', 'ctxmean', 'ctxtype', 'form'] };
   var ts = groups[p.types || 'mix'], words = pick(pool, p.count), items = [];
   words.forEach(function (o, k) {
     var cand = ts.filter(function (t) { return !TYPES[t].ok || TYPES[t].ok(o); }), t = cand[(k + Math.floor(Math.random() * cand.length)) % cand.length];

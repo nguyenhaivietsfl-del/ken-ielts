@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KEN – Khu vực giáo viên</title>
+<style>
+:root{--pri:#0f766e;--pri2:#115e59;--bg:#f3f6f8;--card:#fff;--ink:#1f2937;--mut:#6b7280;--line:#e5e7eb;--ok:#15803d;--okbg:#e7f6ec;--bad:#c62828;--badbg:#fdecec;--warn:#b45309;--warnbg:#fff4e0;--r:14px}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+header{background:var(--pri);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:5}
+header b{font-size:17px}header small{display:block;opacity:.85;font-weight:400;font-size:12px}header .sp{flex:1}
+header button,header a{background:rgba(255,255,255,.16);color:#fff;border:0;border-radius:10px;padding:7px 11px;cursor:pointer;font:inherit;font-size:14px;text-decoration:none}
+main{max-width:1250px;margin:0 auto;padding:14px}
+.card{background:var(--card);border-radius:var(--r);box-shadow:0 1px 3px rgba(0,0,0,.07);padding:16px;margin-bottom:14px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.tabs button{border:2px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font:inherit;font-weight:600;cursor:pointer;color:var(--ink)}
+.tabs button.on{background:var(--pri);border-color:var(--pri);color:#fff}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:12px}
+.stat{background:#fff;border-radius:var(--r);padding:12px 14px;box-shadow:0 1px 3px rgba(0,0,0,.07);cursor:pointer;border:2px solid transparent}
+.stat.on{border-color:var(--pri)}.stat b{font-size:24px;display:block}.stat span{color:var(--mut);font-size:13px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+input,select{font:inherit;padding:8px 10px;border:1px solid #cfd6dc;border-radius:10px;background:#fff;color:var(--ink)}
+input[type=search]{min-width:220px;flex:1}
+.btn{border:0;border-radius:10px;padding:8px 13px;font:inherit;font-weight:600;cursor:pointer;background:#e8eef1;color:var(--ink)}
+.btn.pri{background:var(--pri);color:#fff}.btn:disabled{opacity:.5}
+.tw{overflow:auto;border-radius:12px;border:1px solid var(--line)}
+table{border-collapse:collapse;width:100%;font-size:14px;background:#fff}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:#f0f4f6;position:sticky;top:0;cursor:pointer;white-space:nowrap;font-size:13px;user-select:none}
+th.s::after{content:" ▾"}th.s.up::after{content:" ▴"}
+tbody tr{cursor:pointer}tbody tr:hover{background:#f7fbfa}
+.pill{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap}
+.p-ok{background:var(--okbg);color:var(--ok)}.p-bad{background:var(--badbg);color:var(--bad)}.p-warn{background:var(--warnbg);color:var(--warn)}.p-mut{background:#eef1f3;color:var(--mut)}
+.mut{color:var(--mut)}.small{font-size:12px}
+.drawer{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:20;display:flex;justify-content:flex-end}
+.drawer .in{background:var(--bg);width:min(760px,100%);height:100%;overflow:auto;padding:0 0 30px}
+.drawer .hd{background:var(--pri);color:#fff;padding:14px 16px;position:sticky;top:0;display:flex;gap:10px;align-items:flex-start;z-index:2}
+.drawer .hd h2{margin:0;font-size:19px}.drawer .hd .sp{flex:1}
+.drawer .bd{padding:14px}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.kv div{background:#fff;border-radius:10px;padding:8px 10px}.kv span{display:block;color:var(--mut);font-size:12px}
+pre{white-space:pre-wrap;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;background:#fff;border-radius:10px;padding:10px;margin:0;max-height:300px;overflow:auto}
+.ev{background:#fff;border-radius:10px;padding:10px 12px;margin-bottom:8px;border-left:5px solid #cbd5e1}
+.ev.lesson{border-color:#0f766e}.ev.result{border-color:#2563eb}.ev.viol{border-color:var(--bad);background:#fff7f7}
+.ev .t{font-size:12px;color:var(--mut)}.ev details{margin-top:6px}.ev summary{cursor:pointer;color:#2563eb;font-size:13px}
+.login{max-width:420px;margin:60px auto}
+.err{color:var(--bad);font-weight:600}
+h3{margin:16px 0 8px}
+.empty{padding:30px;text-align:center;color:var(--mut)}
+@media (max-width:640px){th,td{padding:7px}.hide-m{display:none}}
+</style>
+</head>
+<body>
+<header><div>👩‍🏫 <b>KEN – Khu vực giáo viên</b><small>Theo dõi học viên: Oxford 3000 · Tiếng Pháp · KEN SCHOOL</small></div><div class="sp"></div><a id="sheetLink" target="_blank" rel="noopener" style="display:none">📊 Google Sheet</a><button id="logout" style="display:none">Đăng xuất</button></header>
+<main id="app"></main>
+<script src="../shared/ken-config.js"></script>
+<script>
+var URL_ = window.KEN_TRACK_URL || '', APPS = [['school', '🎒 KEN SCHOOL (THCS–THPT)', '../school/'], ['vocab', '📘 Oxford 3000', '../vocab/'], ['french', '🇫🇷 Tiếng Pháp', '../french/']];
+var app = document.getElementById('app'), pw = sessionStorage.getItem('ken_t_pw') || '', cur = (new URLSearchParams(location.search).get('app')) || 'school';
+if (!APPS.some(function (a) { return a[0] === cur; })) cur = 'school';
+var DATA = {}, F = { q: '', cls: '', st: 'all', sort: 'last', up: false };
+function $(s, r) { return (r || document).querySelector(s); }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function today() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function daysAgo(s) { if (!s) return 999; var a = new Date(String(s).slice(0, 10) + 'T00:00:00'), b = new Date(today() + 'T00:00:00'); return Math.round((b - a) / 864e5); }
+function ago(s) { var d = daysAgo(s); if (d >= 999) return '—'; var hm = String(s).slice(11, 16); return d === 0 ? 'Hôm nay ' + hm : d === 1 ? 'Hôm qua ' + hm : d + ' ngày trước'; }
+function api(body) {
+  body.pw = pw;
+  return fetch(URL_, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
+    .then(function (r) { return r.json(); }).then(function (j) { if (!j.ok) throw new Error(j.error || 'Lỗi máy chủ'); return j; });
+}
+
+function renderSetup() {
+  app.innerHTML = '<div class="card" style="max-width:760px;margin:30px auto"><h2>⚙️ Chưa kết nối Google Sheet</h2><p>Khu vực giáo viên cần một Google Sheet để nhận kết quả học từ máy của học viên. Chỉ cần làm 1 lần (khoảng 5 phút):</p><ol>' +
+    '<li>Tạo một <b>Google Sheet</b> mới (ví dụ đặt tên “KEN – Theo dõi học viên”).</li><li>Vào <b>Tiện ích mở rộng → Apps Script</b>, xóa hết code có sẵn, dán toàn bộ file <b>Code.gs</b> (KEN Learning Tracker) rồi bấm 💾 Lưu.</li>' +
+    '<li>Chọn hàm <b>setup</b> → bấm <b>Chạy</b> → cấp quyền.</li><li><b>Triển khai → Tùy chọn triển khai mới → Ứng dụng web</b>: Thực thi với tư cách <b>Tôi</b>, Người có quyền truy cập <b>Bất kỳ ai</b> → Triển khai → sao chép link kết thúc bằng <code>/exec</code>.</li>' +
+    '<li>Gửi link đó để gắn vào web (file <code>shared/ken-config.js</code>). Từ lúc đó mọi kết quả học sẽ hiện ở đây.</li></ol><p class="mut">Mật khẩu giáo viên mặc định: đặt ở dòng <code>ADMIN_PASSWORD</code> trong Code.gs.</p></div>';
+}
+function renderLogin(msg) {
+  $('#logout').style.display = 'none'; $('#sheetLink').style.display = 'none';
+  app.innerHTML = '<div class="card login"><h2>🔐 Đăng nhập giáo viên</h2><p class="mut">Nhập mật khẩu giáo viên để xem kết quả học của học viên.</p><form id="lf"><input type="password" id="pw" placeholder="Mật khẩu giáo viên" style="width:100%" autofocus><p class="err">' + (msg || '') + '</p><button class="btn pri" style="width:100%">Vào khu vực giáo viên</button></form></div>';
+  $('#lf').onsubmit = function (e) { e.preventDefault(); pw = $('#pw').value.trim(); var b = $('#lf button'); b.disabled = true; b.textContent = 'Đang kiểm tra…';
+    api({ action: 'login' }).then(function () { sessionStorage.setItem('ken_t_pw', pw); load(); }).catch(function (er) { renderLogin(er.message); }); };
+}
+function load() {
+  $('#logout').style.display = ''; app.innerHTML = '<div class="empty">⏳ Đang tải dữ liệu…</div>';
+  api({ action: 'dashboard' }).then(function (j) {
+    DATA = {}; APPS.forEach(function (a) { DATA[a[0]] = []; }); (j.students || []).forEach(function (s) { (DATA[s.app] = DATA[s.app] || []).push(s); });
+    if (j.sheet) { var l = $('#sheetLink'); l.href = j.sheet; l.style.display = ''; }
+    render();
+  }).catch(function (er) { if (/mật khẩu/i.test(er.message)) { sessionStorage.removeItem('ken_t_pw'); renderLogin(er.message); } else app.innerHTML = '<div class="card err">Không tải được dữ liệu: ' + esc(er.message) + ' <button class="btn" onclick="load()">Thử lại</button></div>'; });
+}
+function status(s) { var d = daysAgo(s.last); return d === 0 ? 'today' : d >= 3 ? 'idle' : 'recent'; }
+function render() {
+  var list = DATA[cur] || [], classes = {}; list.forEach(function (s) { if (s.cls) classes[s.cls] = 1; });
+  var cnt = { all: list.length, today: list.filter(function (s) { return status(s) === 'today'; }).length, idle: list.filter(function (s) { return status(s) === 'idle'; }).length, viol: list.filter(function (s) { return +s.viol7 > 0; }).length };
+  var lvLabel = cur === 'school' ? 'Lớp học' : 'Trình độ';
+  app.innerHTML = '<div class="tabs">' + APPS.map(function (a) { return '<button data-a="' + a[0] + '" class="' + (a[0] === cur ? 'on' : '') + '">' + a[1] + ' <span class="pill p-mut">' + (DATA[a[0]] || []).length + '</span></button>'; }).join('') + '</div>' +
+    '<div class="stats">' + [['all', 'Tổng học viên', ''], ['today', 'Học hôm nay', 'color:var(--ok)'], ['idle', 'Không học ≥ 3 ngày', 'color:var(--warn)'], ['viol', 'Có vi phạm (7 ngày)', 'color:var(--bad)']].map(function (x) { return '<div class="stat' + (F.st === x[0] ? ' on' : '') + '" data-st="' + x[0] + '"><b style="' + x[2] + '">' + cnt[x[0]] + '</b><span>' + x[1] + '</span></div>'; }).join('') + '</div>' +
+    '<div class="card"><div class="filters"><input type="search" id="q" placeholder="🔎 Tìm tên hoặc mã học viên…" value="' + esc(F.q) + '"><select id="cls"><option value="">Tất cả lớp</option>' + Object.keys(classes).sort().map(function (c) { return '<option' + (F.cls === c ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('') + '</select>' +
+    '<button class="btn" id="rf">🔄 Làm mới</button><button class="btn" id="csv">⬇️ Xuất Excel (CSV)</button><a class="btn" href="' + APPS.filter(function (a) { return a[0] === cur; })[0][2] + '" target="_blank" style="text-decoration:none">↗ Mở web học</a></div>' +
+    '<div class="tw"><table><thead><tr>' + [['name', 'Học viên'], ['cls', 'Lớp'], ['level', lvLabel], ['progress', 'Tiến độ'], ['today', 'Hôm nay'], ['streak', 'Chuỗi'], ['acc7', '% đúng 7 ngày'], ['viol7', 'Vi phạm'], ['last', 'Lần cuối']].map(function (c) { return '<th data-k="' + c[0] + '" class="' + (F.sort === c[0] ? 's' + (F.up ? ' up' : '') : '') + (/streak|today/.test(c[0]) ? ' hide-m' : '') + '">' + c[1] + '</th>'; }).join('') + '</tr></thead><tbody id="tb"></tbody></table></div><p class="mut small" id="cnt"></p></div>';
+  app.querySelector('.tabs').onclick = function (e) { var b = e.target.closest('button'); if (!b) return; cur = b.dataset.a; F.cls = ''; history.replaceState(null, '', '?app=' + cur); render(); };
+  app.querySelector('.stats').onclick = function (e) { var b = e.target.closest('.stat'); if (!b) return; F.st = b.dataset.st; render(); };
+  $('#q').oninput = function () { F.q = this.value; rows(); }; $('#cls').onchange = function () { F.cls = this.value; rows(); };
+  $('#rf').onclick = load; $('#csv').onclick = csv;
+  app.querySelector('thead').onclick = function (e) { var th = e.target.closest('th'); if (!th) return; var k = th.dataset.k; if (F.sort === k) F.up = !F.up; else { F.sort = k; F.up = false; } render(); };
+  rows();
+}
+function filtered() {
+  var q = F.q.trim().toLowerCase();
+  return (DATA[cur] || []).filter(function (s) {
+    if (F.cls && s.cls !== F.cls) return false;
+    if (q && (String(s.name) + ' ' + s.sid).toLowerCase().indexOf(q) < 0) return false;
+    if (F.st === 'today' && status(s) !== 'today') return false; if (F.st === 'idle' && status(s) !== 'idle') return false; if (F.st === 'viol' && !(+s.viol7 > 0)) return false;
+    return true;
+  }).sort(function (a, b) {
+    var k = F.sort, x = a[k], y = b[k]; if (k === 'today') { x = daysAgo(a.last) === 0 ? a.today : ''; y = daysAgo(b.last) === 0 ? b.today : ''; }
+    var num = /streak|acc7|viol7/.test(k); if (num) { x = x === '' ? -1 : +x; y = y === '' ? -1 : +y; } else { x = String(x || ''); y = String(y || ''); }
+    var r = x < y ? -1 : x > y ? 1 : 0; if (k === 'last' || num) r = -r; return F.up ? -r : r;
+  });
+}
+function rows() {
+  var l = filtered(), tb = $('#tb');
+  tb.innerHTML = l.length ? l.map(function (s) {
+    var st = status(s), acc = s.acc7 === '' ? '<span class="mut">—</span>' : '<span class="pill ' + (+s.acc7 >= 80 ? 'p-ok' : +s.acc7 >= 60 ? 'p-warn' : 'p-bad') + '">' + s.acc7 + '%</span>';
+    return '<tr data-sid="' + esc(s.sid) + '"><td><b>' + esc(s.name) + '</b><br><span class="mut small">' + esc(s.sid) + (s.school ? ' · ' + esc(s.school) : '') + '</span></td><td>' + esc(s.cls) + '</td><td>' + esc(s.level) + '</td><td>' + esc(s.progress) + '</td>' +
+      '<td class="hide-m">' + (st === 'today' ? esc(s.today) : '<span class="mut">chưa học</span>') + '</td><td class="hide-m">🔥 ' + (s.streak || 0) + '</td><td>' + acc + ' <span class="mut small">' + (s.q7 || 0) + ' câu</span></td>' +
+      '<td>' + (+s.viol7 > 0 ? '<span class="pill p-bad">⚠️ ' + s.viol7 + '</span>' : '<span class="pill p-ok">0</span>') + ' <span class="mut small">tổng ' + (s.violTotal || 0) + '</span></td>' +
+      '<td><span class="pill ' + (st === 'today' ? 'p-ok' : st === 'idle' ? 'p-warn' : 'p-mut') + '">' + ago(s.last) + '</span></td></tr>';
+  }).join('') : '<tr><td colspan="9" class="empty">' + ((DATA[cur] || []).length ? 'Không có học viên phù hợp bộ lọc.' : 'Chưa có học viên nào gửi kết quả. Học viên chỉ cần mở web và học, kết quả sẽ tự gửi về đây.') + '</td></tr>';
+  $('#cnt').textContent = 'Đang hiển thị ' + l.length + ' / ' + (DATA[cur] || []).length + ' học viên · Bấm vào một học viên để xem chi tiết từng bài đã làm.';
+  tb.onclick = function (e) { var tr = e.target.closest('tr[data-sid]'); if (tr) detail(tr.dataset.sid); };
+}
+function detail(sid) {
+  var s = (DATA[cur] || []).filter(function (x) { return String(x.sid) === sid; })[0]; if (!s) return;
+  var d = document.createElement('div'); d.className = 'drawer';
+  d.innerHTML = '<div class="in"><div class="hd"><div><h2>' + esc(s.name) + '</h2><div class="small" style="opacity:.9">' + esc(s.sid) + ' · ' + esc(s.cls) + (s.school ? ' · ' + esc(s.school) : '') + ' · ' + esc(APPS.filter(function (a) { return a[0] === cur; })[0][1]) + '</div></div><div class="sp"></div><button class="btn" id="x">✕ Đóng</button></div><div class="bd">' +
+    '<div class="kv"><div><span>' + (cur === 'school' ? 'Lớp học' : 'Trình độ') + '</span><b>' + esc(s.level || '—') + '</b></div><div><span>Tiến độ</span><b>' + esc(s.progress || '—') + '</b></div><div><span>Hôm nay</span><b>' + (status(s) === 'today' ? esc(s.today) : 'chưa học') + '</b></div><div><span>Chuỗi ngày đạt mục tiêu</span><b>🔥 ' + (s.streak || 0) + '</b></div>' +
+    '<div><span>% đúng 7 ngày</span><b>' + (s.acc7 === '' ? '—' : s.acc7 + '%') + '</b> <span class="small">(' + (s.q7 || 0) + ' câu, ' + (s.days7 || 0) + '/7 ngày có học)</span></div><div><span>Vi phạm rời tab</span><b style="color:' + (+s.viol7 ? 'var(--bad)' : 'inherit') + '">' + (s.viol7 || 0) + ' lần / 7 ngày</b> <span class="small">(tổng ' + (s.violTotal || 0) + ')</span></div><div><span>Bắt đầu dùng</span><b>' + esc(String(s.first).slice(0, 16)) + '</b></div><div><span>Lần cuối</span><b>' + esc(String(s.last).slice(0, 16)) + '</b></div></div>' +
+    '<h3>📋 Báo cáo tổng hợp</h3><pre>' + esc(s.report || '—') + '</pre><h3>🕘 Nhật ký làm bài</h3><div class="filters"><select id="kf"><option value="">Tất cả</option><option value="lesson">Bài học</option><option value="result">Ôn tập / kiểm tra</option><option value="viol">Vi phạm</option></select></div><div id="evs"><div class="empty">⏳ Đang tải…</div></div></div></div>';
+  document.body.appendChild(d); document.body.style.overflow = 'hidden';
+  function close() { d.remove(); document.body.style.overflow = ''; }
+  $('#x', d).onclick = close; d.onclick = function (e) { if (e.target === d) close(); };
+  var EV = [];
+  function draw() {
+    var k = $('#kf', d).value, l = EV.filter(function (e) { return !k || kindOf(e) === k; });
+    $('#evs', d).innerHTML = l.length ? l.map(function (e) {
+      var kd = kindOf(e), sc = e.score === '' || e.score == null ? '' : '<span class="pill ' + (+e.score >= 80 ? 'p-ok' : 'p-bad') + '">' + e.score + '%</span>';
+      var det = String(e.detail || ''), body = '';
+      var parts = det.split('Câu sai:\n'), steps = parts[0].trim(), wr = (parts[1] || '').trim(), nw = wr ? wr.split('\n').length : 0;
+      if (steps) body += '<div class="small mut">' + esc(steps) + '</div>';
+      if (wr) body += '<details><summary>Xem ' + nw + ' câu làm sai' + (kd === 'lesson' ? ' (kể cả các lần làm lại)' : '') + '</summary><pre>' + esc(wr) + '</pre></details>';
+      return '<div class="ev ' + kd + '"><div class="t">' + esc(e.time) + ' · ' + esc(e.kind) + '</div><div><b>' + esc(e.title) + '</b> ' + sc + (kd === 'result' && e.nWrong === 0 ? ' <span class="pill p-ok">không sai câu nào</span>' : '') + '</div>' + body + '</div>';
+    }).join('') : '<div class="empty">Chưa có hoạt động nào.</div>';
+  }
+  $('#kf', d).onchange = draw;
+  api({ action: 'student', app: cur, sid: s.sid }).then(function (j) { EV = j.events || []; draw(); }).catch(function (er) { $('#evs', d).innerHTML = '<p class="err">' + esc(er.message) + '</p>'; });
+}
+function kindOf(e) { var k = String(e.kind || ''); return /Vi phạm/.test(k) ? 'viol' : /bài học/.test(k) ? 'lesson' : 'result'; }
+function csv() {
+  var head = ['Họ tên', 'Mã', 'Lớp', 'Trường', cur === 'school' ? 'Lớp học' : 'Trình độ', 'Tiến độ', 'Hôm nay', 'Chuỗi ngày', '% đúng 7 ngày', 'Số câu 7 ngày', 'Vi phạm 7 ngày', 'Tổng vi phạm', 'Lần cuối'];
+  var lines = [head].concat(filtered().map(function (s) { return [s.name, s.sid, s.cls, s.school, s.level, s.progress, status(s) === 'today' ? s.today : '', s.streak, s.acc7, s.q7, s.viol7, s.violTotal, s.last]; }))
+    .map(function (r) { return r.map(function (v) { v = String(v == null ? '' : v); return /[",\n;]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(','); }).join('\r\n');
+  var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + lines], { type: 'text/csv;charset=utf-8' })); a.download = 'KEN-' + cur + '-hoc-vien-' + today() + '.csv'; a.click();
+}
+$('#logout').onclick = function () { sessionStorage.removeItem('ken_t_pw'); pw = ''; renderLogin(); };
+if (!URL_) renderSetup(); else if (pw) load(); else renderLogin();
+</script>
+</body>
+</html>

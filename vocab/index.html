@@ -85,8 +85,9 @@ table.t{width:100%;border-collapse:collapse;font-size:15px}table.t td,table.t th
 </style>
 </head>
 <body>
-<header class="top"><div class="brand" id="home">📚 KEN VOCAB<small>Oxford 3000 · A1–B2</small></div><div class="sp"></div><div class="who" id="who"></div><button class="ib" id="menuBtn" title="Cài đặt">⚙️</button></header>
+<header class="top"><div class="brand" id="home">📚 KEN VOCAB<small>Oxford 3000 · A1–B2</small></div><div class="sp"></div><div class="who" id="who"></div><a class="ib" href="../giaovien/?app=vocab" title="Khu vực giáo viên" style="text-decoration:none">👩‍🏫</a><button class="ib" id="menuBtn" title="Cài đặt">⚙️</button></header>
 <main id="app"><div class="card center muted">Đang tải dữ liệu…</div></main>
+<script src="../shared/ken-config.js"></script>
 <script src="data/words.js"></script>
 <script>
 'use strict';
@@ -432,7 +433,7 @@ function runQuiz(title, items, opt, done) {
     function judge(ok, given) {
       if (answered) return; answered = true;
       if (ok) right++; else wrongs.push(q.word);
-      answers.push({ q: q, ok: ok, given: given });
+      answers.push({ q: q, ok: ok, given: given }); if (!ok && window.KT) KT.miss(q, given);
       if (S.data.words[q.word.n] || opt.track) recordAnswer(q.word.n, ok); else { var d = day(); d.q++; if (ok) d.ok++; }
       if (opt.onAnswer) opt.onAnswer(q.word, ok);
       S.save();
@@ -573,7 +574,7 @@ function renderHard() {
 }
 
 /* ================== BÁO CÁO & CÀI ĐẶT ================== */
-function copyReport() {
+function reportLines() {
   var lines = ['KEN VOCAB – BÁO CÁO TIẾN ĐỘ', 'Học viên: ' + student.name + ' (' + student.sid + ') – ' + student.cls + ' – ' + student.school, 'Ngày: ' + today(),
     'Mục tiêu: ' + S.data.goal + ' từ/ngày · Chuỗi ngày đạt mục tiêu: ' + streak() + ' · Tổng từ đã học: ' + learnedCount() + '/' + W.length];
   LEVELS.forEach(function (lv) { var ls = LISTS[lv]; lines.push(lv + ': ' + learnedCount(lv) + ' từ · ' + ls.filter(function (l) { return (S.data.lists[l.key] || {}).passed; }).length + '/' + ls.length + ' bài'); });
@@ -582,6 +583,10 @@ function copyReport() {
   for (var k = 6; k >= 0; k--) { var d = addDays(today(), -k), x = S.data.days[d]; lines.push('  ' + d + ': ' + (x ? x.learned + ' từ mới, ' + x.rev + ' lượt ôn, đúng ' + (x.q ? Math.round(x.ok / x.q * 100) : 0) + '%' : 'không học')); }
   var tests = (S.data.tests || []).filter(function (t) { return t.test; }).slice(0, 5);
   if (tests.length) lines.push('Kiểm tra gần đây: ' + tests.map(function (t) { return t.d + ' ' + t.lv + ' ' + t.score + '%'; }).join('; '));
+  return lines;
+}
+function copyReport() {
+  var lines = reportLines();
   var txt = lines.join('\n');
   var done = function () { modal('📋 Đã sao chép báo cáo', 'Dán (Paste) vào Zalo/Messenger để gửi giáo viên.<pre style="white-space:pre-wrap;font-size:13px;background:var(--bg);padding:10px;border-radius:10px;max-height:40vh;overflow:auto">' + esc(txt) + '</pre>', 'Đóng'); };
   if (navigator.clipboard) navigator.clipboard.writeText(txt).then(done, done); else done();
@@ -609,7 +614,7 @@ else renderLogin();
   function active() { return !!(student && S && document.querySelector('#quit')); }
   function typing() { var a = document.activeElement; return !!a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName); }
   function warn(kind) {
-    if (!S) return; var d = day(); d.viol = (d.viol || 0) + 1; S.data.violTotal = (S.data.violTotal || 0) + 1; S.save();
+    if (!S) return; var d = day(); d.viol = (d.viol || 0) + 1; S.data.violTotal = (S.data.violTotal || 0) + 1; S.save(); if (window.KT) KT.ev('viol', kind);
     var old = document.querySelector('.modal.vw'); if (old) old.remove();
     var m = document.createElement('div'); m.className = 'modal vw';
     m.innerHTML = '<div class="card" style="border:3px solid #d64545"><h2 style="color:#d64545">⚠️ Cảnh báo vi phạm</h2><p>Bạn vừa <b>' + kind + '</b> trong lúc đang học.</p><p>Khi đang học và làm bài, <b>không được thoát tab, chuyển sang ứng dụng khác hay mở cửa sổ khác</b>.</p><p>Số lần vi phạm hôm nay: <b style="color:#d64545">' + d.viol + '</b>. Số lần này được ghi vào báo cáo gửi giáo viên.</p><div class="row" style="justify-content:flex-end"><button class="btn pri">Tôi đã hiểu, học tiếp</button></div></div>';
@@ -624,6 +629,68 @@ else renderLogin();
     setTimeout(function () { if (!document.hidden && !document.hasFocus() && !typing() && active()) warn('chuyển sang cửa sổ khác'); }, 400);
   });
 })();
+window.KEN_SYNC = { app: 'vocab',
+  progress: function () { var n = 0; for (var k in S.data.lists) if (S.data.lists[k].passed) n++; return learnedCount() + '/' + W.length + ' từ · ' + n + ' bài đã qua'; },
+  level: function () { var lv = ''; LEVELS.forEach(function (x) { if (!lv && LISTS[x].some(function (l) { return !(S.data.lists[l.key] || {}).passed; })) lv = x; }); return lv || 'Hoàn thành'; },
+  todayStr: function () { var d = day(); return (d.learned || 0) + '/' + S.data.goal + ' từ mới hôm nay'; },
+  lessonTitle: function () { return L.list.lv + ' · Bài ' + L.list.idx; } };
+/* ===== ĐỒNG BỘ KẾT QUẢ LÊN GOOGLE SHEET → KHU VỰC GIÁO VIÊN ===== */
+(function () {
+  var C = window.KEN_SYNC || {}, URL = window.KEN_TRACK_URL || '', timer = null, busy = false;
+  function qk() { return 'ken_sync_' + C.app + '_' + ((student && student.sid) || 'guest').toLowerCase(); }
+  function getq() { try { return JSON.parse(localStorage.getItem(qk())) || []; } catch (e) { return []; } }
+  function setq(a) { try { localStorage.setItem(qk(), JSON.stringify(a.slice(-400))); } catch (e) {} }
+  function txt(h) { var d = document.createElement('div'); d.innerHTML = String(h == null ? '' : h); return d.textContent.replace(/\s+/g, ' ').trim(); }
+  function wrongList(ws) {
+    try { var d = document.createElement('div'); d.innerHTML = '<table>' + wrongTable(ws || []) + '</table>';
+      return [].slice.call(d.querySelectorAll('tr')).map(function (tr) { var c = tr.querySelectorAll('td'); return c.length ? [].map.call(c, function (x) { return x.textContent.replace(/\s+/g, ' ').trim(); }).join(' → ') : ''; }).filter(Boolean).slice(0, 30);
+    } catch (e) { return []; }
+  }
+  function snap() {
+    var q7 = 0, ok7 = 0, v7 = 0, a7 = 0;
+    for (var k = 6; k >= 0; k--) { var x = S.data.days[addDays(today(), -k)]; if (x) { q7 += x.q || 0; ok7 += x.ok || 0; v7 += x.viol || 0; if (x.q) a7++; } }
+    var rep = ''; try { rep = reportLines().join('\n'); } catch (e) {}
+    return { streak: streak(), acc7: q7 ? Math.round(ok7 / q7 * 100) : '', q7: q7, days7: a7, viol7: v7, violTotal: S.data.violTotal || 0,
+      progress: C.progress ? C.progress() : '', level: C.level ? C.level() : '', today: C.todayStr ? C.todayStr() : '', report: rep };
+  }
+  function push() {
+    if (!URL || busy || !student || !S) return;
+    var a = getq(), n = Math.min(a.length, 80); busy = true;
+    var body = JSON.stringify({ action: 'track', app: C.app, student: { name: student.name, sid: student.sid, cls: student.cls, school: student.school || '' }, snap: snap(), events: a.slice(0, n) });
+    fetch(URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: body, keepalive: body.length < 60000 })
+      .then(function (r) { return r.json(); })
+      .then(function (j) { busy = false; if (j && j.ok) { setq(getq().slice(n)); if (getq().length) KT.sync(500); } })
+      .catch(function () { busy = false; });
+  }
+  var BUF = [];
+  function grab() { var b = BUF; BUF = []; return b; }
+  window.KT = {
+    miss: function (q, given) {
+      try { var corr = q.opts ? q.opts[q.ans] : (q.accept || [])[0], g = given == null || given === '' ? '(bỏ trống / hết giờ)' : (q.opts && typeof given === 'number' ? q.opts[given] : given);
+        BUF.push(txt(q.prompt).slice(0, 180) + '  ✗ HS trả lời: ' + txt(g).slice(0, 80) + '  ✓ Đúng: ' + txt(corr).slice(0, 80)); if (BUF.length > 80) BUF.shift(); } catch (e) {}
+    },
+    ev: function (kind, title, score, extra) {
+      if (!student) return; var e = extra || {};
+      e.id = Date.now().toString(36) + Math.random().toString(36).slice(2, 7); e.t = new Date().toISOString(); e.kind = kind; e.title = title || ''; e.score = score == null ? '' : score;
+      var a = getq(); a.push(e); setq(a); KT.sync(1200);
+    },
+    sync: function (ms) { clearTimeout(timer); timer = setTimeout(push, ms || 0); }
+  };
+  var _rp = resultPage;
+  resultPage = function (title, score, wrongs) { try { var b = grab(); KT.ev('result', txt(title), score, { wrong: b.length ? b : wrongList(wrongs), nWrong: (wrongs || []).length }); } catch (e) {} return _rp.apply(this, arguments); };
+  var _fl = finishLesson;
+  finishLesson = function () {
+    var title = '', steps = null; try { title = C.lessonTitle ? C.lessonTitle() : ''; steps = L && L.scores ? JSON.parse(JSON.stringify(L.scores)) : null; } catch (e) {}
+    var r = _fl.apply(this, arguments);
+    try { var m = app.innerHTML.match(/Điểm trung bình[^<]*<b>(\d+)%/); var b = grab(); KT.ev('lesson', title, m ? +m[1] : '', { steps: steps, wrong: b, nWrong: b.length }); } catch (e) {}
+    return r;
+  };
+  var _rh = renderHome;
+  renderHome = function () { BUF = []; var r = _rh.apply(this, arguments); KT.sync(1500); return r; };
+  document.addEventListener('visibilitychange', function () { if (document.hidden) push(); });
+  setInterval(function () { if (getq().length) push(); }, 60000);
+})();
+KT.sync(2500);
 </script>
 </body>
 </html>

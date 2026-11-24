@@ -53,11 +53,11 @@ h3{margin:16px 0 8px}
 </style>
 </head>
 <body>
-<header><div>👩‍🏫 <b>KEN – Khu vực giáo viên</b><small>Theo dõi học viên: Oxford 3000 · Tiếng Pháp · KEN SCHOOL</small></div><div class="sp"></div><a id="sheetLink" target="_blank" rel="noopener" style="display:none">📊 Google Sheet</a><button id="logout" style="display:none">Đăng xuất</button></header>
+<header><div>👩‍🏫 <b>KEN – Khu vực giáo viên</b><small>Theo dõi học viên: KEN SCHOOL · Oxford 3000 · Cambridge IELTS · Tiếng Pháp</small></div><div class="sp"></div><a id="sheetLink" target="_blank" rel="noopener" style="display:none">📊 Google Sheet</a><button id="logout" style="display:none">Đăng xuất</button></header>
 <main id="app"></main>
 <script src="../shared/ken-config.js"></script>
 <script>
-var URL_ = window.KEN_TRACK_URL || '', APPS = [['school', '🎒 KEN SCHOOL (THCS–THPT)', '../school/'], ['vocab', '📘 Oxford 3000', '../vocab/'], ['french', '🇫🇷 Tiếng Pháp', '../french/']];
+var URL_ = window.KEN_TRACK_URL || '', APPS = [['school', '🎒 KEN SCHOOL (THCS–THPT)', '../school/'], ['vocab', '📘 Oxford 3000', '../vocab/'], ['cam', '📗 Cambridge IELTS', '../cam/'], ['french', '🇫🇷 Tiếng Pháp', '../french/']];
 var app = document.getElementById('app'), pw = sessionStorage.getItem('ken_t_pw') || '', cur = (new URLSearchParams(location.search).get('app')) || 'school';
 if (!APPS.some(function (a) { return a[0] === cur; })) cur = 'school';
 var DATA = {}, F = { q: '', teacher: '', school: '', cls: '', level: '', st: 'all', sort: 'last', up: false };

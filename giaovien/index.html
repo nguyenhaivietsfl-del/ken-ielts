@@ -87,7 +87,7 @@ function renderLogin(msg) {
   $('#logout').style.display = 'none'; $('#sheetLink').style.display = 'none';
   app.innerHTML = '<div class="card login"><h2>🔐 Đăng nhập giáo viên</h2><p class="mut">Nhập mật khẩu giáo viên để xem kết quả học của học viên.</p><form id="lf"><input type="password" id="pw" placeholder="Mật khẩu giáo viên" style="width:100%" autofocus><p class="err">' + (msg || '') + '</p><button class="btn pri" style="width:100%">Vào khu vực giáo viên</button></form></div>';
   $('#lf').onsubmit = function (e) { e.preventDefault(); pw = $('#pw').value.trim(); var b = $('#lf button'); b.disabled = true; b.textContent = 'Đang kiểm tra…';
-    api({ action: 'login' }).then(function () { sessionStorage.setItem('ken_t_pw', pw); load(); }).catch(function (er) { renderLogin(er.message); }); };
+    api({ action: 'login' }).then(function () { sessionStorage.setItem('ken_t_pw', pw); try { localStorage.setItem('ken_t_pw', pw); } catch (e) {} load(); }).catch(function (er) { renderLogin(er.message); }); };
 }
 function load() {
   $('#logout').style.display = ''; app.innerHTML = '<div class="empty">⏳ Đang tải dữ liệu…</div>';
@@ -111,7 +111,7 @@ function render() {
     '<label>📌 Tình trạng<select id="stSel">' + [['all', 'Tất cả'], ['today', 'Học hôm nay'], ['recent', 'Học 1–2 ngày trước'], ['idle', 'Không học ≥ 3 ngày'], ['low', 'Đúng dưới 60%'], ['viol', 'Có vi phạm 7 ngày']].map(function (o) { return '<option value="' + o[0] + '"' + (F.st === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></label>' +
     (F.teacher || F.school || F.cls || F.level || F.st !== 'all' ? '<button class="btn" id="clr" style="align-self:flex-end">✖ Bỏ lọc</button>' : '') + '</div>' +
     '<div class="filters"><input type="search" id="q" placeholder="🔎 Tìm tên hoặc mã học viên…" value="' + esc(F.q) + '">' +
-    '<button class="btn" id="rf">🔄 Làm mới</button><button class="btn" id="csv">⬇️ Xuất Excel (CSV)</button><a class="btn" href="' + APPS.filter(function (a) { return a[0] === cur; })[0][2] + '" target="_blank" style="text-decoration:none">↗ Mở web học</a></div>' +
+    '<button class="btn" id="rf">🔄 Làm mới</button><button class="btn" id="csv">⬇️ Xuất Excel (CSV)</button><a class="btn" href="' + APPS.filter(function (a) { return a[0] === cur; })[0][2] + '?preview=1" target="_blank" style="text-decoration:none">👀 Vào học thử (giáo viên)</a></div>' +
     '<div class="tw"><table><thead><tr>' + [['name', 'Học viên'], ['school', 'Trường'], ['cls', 'Lớp'], ['teacher', 'Giáo viên'], ['level', lvLabel], ['progress', 'Tiến độ'], ['today', 'Hôm nay'], ['streak', 'Chuỗi'], ['acc7', '% đúng 7 ngày'], ['viol7', 'Vi phạm'], ['last', 'Lần cuối']].map(function (c) { return '<th data-k="' + c[0] + '" class="' + (F.sort === c[0] ? 's' + (F.up ? ' up' : '') : '') + (/streak|today|school|teacher/.test(c[0]) ? ' hide-m' : '') + '">' + c[1] + '</th>'; }).join('') + '</tr></thead><tbody id="tb"></tbody></table></div><p class="mut small" id="cnt"></p></div>';
   app.querySelector('.tabs').onclick = function (e) { var b = e.target.closest('button'); if (!b) return; cur = b.dataset.a; F.cls = ''; F.level = ''; history.replaceState(null, '', '?app=' + cur); render(); };
   app.querySelector('.stats').onclick = function (e) { var b = e.target.closest('.stat'); if (!b) return; F.st = b.dataset.st; render(); };
@@ -179,7 +179,7 @@ function csv() {
     .map(function (r) { return r.map(function (v) { v = String(v == null ? '' : v); return /[",\n;]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(','); }).join('\r\n');
   var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + lines], { type: 'text/csv;charset=utf-8' })); a.download = 'KEN-' + cur + '-hoc-vien-' + today() + '.csv'; a.click();
 }
-$('#logout').onclick = function () { sessionStorage.removeItem('ken_t_pw'); pw = ''; renderLogin(); };
+$('#logout').onclick = function () { sessionStorage.removeItem('ken_t_pw'); try { localStorage.removeItem('ken_t_pw'); } catch (e) {} pw = ''; renderLogin(); };
 if (!URL_) renderSetup(); else if (pw) load(); else renderLogin();
 </script>
 </body>

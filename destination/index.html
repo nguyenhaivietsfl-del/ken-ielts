@@ -529,7 +529,7 @@ if (!UNITS.length) app.innerHTML = '<div class="card">Không tải được dữ
 /* ===== GIÁM SÁT: không được rời tab / chuyển ứng dụng khi đang học (chỉ cảnh báo, ghi vào báo cáo) ===== */
 (function () {
   var away = false, isTouch = /iPhone|iPad|iPod|Android/.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.userAgent));
-  function active() { return !!(student && S && document.querySelector('#quit')); }
+  function active() { return !!(student && S && student.sid !== '__teacher__' && document.querySelector('#quit')); }
   function typing() { var a = document.activeElement; return !!a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName); }
   function warn(kind) {
     if (!S) return; var d = day(); d.viol = (d.viol || 0) + 1; S.data.violTotal = (S.data.violTotal || 0) + 1; S.save(); if (window.KT) KT.ev('viol', kind);
@@ -572,7 +572,7 @@ window.KEN_SYNC = { app: 'dest',
       progress: C.progress ? C.progress() : '', level: C.level ? C.level() : '', today: C.todayStr ? C.todayStr() : '', report: rep };
   }
   function push() {
-    if (!URL || busy || !student || !S) return;
+    if (!URL || busy || !student || !S || student.sid === '__teacher__') return;
     var a = getq(), n = Math.min(a.length, 80); busy = true;
     var body = JSON.stringify({ action: 'track', app: C.app, student: { name: student.name, sid: student.sid, cls: student.cls, school: student.school || '', teacher: student.teacher || '' }, snap: snap(), events: a.slice(0, n) });
     fetch(URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: body, keepalive: body.length < 60000 })
@@ -588,7 +588,7 @@ window.KEN_SYNC = { app: 'dest',
         BUF.push(txt(q.prompt).slice(0, 180) + '  ✗ HS trả lời: ' + txt(g).slice(0, 80) + '  ✓ Đúng: ' + txt(corr).slice(0, 80)); if (BUF.length > 80) BUF.shift(); } catch (e) {}
     },
     ev: function (kind, title, score, extra) {
-      if (!student) return; var e = extra || {};
+      if (!student || student.sid === '__teacher__') return; var e = extra || {};
       e.id = Date.now().toString(36) + Math.random().toString(36).slice(2, 7); e.t = new Date().toISOString(); e.kind = kind; e.title = title || ''; e.score = score == null ? '' : score;
       var a = getq(); a.push(e); setq(a); KT.sync(1200);
     },
@@ -606,7 +606,7 @@ window.KEN_SYNC = { app: 'dest',
   var _rh = renderHome;
   renderHome = function () { BUF = []; var r = _rh.apply(this, arguments); KT.sync(1500); askTeacher(); return r; };
   function askTeacher() {
-    if (!student || student.teacher || document.querySelector('.modal.tch')) return;
+    if (!student || student.teacher || student.sid === '__teacher__' || document.querySelector('.modal.tch')) return;
     var m = document.createElement('div'); m.className = 'modal tch';
     m.innerHTML = '<div class="card"><h2>👩‍🏫 Giáo viên phụ trách</h2><p>Em nhập tên giáo viên đang dạy em (để thầy cô theo dõi được kết quả học nhé).</p><input class="in" id="tchIn" list="kenTeachers2" placeholder="VD: Thầy Việt"><datalist id="kenTeachers2">' + (window.KEN_TEACHERS || []).map(function (t) { return '<option value="' + esc(t) + '">'; }).join('') + '</datalist><div class="err" id="tchErr"></div><div class="row" style="margin-top:10px"><button class="btn pri" id="tchOk">Lưu</button></div></div>';
     document.body.appendChild(m);
@@ -637,5 +637,6 @@ function confetti() { var c = ['#f472b6', '#a78bfa', '#60a5fa', '#34d399', '#fbb
   }).observe(app, { childList: true });
 })();
 </script>
+<script src="../shared/teacher-preview.js"></script>
 </body>
 </html>

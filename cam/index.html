@@ -236,7 +236,7 @@ function renderHome() {
     var ls = LISTS[lv], done = ls.filter(function (l) { return (S.data.lists[l.key] || {}).passed; }).length, tot = W.filter(function (o) { return o.lv === lv; }).length, lc = learnedCount(lv);
     return '<div class="card lvl" style="--c:var(--' + lv + ')"><span class="tag">' + lv + '</span> <b>' + LVNAME[lv] + '</b>' +
       '<div class="bar"><i style="width:' + Math.round(lc / tot * 100) + '%"></i></div><div class="small muted">' + lc + '/' + tot + ' từ · ' + done + '/' + ls.length + ' bài đã qua</div>' +
-      '<div class="row" style="margin-top:10px"><button class="btn sm pri" data-learn="' + lv + '">Học tiếp</button><button class="btn sm" data-lists="' + lv + '">Danh sách bài</button><button class="btn sm" data-prac="' + lv + '">Luyện tập</button></div></div>';
+      '<div class="row" style="margin-top:10px"><button class="btn sm pri" data-learn="' + lv + '">Học tiếp</button><button class="btn sm" data-lists="' + lv + '">Bài học & 📝 Kiểm tra</button><button class="btn sm" data-prac="' + lv + '">Luyện tập</button></div></div>';
   }).join('') + '</div>';
   html += '<div class="card lvl" style="--c:var(--ALL)"><span class="tag">Cam 11→18</span> <b>Luyện tập tổng hợp</b><p class="muted small" style="margin:6px 0 10px">Trộn từ của tất cả các cuốn Cambridge, nhiều dạng bài, từ trắc nghiệm đến tự luận và ngữ cảnh.</p><div class="row"><button class="btn sm pri" data-prac="ALL">Luyện tập tổng hợp</button><button class="btn sm" data-test="ALL">📝 Kiểm tra tổng hợp (40 câu)</button><button class="btn sm" id="report">📋 Báo cáo cho giáo viên</button></div></div>';
   app.innerHTML = html;
@@ -257,12 +257,13 @@ function renderHome() {
 function renderLists(lv) {
   app.onclick = null; window.scrollTo(0, 0);
   var nx = nextList(lv);
-  app.innerHTML = '<div class="card lvl" style="--c:var(--' + lv + ')"><div class="row"><button class="btn sm" id="back">← Trang chính</button><span class="tag">' + lv + '</span><b>' + LVNAME[lv] + '</b></div><p class="muted small">Chọn bài để học. Bài đã qua có thể học lại để ôn. Mỗi passage chia 2 bài.</p><div class="lists">' +
+  app.innerHTML = '<div class="card lvl" style="--c:var(--' + lv + ')"><div class="row"><button class="btn sm" id="back">← Trang chính</button><span class="tag">' + lv + '</span><b>' + LVNAME[lv] + '</b></div><p class="muted small">Chọn bài để học. Bài đã qua có thể học lại để ôn. Mỗi passage chia 2 bài.</p>' + examHTML(lv) + '<h3 style="margin:14px 0 6px">📚 Bài học</h3><div class="lists">' +
     LISTS[lv].map(function (l) {
       var st = S.data.lists[l.key] || {}, first = BYN[l.words[0]].w, last = BYN[l.words[l.words.length - 1]].w;
       return '<button class="li' + (st.passed ? ' done' : '') + (nx && nx.key === l.key ? ' cur' : '') + '" data-k="' + l.key + '"><b>' + l.idx + (st.passed ? ' ✓' : '') + '</b><small>' + esc(first) + ' → ' + esc(last) + '<br>' + l.words.length + ' từ' + (st.best ? ' · ' + st.best + '%' : '') + '</small></button>';
     }).join('') + '</div></div>';
   $('#back').onclick = renderHome;
+  app.querySelector('.exams').onclick = function (e) { var b = e.target.closest('[data-ex]'); if (b) startExam(b.dataset.ex); };
   app.querySelector('.lists').onclick = function (e) { var b = e.target.closest('[data-k]'); if (b) startLesson(b.dataset.k); };
 }
 
@@ -406,6 +407,14 @@ function wrongTable(ws) {
   ws.forEach(function (o) { if (seen[o.n]) return; seen[o.n] = 1; rows += '<tr><td><b>' + esc(o.w) + '</b><br><span class="muted small">' + esc(o.ipa) + '</span></td><td>' + esc(o.vi) + '</td><td class="small">' + sentHTML(o, 'bold') + '</td></tr>'; });
   return '<table class="t">' + rows + '</table>';
 }
+function examAfterLesson(key) {
+  var p = key.split('-'), t = p[1].replace(/P\d+$/, ''), k = p[0] + '-' + t, info = examInfo(k), cam = examInfo(p[0] + '-ALL'), hit = null;
+  if (!cam.left && !(S.data.exams || {})[p[0] + '-ALL']) hit = p[0] + '-ALL'; else if (!info.left && !(S.data.exams || {})[k]) hit = k;
+  if (!hit) return;
+  var box = document.createElement('div'); box.className = 'card center'; box.style.border = '2px solid var(--ok)';
+  box.innerHTML = '<h3>🎉 Bạn đã học xong ' + (hit.split('-')[1] === 'ALL' ? 'cả cuốn ' + LVNAME[p[0]] : 'cả 3 passage của ' + t.replace('T', 'Test ')) + '!</h3><p>Làm ngay bài kiểm tra tổng hợp để tính điểm nhé.</p><button class="btn pri" id="goExam">' + examName(hit) + '</button>';
+  app.insertBefore(box, app.firstChild); $('#goExam').onclick = function () { startExam(hit); };
+}
 function finishLesson() {
   var key = L.key, sc = 0; LESSON_PLAN.forEach(function (p, i) { sc += L.scores[i] || 0; }); sc = Math.round(sc / LESSON_PLAN.length);
   var st = S.data.lists[key] || {}, firstTime = !st.passed, t = today();
@@ -427,6 +436,7 @@ function finishLesson() {
     S.data.writings.unshift({ d: t, k: key, txt: txt, used: used.map(function (o) { return o.w; }) }); S.save();
     $('#wrr').style.color = 'var(--ok)'; $('#wrr').textContent = '✓ Đã lưu. Bạn đã dùng ' + used.length + ' từ của bài: ' + used.map(function (o) { return o.w; }).join(', ');
   };
+  try { examAfterLesson(key); } catch (e) {}
 }
 
 /* ================== TRÌNH CHẠY CÂU HỎI ================== */
@@ -561,22 +571,51 @@ function renderPracticeSetup(lv) {
   $('#go').onclick = function () { startPractice(PR); };
   $('#test').onclick = function () { startPractice({ lv: PR.lv, src: PR.src, count: 40, types: 'mix', test: true }); };
 }
+
+/* ================== KIỂM TRA THEO TEST / CUỐI CAM ================== */
+var EXAM = { TEST_Q: 40, TEST_MIN: 20, CAM_Q: 60, CAM_MIN: 30 };
+function testsOf(lv) { var m = {}; LISTS[lv].forEach(function (l) { var t = l.key.split('-')[1].replace(/P\d+$/, ''); (m[t] = m[t] || []).push(l); }); return m; }
+function examName(k) { var p = k.split('-'); return LVNAME[p[0]] ? (p[1] === 'ALL' ? '🏁 Kiểm tra cuối ' + LVNAME[p[0]] : '📝 Kiểm tra ' + LVNAME[p[0]] + ' · ' + p[1].replace('T', 'Test ')) : k; }
+function examInfo(k) {
+  var p = k.split('-'), lv = p[0], ls = p[1] === 'ALL' ? LISTS[lv] : testsOf(lv)[p[1]] || [];
+  var ws = []; ls.forEach(function (l) { ws = ws.concat(l.words.map(function (n) { return BYN[n]; })); });
+  return { lists: ls, words: ws, left: ls.filter(function (l) { return !(S.data.lists[l.key] || {}).passed; }).length, cam: p[1] === 'ALL' };
+}
+function examBtn(k, title, sub) {
+  var e = (S.data.exams || {})[k], info = examInfo(k), open = !info.left;
+  return '<button class="li' + (e && e.best >= CONFIG.PASS ? ' done' : '') + (open && !e ? ' cur' : '') + '" data-ex="' + k + '"' + (open ? '' : ' style="opacity:.6"') + '><b>' + (open ? '' : '🔒 ') + title + (e ? ' · ' + e.best + '%' : '') + '</b><small>' + sub + '<br>' + (open ? (e ? 'Đã làm ' + e.times + ' lần · lần gần nhất ' + e.last + '%' : 'Sẵn sàng làm bài') : 'Còn ' + info.left + ' bài học chưa qua') + '</small></button>';
+}
+function examHTML(lv) {
+  var ts = testsOf(lv);
+  return '<h3 style="margin:10px 0 6px">📝 Kiểm tra tổng hợp</h3><p class="muted small" style="margin:0 0 8px">Học xong 3 passage của một Test thì mở bài kiểm tra Test đó (' + EXAM.TEST_Q + ' câu, ' + EXAM.TEST_MIN + ' phút). Học xong cả cuốn thì mở bài kiểm tra cuối Cam (' + EXAM.CAM_Q + ' câu, ' + EXAM.CAM_MIN + ' phút). Cần đạt ≥ ' + CONFIG.PASS + '%; điểm được gửi cho giáo viên.</p><div class="lists exams">' +
+    Object.keys(ts).sort().map(function (t) { return examBtn(lv + '-' + t, t.replace('T', 'Test '), ts[t].length / 2 + ' passage · ' + examInfo(lv + '-' + t).words.length + ' từ'); }).join('') +
+    examBtn(lv + '-ALL', '🏁 Cuối ' + LVNAME[lv].replace('Cambridge IELTS', 'Cam'), 'Toàn bộ ' + examInfo(lv + '-ALL').words.length + ' từ') + '</div>';
+}
+function startExam(k) {
+  var info = examInfo(k);
+  if (info.left) return toast('Bạn cần học xong ' + info.left + ' bài học còn lại trước khi làm bài kiểm tra này.');
+  var p = k.split('-');
+  startPractice({ lv: p[0], src: 'all', test: true, exam: k, pool: info.words, count: info.cam ? EXAM.CAM_Q : EXAM.TEST_Q, secs: (info.cam ? EXAM.CAM_MIN : EXAM.TEST_MIN) * 60, label: examName(k), types: 'exam' });
+}
 function practicePool(p) {
+  if (p.pool) return p.pool;
   return W.filter(function (o) { return (p.lv === 'ALL' || o.lv === p.lv) && (p.src === 'all' || S.data.words[o.n]); });
 }
 function startPractice(p) {
   var pool = practicePool(p);
   if (pool.length < 10) { if (p.src === 'learned') { toast('Chưa đủ từ đã học, chuyển sang tất cả từ của cấp độ.'); p = Object.assign({}, p, { src: 'all' }); pool = practicePool(p); } }
-  var groups = { mix: ['en2vi', 'syn', 'tf', 'vi2en', 'synrev', 'listen', 'ctx', 'ctxmean', 'scramble', 'spell', 'synwrite', 'ctxtype', 'form'], mcq: ['en2vi', 'syn', 'tf', 'vi2en', 'synrev', 'listen', 'ctx', 'ctxmean'], typing: ['scramble', 'spell', 'synwrite', 'dict', 'ctxtype', 'form'], context: ['syn', 'ctx', 'ctxmean', 'ctxtype', 'form'] };
+  var groups = { exam: ['syn', 'en2vi', 'synrev', 'ctx', 'ctxmean', 'tf', 'vi2en', 'spell', 'synwrite', 'ctxtype'], mix: ['en2vi', 'syn', 'tf', 'vi2en', 'synrev', 'listen', 'ctx', 'ctxmean', 'scramble', 'spell', 'synwrite', 'ctxtype', 'form'], mcq: ['en2vi', 'syn', 'tf', 'vi2en', 'synrev', 'listen', 'ctx', 'ctxmean'], typing: ['scramble', 'spell', 'synwrite', 'dict', 'ctxtype', 'form'], context: ['syn', 'ctx', 'ctxmean', 'ctxtype', 'form'] };
   var ts = groups[p.types || 'mix'], words = pick(pool, p.count), items = [];
   words.forEach(function (o, k) {
     var cand = ts.filter(function (t) { return !TYPES[t].ok || TYPES[t].ok(o); }), t = cand[(k + Math.floor(Math.random() * cand.length)) % cand.length];
     var q = TYPES[t].make(o, pool.length > 30 ? pool : W); q.word = o; q.type = t; items.push(q);
   });
-  var label = (p.test ? '📝 Kiểm tra ' : '🎯 Luyện tập ') + LVNAME[p.lv];
+  var label = p.label || ((p.test ? '📝 Kiểm tra ' : '🎯 Luyện tập ') + LVNAME[p.lv]);
   var head = function () { return '<div class="exhead"><button class="btn sm" id="quit">✕ Thoát</button><b>' + label + '</b></div>'; };
-  runQuiz(label, items, { feedback: !p.test, seconds: p.test ? 20 * 60 : 0, head: head, track: true }, function (score, wrongs, answers, secs) {
-    var hist = S.data.tests || (S.data.tests = []); hist.unshift({ d: today(), lv: p.lv, test: !!p.test, n: items.length, score: score }); hist.length = Math.min(hist.length, 100); S.save();
+  runQuiz(label, items, { feedback: !p.test, seconds: p.test ? (p.secs || 20 * 60) : 0, head: head, track: true }, function (score, wrongs, answers, secs) {
+    var hist = S.data.tests || (S.data.tests = []); hist.unshift({ d: today(), lv: p.lv, test: !!p.test, n: items.length, score: score }); hist.length = Math.min(hist.length, 100);
+    if (p.exam) { var ex = S.data.exams || (S.data.exams = {}), o = ex[p.exam] || {}; ex[p.exam] = { best: Math.max(o.best || 0, score), last: score, d: today(), times: (o.times || 0) + 1 }; }
+    S.save();
     var extra = '<p class="muted">' + answers.filter(function (a) { return a.ok; }).length + '/' + items.length + ' câu đúng · thời gian ' + Math.floor(secs / 60) + ' phút ' + secs % 60 + ' giây</p>';
     if (p.test) extra += '<div style="text-align:left"><h3>Bài làm chi tiết</h3><table class="t">' + answers.map(function (a, k) { return '<tr><td>' + (k + 1) + '</td><td>' + (a.ok ? '✅' : '❌') + '</td><td><b>' + esc(a.q.word.w) + '</b> – ' + esc(a.q.word.vi) + '<br><span class="small muted">' + TYPES[a.q.type].name + ' · Bạn trả lời: ' + esc(a.given || '(bỏ trống)') + '</span></td></tr>'; }).join('') + '</table></div>';
     resultPage(label, score, wrongs, function () { startPractice(p); }, extra);
@@ -604,6 +643,8 @@ function reportLines() {
   var vv = 0; for (var kk = 6; kk >= 0; kk--) { var dd = S.data.days[addDays(today(), -kk)]; if (dd && dd.viol) vv += dd.viol; } lines.push('⚠️ Vi phạm rời tab/chuyển ứng dụng khi đang học: ' + vv + ' lần trong 7 ngày (tổng ' + (S.data.violTotal || 0) + ' lần)');
   lines.push('7 ngày gần nhất:');
   for (var k = 6; k >= 0; k--) { var d = addDays(today(), -k), x = S.data.days[d]; lines.push('  ' + d + ': ' + (x ? x.learned + ' từ mới, ' + x.rev + ' lượt ôn, đúng ' + (x.q ? Math.round(x.ok / x.q * 100) : 0) + '%' : 'không học')); }
+  var exk = Object.keys(S.data.exams || {}).sort();
+  if (exk.length) { lines.push('Kết quả kiểm tra theo Test / Cam (cao nhất · lần gần nhất):'); exk.forEach(function (k) { var e = S.data.exams[k]; lines.push('  ' + examName(k) + ': ' + e.best + '% · ' + e.last + '% (' + e.d + ', ' + e.times + ' lần)'); }); }
   var tests = (S.data.tests || []).filter(function (t) { return t.test; }).slice(0, 5);
   if (tests.length) lines.push('Kiểm tra gần đây: ' + tests.map(function (t) { return t.d + ' ' + t.lv + ' ' + t.score + '%'; }).join('; '));
   return lines;

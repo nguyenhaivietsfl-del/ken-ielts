@@ -170,6 +170,7 @@ function renderLogin() {
     '<label class="f">Mã SV/HS</label><input class="in" name="sid" required value="' + esc(st.sid || '') + '">' +
     '<label class="f">Trường</label><select class="in" name="school">' + CONFIG.SCHOOLS.concat(['Khác']).map(function (s) { return '<option' + (st.school === s ? ' selected' : '') + '>' + s + '</option>'; }).join('') + '</select>' +
     '<input class="in" name="other" placeholder="Nhập tên trường" style="margin-top:8px;display:none" value="' + esc(CONFIG.SCHOOLS.indexOf(st.school) < 0 && st.school ? st.school : '') + '">' +
+    '<label class="f">Giáo viên phụ trách</label><input class="in" name="teacher" required list="kenTeachers" placeholder="VD: Thầy Việt" value="' + esc(st.teacher || '') + '"><datalist id="kenTeachers">' + (window.KEN_TEACHERS || []).map(function (t) { return '<option value="' + esc(t) + '">'; }).join('') + '</datalist>' +
     '<label class="f">Lớp (Lớp + Khóa)</label><input class="in" name="cls" required placeholder="VD: K20 Pháp 1" value="' + esc(st.cls || '') + '">' +
     '<div class="err" id="lerr"></div><button class="btn pri big">Commencer – Bắt đầu học</button></form></div>';
   var f = $('#lf'), sel = f.school, other = f.other;
@@ -177,8 +178,8 @@ function renderLogin() {
   function tog() { other.style.display = sel.value === 'Khác' ? 'block' : 'none'; } sel.onchange = tog; tog();
   f.onsubmit = function (e) {
     e.preventDefault();
-    var s = { name: f.name.value.trim(), sid: f.sid.value.trim(), school: sel.value === 'Khác' ? other.value.trim() : sel.value, cls: f.cls.value.trim() };
-    if (!s.name || !s.sid || !s.school || !s.cls) { $('#lerr').textContent = 'Vui lòng điền đủ thông tin.'; return; }
+    var s = { name: f.name.value.trim(), sid: f.sid.value.trim(), school: sel.value === 'Khác' ? other.value.trim() : sel.value, cls: f.cls.value.trim(), teacher: f.teacher.value.trim() };
+    if (!s.name || !s.sid || !s.school || !s.cls || !s.teacher) { $('#lerr').textContent = 'Vui lòng điền đủ thông tin.'; return; }
     student = s; LSset('kf_student', s); loadState(); updateWho(); renderHome();
   };
 }
@@ -603,7 +604,7 @@ window.KEN_SYNC = { app: 'french',
   function push() {
     if (!URL || busy || !student || !S) return;
     var a = getq(), n = Math.min(a.length, 80); busy = true;
-    var body = JSON.stringify({ action: 'track', app: C.app, student: { name: student.name, sid: student.sid, cls: student.cls, school: student.school || '' }, snap: snap(), events: a.slice(0, n) });
+    var body = JSON.stringify({ action: 'track', app: C.app, student: { name: student.name, sid: student.sid, cls: student.cls, school: student.school || '', teacher: student.teacher || '' }, snap: snap(), events: a.slice(0, n) });
     fetch(URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: body, keepalive: body.length < 60000 })
       .then(function (r) { return r.json(); })
       .then(function (j) { busy = false; if (j && j.ok) { setq(getq().slice(n)); if (getq().length) KT.sync(500); } })
@@ -633,7 +634,15 @@ window.KEN_SYNC = { app: 'french',
     return r;
   };
   var _rh = renderHome;
-  renderHome = function () { BUF = []; var r = _rh.apply(this, arguments); KT.sync(1500); return r; };
+  renderHome = function () { BUF = []; var r = _rh.apply(this, arguments); KT.sync(1500); askTeacher(); return r; };
+  function askTeacher() {
+    if (!student || student.teacher || document.querySelector('.modal.tch')) return;
+    var m = document.createElement('div'); m.className = 'modal tch';
+    m.innerHTML = '<div class="card"><h2>👩‍🏫 Giáo viên phụ trách</h2><p>Em nhập tên giáo viên đang dạy em (để thầy cô theo dõi được kết quả học nhé).</p><input class="in" id="tchIn" list="kenTeachers2" placeholder="VD: Thầy Việt"><datalist id="kenTeachers2">' + (window.KEN_TEACHERS || []).map(function (t) { return '<option value="' + esc(t) + '">'; }).join('') + '</datalist><div class="err" id="tchErr"></div><div class="row" style="margin-top:10px"><button class="btn pri" id="tchOk">Lưu</button></div></div>';
+    document.body.appendChild(m);
+    m.querySelector('#tchOk').onclick = function () { var v = m.querySelector('#tchIn').value.trim(); if (!v) { m.querySelector('#tchErr').textContent = 'Vui lòng nhập tên giáo viên.'; return; } student.teacher = v; LSset('kf_student', student); m.remove(); KT.sync(300); };
+  }
+  setTimeout(askTeacher, 800);
   document.addEventListener('visibilitychange', function () { if (document.hidden) push(); });
   setInterval(function () { if (getq().length) push(); }, 60000);
 })();

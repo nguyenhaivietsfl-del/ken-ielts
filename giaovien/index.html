@@ -19,6 +19,8 @@ main{max-width:1250px;margin:0 auto;padding:14px}
 .stat{background:#fff;border-radius:var(--r);padding:12px 14px;box-shadow:0 1px 3px rgba(0,0,0,.07);cursor:pointer;border:2px solid transparent}
 .stat.on{border-color:var(--pri)}.stat b{font-size:24px;display:block}.stat span{color:var(--mut);font-size:13px}
 .filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.fl{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;align-items:end;padding-bottom:10px;border-bottom:1px dashed var(--line)}
+.fl label{display:flex;flex-direction:column;gap:3px;font-size:12px;font-weight:700;color:var(--mut)}.fl select{width:100%}
 input,select{font:inherit;padding:8px 10px;border:1px solid #cfd6dc;border-radius:10px;background:#fff;color:var(--ink)}
 input[type=search]{min-width:220px;flex:1}
 .btn{border:0;border-radius:10px;padding:8px 13px;font:inherit;font-weight:600;cursor:pointer;background:#e8eef1;color:var(--ink)}
@@ -58,7 +60,12 @@ h3{margin:16px 0 8px}
 var URL_ = window.KEN_TRACK_URL || '', APPS = [['school', '🎒 KEN SCHOOL (THCS–THPT)', '../school/'], ['vocab', '📘 Oxford 3000', '../vocab/'], ['french', '🇫🇷 Tiếng Pháp', '../french/']];
 var app = document.getElementById('app'), pw = sessionStorage.getItem('ken_t_pw') || '', cur = (new URLSearchParams(location.search).get('app')) || 'school';
 if (!APPS.some(function (a) { return a[0] === cur; })) cur = 'school';
-var DATA = {}, F = { q: '', cls: '', st: 'all', sort: 'last', up: false };
+var DATA = {}, F = { q: '', teacher: '', school: '', cls: '', level: '', st: 'all', sort: 'last', up: false };
+try { var _sf = JSON.parse(localStorage.getItem('ken_t_filter') || '{}'); ['teacher', 'school', 'cls', 'level', 'st', 'sort', 'up'].forEach(function (k) { if (_sf[k] != null) F[k] = _sf[k]; }); } catch (e) {}
+function saveF() { try { localStorage.setItem('ken_t_filter', JSON.stringify(F)); } catch (e) {} }
+function low(x) { return String(x == null ? '' : x).trim().toLowerCase(); }
+function opts(list, k, sel, all) { var m = {}; list.forEach(function (s) { var v = String(s[k] || '').trim(); if (v) m[low(v)] = m[low(v)] || v; }); return '<option value="">' + all + '</option>' + Object.keys(m).sort(function (a, b) { return a.localeCompare(b, 'vi', { numeric: true }); }).map(function (x) { return '<option value="' + esc(x) + '"' + (sel === x ? ' selected' : '') + '>' + esc(m[x]) + '</option>'; }).join(''); }
+function base(skip) { return (DATA[cur] || []).filter(function (s) { return (skip === 'teacher' || !F.teacher || low(s.teacher) === F.teacher) && (skip === 'school' || !F.school || low(s.school) === F.school) && (skip === 'cls' || !F.cls || low(s.cls) === F.cls) && (skip === 'level' || !F.level || low(s.level) === F.level); }); }
 function $(s, r) { return (r || document).querySelector(s); }
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 function today() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
@@ -92,27 +99,35 @@ function load() {
 }
 function status(s) { var d = daysAgo(s.last); return d === 0 ? 'today' : d >= 3 ? 'idle' : 'recent'; }
 function render() {
-  var list = DATA[cur] || [], classes = {}; list.forEach(function (s) { if (s.cls) classes[s.cls] = 1; });
-  var cnt = { all: list.length, today: list.filter(function (s) { return status(s) === 'today'; }).length, idle: list.filter(function (s) { return status(s) === 'idle'; }).length, viol: list.filter(function (s) { return +s.viol7 > 0; }).length };
+  saveF(); var list = base();
+  var cnt = { all: list.length, today: list.filter(function (s) { return status(s) === 'today'; }).length, idle: list.filter(function (s) { return status(s) === 'idle'; }).length, viol: list.filter(function (s) { return +s.viol7 > 0; }).length, low: list.filter(function (s) { return s.acc7 !== '' && +s.acc7 < 60; }).length };
   var lvLabel = cur === 'school' ? 'Lớp học' : 'Trình độ';
   app.innerHTML = '<div class="tabs">' + APPS.map(function (a) { return '<button data-a="' + a[0] + '" class="' + (a[0] === cur ? 'on' : '') + '">' + a[1] + ' <span class="pill p-mut">' + (DATA[a[0]] || []).length + '</span></button>'; }).join('') + '</div>' +
-    '<div class="stats">' + [['all', 'Tổng học viên', ''], ['today', 'Học hôm nay', 'color:var(--ok)'], ['idle', 'Không học ≥ 3 ngày', 'color:var(--warn)'], ['viol', 'Có vi phạm (7 ngày)', 'color:var(--bad)']].map(function (x) { return '<div class="stat' + (F.st === x[0] ? ' on' : '') + '" data-st="' + x[0] + '"><b style="' + x[2] + '">' + cnt[x[0]] + '</b><span>' + x[1] + '</span></div>'; }).join('') + '</div>' +
-    '<div class="card"><div class="filters"><input type="search" id="q" placeholder="🔎 Tìm tên hoặc mã học viên…" value="' + esc(F.q) + '"><select id="cls"><option value="">Tất cả lớp</option>' + Object.keys(classes).sort().map(function (c) { return '<option' + (F.cls === c ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('') + '</select>' +
+    '<div class="stats">' + [['all', 'Học viên (theo bộ lọc)', ''], ['today', 'Học hôm nay', 'color:var(--ok)'], ['idle', 'Không học ≥ 3 ngày', 'color:var(--warn)'], ['low', 'Đúng dưới 60% (7 ngày)', 'color:var(--warn)'], ['viol', 'Có vi phạm (7 ngày)', 'color:var(--bad)']].map(function (x) { return '<div class="stat' + (F.st === x[0] ? ' on' : '') + '" data-st="' + x[0] + '"><b style="' + x[2] + '">' + cnt[x[0]] + '</b><span>' + x[1] + '</span></div>'; }).join('') + '</div>' +
+    '<div class="card"><div class="filters fl"><label>👩‍🏫 Giáo viên<select data-f="teacher">' + opts(base('teacher'), 'teacher', F.teacher, 'Tất cả giáo viên') + '</select></label>' +
+    '<label>🏫 Trường<select data-f="school">' + opts(base('school'), 'school', F.school, 'Tất cả trường') + '</select></label>' +
+    '<label>👥 Lớp<select data-f="cls">' + opts(base('cls'), 'cls', F.cls, 'Tất cả lớp') + '</select></label>' +
+    '<label>📚 ' + lvLabel + '<select data-f="level">' + opts(base('level'), 'level', F.level, 'Tất cả') + '</select></label>' +
+    '<label>📌 Tình trạng<select id="stSel">' + [['all', 'Tất cả'], ['today', 'Học hôm nay'], ['recent', 'Học 1–2 ngày trước'], ['idle', 'Không học ≥ 3 ngày'], ['low', 'Đúng dưới 60%'], ['viol', 'Có vi phạm 7 ngày']].map(function (o) { return '<option value="' + o[0] + '"' + (F.st === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></label>' +
+    (F.teacher || F.school || F.cls || F.level || F.st !== 'all' ? '<button class="btn" id="clr" style="align-self:flex-end">✖ Bỏ lọc</button>' : '') + '</div>' +
+    '<div class="filters"><input type="search" id="q" placeholder="🔎 Tìm tên hoặc mã học viên…" value="' + esc(F.q) + '">' +
     '<button class="btn" id="rf">🔄 Làm mới</button><button class="btn" id="csv">⬇️ Xuất Excel (CSV)</button><a class="btn" href="' + APPS.filter(function (a) { return a[0] === cur; })[0][2] + '" target="_blank" style="text-decoration:none">↗ Mở web học</a></div>' +
-    '<div class="tw"><table><thead><tr>' + [['name', 'Học viên'], ['cls', 'Lớp'], ['level', lvLabel], ['progress', 'Tiến độ'], ['today', 'Hôm nay'], ['streak', 'Chuỗi'], ['acc7', '% đúng 7 ngày'], ['viol7', 'Vi phạm'], ['last', 'Lần cuối']].map(function (c) { return '<th data-k="' + c[0] + '" class="' + (F.sort === c[0] ? 's' + (F.up ? ' up' : '') : '') + (/streak|today/.test(c[0]) ? ' hide-m' : '') + '">' + c[1] + '</th>'; }).join('') + '</tr></thead><tbody id="tb"></tbody></table></div><p class="mut small" id="cnt"></p></div>';
-  app.querySelector('.tabs').onclick = function (e) { var b = e.target.closest('button'); if (!b) return; cur = b.dataset.a; F.cls = ''; history.replaceState(null, '', '?app=' + cur); render(); };
+    '<div class="tw"><table><thead><tr>' + [['name', 'Học viên'], ['school', 'Trường'], ['cls', 'Lớp'], ['teacher', 'Giáo viên'], ['level', lvLabel], ['progress', 'Tiến độ'], ['today', 'Hôm nay'], ['streak', 'Chuỗi'], ['acc7', '% đúng 7 ngày'], ['viol7', 'Vi phạm'], ['last', 'Lần cuối']].map(function (c) { return '<th data-k="' + c[0] + '" class="' + (F.sort === c[0] ? 's' + (F.up ? ' up' : '') : '') + (/streak|today|school|teacher/.test(c[0]) ? ' hide-m' : '') + '">' + c[1] + '</th>'; }).join('') + '</tr></thead><tbody id="tb"></tbody></table></div><p class="mut small" id="cnt"></p></div>';
+  app.querySelector('.tabs').onclick = function (e) { var b = e.target.closest('button'); if (!b) return; cur = b.dataset.a; F.cls = ''; F.level = ''; history.replaceState(null, '', '?app=' + cur); render(); };
   app.querySelector('.stats').onclick = function (e) { var b = e.target.closest('.stat'); if (!b) return; F.st = b.dataset.st; render(); };
-  $('#q').oninput = function () { F.q = this.value; rows(); }; $('#cls').onchange = function () { F.cls = this.value; rows(); };
+  $('#q').oninput = function () { F.q = this.value; rows(); };
+  app.querySelectorAll('select[data-f]').forEach(function (el) { el.onchange = function () { F[el.dataset.f] = el.value; render(); }; });
+  $('#stSel').onchange = function () { F.st = this.value; render(); };
+  if ($('#clr')) $('#clr').onclick = function () { F.teacher = F.school = F.cls = F.level = ''; F.st = 'all'; render(); };
   $('#rf').onclick = load; $('#csv').onclick = csv;
   app.querySelector('thead').onclick = function (e) { var th = e.target.closest('th'); if (!th) return; var k = th.dataset.k; if (F.sort === k) F.up = !F.up; else { F.sort = k; F.up = false; } render(); };
   rows();
 }
 function filtered() {
   var q = F.q.trim().toLowerCase();
-  return (DATA[cur] || []).filter(function (s) {
-    if (F.cls && s.cls !== F.cls) return false;
+  return base().filter(function (s) {
     if (q && (String(s.name) + ' ' + s.sid).toLowerCase().indexOf(q) < 0) return false;
-    if (F.st === 'today' && status(s) !== 'today') return false; if (F.st === 'idle' && status(s) !== 'idle') return false; if (F.st === 'viol' && !(+s.viol7 > 0)) return false;
+    if (F.st === 'today' && status(s) !== 'today') return false; if (F.st === 'recent' && status(s) !== 'recent') return false; if (F.st === 'idle' && status(s) !== 'idle') return false; if (F.st === 'viol' && !(+s.viol7 > 0)) return false; if (F.st === 'low' && !(s.acc7 !== '' && +s.acc7 < 60)) return false;
     return true;
   }).sort(function (a, b) {
     var k = F.sort, x = a[k], y = b[k]; if (k === 'today') { x = daysAgo(a.last) === 0 ? a.today : ''; y = daysAgo(b.last) === 0 ? b.today : ''; }
@@ -124,18 +139,18 @@ function rows() {
   var l = filtered(), tb = $('#tb');
   tb.innerHTML = l.length ? l.map(function (s) {
     var st = status(s), acc = s.acc7 === '' ? '<span class="mut">—</span>' : '<span class="pill ' + (+s.acc7 >= 80 ? 'p-ok' : +s.acc7 >= 60 ? 'p-warn' : 'p-bad') + '">' + s.acc7 + '%</span>';
-    return '<tr data-sid="' + esc(s.sid) + '"><td><b>' + esc(s.name) + '</b><br><span class="mut small">' + esc(s.sid) + (s.school ? ' · ' + esc(s.school) : '') + '</span></td><td>' + esc(s.cls) + '</td><td>' + esc(s.level) + '</td><td>' + esc(s.progress) + '</td>' +
+    return '<tr data-sid="' + esc(s.key) + '"><td><b>' + esc(s.name) + '</b><br><span class="mut small">' + esc(s.sid) + '</span></td><td class="hide-m">' + esc(s.school) + '</td><td>' + esc(s.cls) + '</td><td class="hide-m">' + (s.teacher ? esc(s.teacher) : '<span class="mut">—</span>') + '</td><td>' + esc(s.level) + '</td><td>' + esc(s.progress) + '</td>' +
       '<td class="hide-m">' + (st === 'today' ? esc(s.today) : '<span class="mut">chưa học</span>') + '</td><td class="hide-m">🔥 ' + (s.streak || 0) + '</td><td>' + acc + ' <span class="mut small">' + (s.q7 || 0) + ' câu</span></td>' +
       '<td>' + (+s.viol7 > 0 ? '<span class="pill p-bad">⚠️ ' + s.viol7 + '</span>' : '<span class="pill p-ok">0</span>') + ' <span class="mut small">tổng ' + (s.violTotal || 0) + '</span></td>' +
       '<td><span class="pill ' + (st === 'today' ? 'p-ok' : st === 'idle' ? 'p-warn' : 'p-mut') + '">' + ago(s.last) + '</span></td></tr>';
-  }).join('') : '<tr><td colspan="9" class="empty">' + ((DATA[cur] || []).length ? 'Không có học viên phù hợp bộ lọc.' : 'Chưa có học viên nào gửi kết quả. Học viên chỉ cần mở web và học, kết quả sẽ tự gửi về đây.') + '</td></tr>';
+  }).join('') : '<tr><td colspan="11" class="empty">' + ((DATA[cur] || []).length ? 'Không có học viên phù hợp bộ lọc.' : 'Chưa có học viên nào gửi kết quả. Học viên chỉ cần mở web và học, kết quả sẽ tự gửi về đây.') + '</td></tr>';
   $('#cnt').textContent = 'Đang hiển thị ' + l.length + ' / ' + (DATA[cur] || []).length + ' học viên · Bấm vào một học viên để xem chi tiết từng bài đã làm.';
   tb.onclick = function (e) { var tr = e.target.closest('tr[data-sid]'); if (tr) detail(tr.dataset.sid); };
 }
 function detail(sid) {
-  var s = (DATA[cur] || []).filter(function (x) { return String(x.sid) === sid; })[0]; if (!s) return;
+  var s = (DATA[cur] || []).filter(function (x) { return x.key === sid; })[0]; if (!s) return;
   var d = document.createElement('div'); d.className = 'drawer';
-  d.innerHTML = '<div class="in"><div class="hd"><div><h2>' + esc(s.name) + '</h2><div class="small" style="opacity:.9">' + esc(s.sid) + ' · ' + esc(s.cls) + (s.school ? ' · ' + esc(s.school) : '') + ' · ' + esc(APPS.filter(function (a) { return a[0] === cur; })[0][1]) + '</div></div><div class="sp"></div><button class="btn" id="x">✕ Đóng</button></div><div class="bd">' +
+  d.innerHTML = '<div class="in"><div class="hd"><div><h2>' + esc(s.name) + '</h2><div class="small" style="opacity:.9">' + esc(s.sid) + ' · ' + esc(s.cls) + (s.school ? ' · ' + esc(s.school) : '') + (s.teacher ? ' · GV: ' + esc(s.teacher) : '') + ' · ' + esc(APPS.filter(function (a) { return a[0] === cur; })[0][1]) + '</div></div><div class="sp"></div><button class="btn" id="x">✕ Đóng</button></div><div class="bd">' +
     '<div class="kv"><div><span>' + (cur === 'school' ? 'Lớp học' : 'Trình độ') + '</span><b>' + esc(s.level || '—') + '</b></div><div><span>Tiến độ</span><b>' + esc(s.progress || '—') + '</b></div><div><span>Hôm nay</span><b>' + (status(s) === 'today' ? esc(s.today) : 'chưa học') + '</b></div><div><span>Chuỗi ngày đạt mục tiêu</span><b>🔥 ' + (s.streak || 0) + '</b></div>' +
     '<div><span>% đúng 7 ngày</span><b>' + (s.acc7 === '' ? '—' : s.acc7 + '%') + '</b> <span class="small">(' + (s.q7 || 0) + ' câu, ' + (s.days7 || 0) + '/7 ngày có học)</span></div><div><span>Vi phạm rời tab</span><b style="color:' + (+s.viol7 ? 'var(--bad)' : 'inherit') + '">' + (s.viol7 || 0) + ' lần / 7 ngày</b> <span class="small">(tổng ' + (s.violTotal || 0) + ')</span></div><div><span>Bắt đầu dùng</span><b>' + esc(String(s.first).slice(0, 16)) + '</b></div><div><span>Lần cuối</span><b>' + esc(String(s.last).slice(0, 16)) + '</b></div></div>' +
     '<h3>📋 Báo cáo tổng hợp</h3><pre>' + esc(s.report || '—') + '</pre><h3>🕘 Nhật ký làm bài</h3><div class="filters"><select id="kf"><option value="">Tất cả</option><option value="lesson">Bài học</option><option value="result">Ôn tập / kiểm tra</option><option value="viol">Vi phạm</option></select></div><div id="evs"><div class="empty">⏳ Đang tải…</div></div></div></div>';
@@ -155,12 +170,12 @@ function detail(sid) {
     }).join('') : '<div class="empty">Chưa có hoạt động nào.</div>';
   }
   $('#kf', d).onchange = draw;
-  api({ action: 'student', app: cur, sid: s.sid }).then(function (j) { EV = j.events || []; draw(); }).catch(function (er) { $('#evs', d).innerHTML = '<p class="err">' + esc(er.message) + '</p>'; });
+  api({ action: 'student', app: cur, sid: s.sid, school: s.school }).then(function (j) { EV = j.events || []; draw(); }).catch(function (er) { $('#evs', d).innerHTML = '<p class="err">' + esc(er.message) + '</p>'; });
 }
 function kindOf(e) { var k = String(e.kind || ''); return /Vi phạm/.test(k) ? 'viol' : /bài học/.test(k) ? 'lesson' : 'result'; }
 function csv() {
-  var head = ['Họ tên', 'Mã', 'Lớp', 'Trường', cur === 'school' ? 'Lớp học' : 'Trình độ', 'Tiến độ', 'Hôm nay', 'Chuỗi ngày', '% đúng 7 ngày', 'Số câu 7 ngày', 'Vi phạm 7 ngày', 'Tổng vi phạm', 'Lần cuối'];
-  var lines = [head].concat(filtered().map(function (s) { return [s.name, s.sid, s.cls, s.school, s.level, s.progress, status(s) === 'today' ? s.today : '', s.streak, s.acc7, s.q7, s.viol7, s.violTotal, s.last]; }))
+  var head = ['Họ tên', 'Mã', 'Lớp', 'Trường', 'Giáo viên', cur === 'school' ? 'Lớp học' : 'Trình độ', 'Tiến độ', 'Hôm nay', 'Chuỗi ngày', '% đúng 7 ngày', 'Số câu 7 ngày', 'Vi phạm 7 ngày', 'Tổng vi phạm', 'Lần cuối'];
+  var lines = [head].concat(filtered().map(function (s) { return [s.name, s.sid, s.cls, s.school, s.teacher, s.level, s.progress, status(s) === 'today' ? s.today : '', s.streak, s.acc7, s.q7, s.viol7, s.violTotal, s.last]; }))
     .map(function (r) { return r.map(function (v) { v = String(v == null ? '' : v); return /[",\n;]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(','); }).join('\r\n');
   var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + lines], { type: 'text/csv;charset=utf-8' })); a.download = 'KEN-' + cur + '-hoc-vien-' + today() + '.csv'; a.click();
 }

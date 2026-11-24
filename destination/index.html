@@ -4,7 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>KEN DESTINATION – Từ vựng HSG (B1 · B2 · C1&C2)</title>
-<meta name="theme-color" content="#0f5c4d">
+<meta name="theme-color" content="#a855f7">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#f3f7f6;--card:#fff;--ink:#1c2433;--muted:#667085;--line:#e1e8e6;--pri:#0f5c4d;--pri2:#13836d;--acc:#f59e0b;--ok:#1a9e5c;--okbg:#e6f6ee;--bad:#d64545;--badbg:#fdecec;--r:16px;
 --g1:#22a06b;--g2:#1d7afc;--g3:#be185d}
@@ -71,6 +72,67 @@ table.t{width:100%;border-collapse:collapse;font-size:15px}table.t td,table.t th
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1c2433;color:#fff;padding:10px 16px;border-radius:12px;z-index:60;font-size:15px}
 @media (max-width:560px){h1{font-size:21px}.fc .w{font-size:28px}main{padding:12px 10px 80px}.card{padding:14px}}
 @media (max-width:430px){.brand small{display:none}}
+
+/* ===== GIAO DIỆN DỄ THƯƠNG ===== */
+:root{--bg:#fff7fb;--card:#fff;--ink:#2b2350;--muted:#7a7396;--line:#efe6f7;--pri:#7c3aed;--pri2:#8b5cf6;--acc:#f59e0b;--ok:#16a34a;--okbg:#e9fbef;--bad:#ef4444;--badbg:#fff0f0;--r:24px;--g1:#10b981;--g2:#3b82f6;--g3:#ec4899}
+body{font-family:"Nunito","Quicksand",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:
+ radial-gradient(circle at 10% 0%,#ffe4f1 0,transparent 35%),radial-gradient(circle at 95% 15%,#e0f2fe 0,transparent 35%),radial-gradient(circle at 50% 100%,#ede9fe 0,transparent 45%),#fffafd;background-attachment:fixed;min-height:100vh}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background-image:radial-gradient(#e9d5ff 1.2px,transparent 1.3px);background-size:22px 22px;opacity:.45;z-index:-1}
+header.top{background:linear-gradient(120deg,#8b5cf6,#ec4899 60%,#f97316);box-shadow:0 6px 20px rgba(139,92,246,.25);border-radius:0 0 22px 22px}
+header.top .brand{font-size:19px;letter-spacing:.2px;text-shadow:0 2px 0 rgba(0,0,0,.08)}
+header.top .ib{background:rgba(255,255,255,.25);border-radius:14px;transition:transform .15s}header.top .ib:hover{transform:rotate(-8deg) scale(1.08)}
+.card{border-radius:var(--r);border:2px solid #f3e8ff;box-shadow:0 10px 30px -12px rgba(124,58,237,.25),0 2px 0 #f3e8ff;animation:pop .35s ease both}
+@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+h1{font-weight:900;background:linear-gradient(90deg,#7c3aed,#ec4899);-webkit-background-clip:text;background-clip:text;color:transparent}
+h2,h3{font-weight:900;color:#4c1d95}
+.btn{border-radius:16px;border:2px solid var(--line);font-weight:800;box-shadow:0 3px 0 #eadcf8;transition:transform .08s,box-shadow .08s}
+.btn:active{transform:translateY(3px);box-shadow:none}
+.btn.pri{background:linear-gradient(135deg,#8b5cf6,#ec4899);border-color:transparent;box-shadow:0 4px 0 #a21caf}
+.btn.ok{box-shadow:0 4px 0 #15803d}
+input.in,select.in,textarea.in{border-radius:16px;border:2px solid var(--line);background:#fffdfe}
+input.in:focus,textarea.in:focus,select.in:focus{border-color:#c084fc;box-shadow:0 0 0 4px rgba(192,132,252,.25)}
+.ring{background:conic-gradient(#ec4899 0,#8b5cf6 calc(var(--p)*1%),#f3e8ff 0);box-shadow:0 6px 18px rgba(236,72,153,.2)}
+.ring b{color:#7c3aed}
+.stat{background:linear-gradient(160deg,#fdf4ff,#eff6ff);border:2px solid #f3e8ff;border-radius:18px}.stat b{color:#7c3aed}
+.tabs button{border:2px solid var(--line);font-weight:900;box-shadow:0 3px 0 #eadcf8;padding:9px 18px}.tabs button.on{box-shadow:0 4px 0 rgba(0,0,0,.15);transform:translateY(-1px)}
+.tabs button::before{margin-right:4px}.tabs button[data-g="1"]::before{content:"🌱"}.tabs button[data-g="2"]::before{content:"🚀"}.tabs button[data-g="3"]::before{content:"👑"}
+.bar{background:#f3e8ff;height:12px}.bar>i{background:linear-gradient(90deg,var(--c,#8b5cf6),#ec4899)}
+.un{border:2px solid var(--line);border-left-width:2px;border-radius:20px;background:#fff;position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s;box-shadow:0 3px 0 #f3e8ff}
+.un::after{content:"";position:absolute;right:-18px;top:-18px;width:64px;height:64px;border-radius:50%;background:var(--c);opacity:.12}
+.un:hover{transform:translateY(-3px) rotate(-.4deg);box-shadow:0 10px 20px -10px rgba(124,58,237,.35)}
+.un.cur{box-shadow:0 0 0 3px #f0abfc,0 8px 20px -10px rgba(236,72,153,.5)}
+.un.done{background:linear-gradient(160deg,#ecfdf5,#fff);border-color:#86efac}
+.lsi{border:2px solid var(--line);border-radius:20px;box-shadow:0 3px 0 #f3e8ff;transition:transform .12s}.lsi:hover{transform:translateX(3px)}
+.lsi .ic{border-radius:16px;background:linear-gradient(135deg,#fae8ff,#e0f2fe);font-size:21px}
+.lsi.done{background:linear-gradient(160deg,#ecfdf5,#fff);border-color:#86efac}.lsi.done .ic{background:#dcfce7}
+.plan{background:linear-gradient(135deg,#fff7ed,#fdf2f8);border:2px dashed #fbcfe8;border-radius:18px}
+.pill{background:#f5f3ff;color:#7c3aed;border:1.5px solid #ede9fe}
+.fc{background:linear-gradient(160deg,#fdf4ff,#f0f9ff);border-radius:24px;padding:18px;border:2px dashed #e9d5ff}
+.fc .w{color:#7c3aed;font-size:38px;font-weight:900}.fc .vi{color:#be185d}
+.fc .ex{background:#fff;border:2px solid #f3e8ff}.fc .ex b,.sent b{color:#db2777}
+.say{background:linear-gradient(135deg,#fae8ff,#e0f2fe);transition:transform .15s}.say:hover{transform:scale(1.12) rotate(8deg)}
+.steps i{height:10px;border-radius:6px;background:#f3e8ff}.steps i.d{background:#34d399}.steps i.c{background:linear-gradient(90deg,#8b5cf6,#ec4899)}
+.qbar{height:10px;background:#f3e8ff;border-radius:8px}.qbar>i{background:linear-gradient(90deg,#8b5cf6,#ec4899);border-radius:8px}
+.q .big{color:#7c3aed}
+.sent{background:linear-gradient(160deg,#fdf4ff,#f0f9ff);border:2px solid #f3e8ff;border-radius:18px}.sent .gap{border-bottom:3px dashed #ec4899}
+.opts{counter-reset:o}
+.opt{border:2px solid var(--line);border-radius:18px;box-shadow:0 3px 0 #f3e8ff;transition:transform .1s,border-color .1s;display:flex;align-items:center;gap:10px}
+.opt:hover{border-color:#c084fc;transform:translateY(-2px)}
+.opt.right{border-color:#4ade80;background:var(--okbg);animation:yay .4s}.opt.wrong{border-color:#fca5a5;animation:sh .35s}
+@keyframes yay{40%{transform:scale(1.04)}}
+.fb{border-radius:18px;border:2px solid transparent}.fb.ok{border-color:#bbf7d0}.fb.no{border-color:#fecaca}
+.tile{border:2px solid var(--line);border-radius:14px;background:linear-gradient(160deg,#fff,#fdf4ff);box-shadow:0 3px 0 #eadcf8;color:#7c3aed}
+.mt{border:2px solid var(--line);border-radius:16px;box-shadow:0 3px 0 #f3e8ff}.mt.sel{border-color:#c084fc;box-shadow:0 0 0 4px rgba(192,132,252,.3)}
+.score{font-size:64px}.score.ok{background:linear-gradient(90deg,#16a34a,#10b981);-webkit-background-clip:text;background-clip:text;color:transparent}
+.toast{background:linear-gradient(135deg,#7c3aed,#db2777);border-radius:16px;box-shadow:0 10px 25px rgba(124,58,237,.35)}
+.modal .card{border-radius:26px}
+.seg button{border:2px solid var(--line);border-radius:14px}.seg button.on{border-color:#c084fc;background:#faf5ff;color:#7c3aed}
+.mascot{display:flex;gap:12px;align-items:center;background:linear-gradient(135deg,#fdf2f8,#eef2ff);border:2px solid #fbcfe8;border-radius:22px;padding:12px 14px;margin-bottom:14px}
+.mascot .m{font-size:42px;animation:bob 2.6s ease-in-out infinite}.mascot b{color:#7c3aed}
+@keyframes bob{50%{transform:translateY(-6px) rotate(-6deg)}}
+.confetti{position:fixed;top:-12px;width:10px;height:14px;border-radius:3px;z-index:80;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg);opacity:.9}}
+table.t tr:nth-child(even) td{background:#fdfaff}
 </style>
 </head>
 <body>
@@ -555,6 +617,25 @@ window.KEN_SYNC = { app: 'dest',
   setInterval(function () { if (getq().length) push(); }, 60000);
 })();
 KT.sync(2500);
+
+/* ===== linh vật + pháo giấy ===== */
+var UEMO = { 'fun and games': '🎲', 'learning': '📚', 'coming and going': '🧳', 'friends': '🤝', 'buying': '🛍️', 'invention': '💡', 'sending': '✉️', 'daily life': '☕', 'working': '💼', 'body': '🧘', 'creating': '🏗️', 'nature and the universe': '🌌', 'laughing': '😂', 'problems': '🧩', 'travel': '✈️', 'hobbies': '🎨', 'science': '🔬', 'media': '📺', 'people and society': '👥', 'law': '⚖️', 'health': '💪', 'food': '🍜', 'education': '🎓', 'weather': '🌦️', 'money': '💰', 'entertainment': '🎬', 'fashion': '👗', 'business': '📈', 'thinking': '🧠', 'change and technology': '🤖', 'time and work': '⏰', 'movement': '🚗', 'communication': '📣', 'chance': '🍀', 'quantity': '🔢', 'materials': '🧱', 'reactions': '😮', 'power': '🏛️', 'quality and the arts': '🎭', 'relationships': '💞', 'preference': '🎡' };
+var MASCOT_LINES = ['Mỗi ngày 1 bài, cuối tuần chinh phục cả unit nhé! 💪', 'Học từ trong câu sẽ nhớ lâu hơn đó! ✨', 'Phrasal verbs khó? Luyện nhiều lần là quen ngay! 🚀', 'Cố lên nhà vô địch HSG tương lai! 🏆', 'Sai cũng không sao, ôn lại là nhớ thôi! 🌈'];
+function confetti() { var c = ['#f472b6', '#a78bfa', '#60a5fa', '#34d399', '#fbbf24', '#fb7185']; for (var i = 0; i < 70; i++) { var e = document.createElement('i'); e.className = 'confetti'; e.style.left = Math.random() * 100 + 'vw'; e.style.background = c[i % c.length]; e.style.animationDuration = (1.6 + Math.random() * 1.8) + 's'; e.style.animationDelay = Math.random() * .4 + 's'; document.body.appendChild(e); setTimeout(function (x) { return function () { x.remove(); }; }(e), 4200); } }
+(function () {
+  var last = '';
+  new MutationObserver(function () {
+    var sc = app.querySelector('.score.ok') || (app.innerText.indexOf('Hoàn thành bài học') >= 0 ? app : null); var k = sc ? app.innerText.slice(0, 80) : '';
+    if (sc && k !== last) { last = k; confetti(); } else if (!sc) last = '';
+    app.querySelectorAll('.un:not([data-e]), h1:not([data-e])').forEach(function (el) { el.setAttribute('data-e', 1); var t = el.textContent.toLowerCase(), e = '';
+      for (var k in UEMO) if (t.indexOf(k) >= 0) { e = UEMO[k]; break; }
+      if (e) { var b = el.querySelector('b') || el; if (el.tagName === 'H1' && t.indexOf('unit') < 0) return; b.insertAdjacentHTML('afterbegin', '<span style="-webkit-text-fill-color:initial">' + e + '</span> '); } });
+    if (student && app.querySelector('.goal') && !app.querySelector('.mascot')) {
+      var m = document.createElement('div'); m.className = 'mascot'; m.innerHTML = '<div class="m">🦉</div><div><b>Hi ' + esc(student.name.split(' ').pop()) + '!</b><br><span class="small">' + MASCOT_LINES[Math.floor(Math.random() * MASCOT_LINES.length)] + '</span></div>';
+      app.insertBefore(m, app.firstChild);
+    }
+  }).observe(app, { childList: true });
+})();
 </script>
 </body>
 </html>

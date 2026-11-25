@@ -328,7 +328,7 @@ function grammarQ(it) {
 var L = null;
 function lessonPlan(s) {
   if (s.type === 'g') { var mc = s.items.filter(function (x) { return x.t === 'mc'; }), gp = s.items.filter(function (x) { return x.t === 'gap'; }); var p = []; if (mc.length) p.push({ t: 'gmc', label: 'Phần A: Trắc nghiệm' }); if (gp.length) p.push({ t: 'ggap', label: 'Phần B: Điền / chia dạng đúng' }); p.push({ t: 'gmix', label: 'Phần C: Tổng hợp' }); return p; }
-  return VPLAN.map(function (p) { var t = p.t; if (TYPES[t].ok && s.words.filter(TYPES[t].ok).length < 4 && p.alt) t = p.alt; return { t: t, n: p.n }; });
+  return VPLAN.map(function (p) { var n = Math.min(4, s.words.length), cnt = function (t) { return t === 'match' || !TYPES[t].ok ? s.words.length : s.words.filter(TYPES[t].ok).length; }; var cands = [p.t, p.alt, 'ctx', 'en2vi', 'vi2en', 'listen'].filter(function (t, i, a) { return t && TYPES[t] && a.indexOf(t) === i; }); var t = cands.filter(function (c) { return cnt(c) >= n; })[0] || 'en2vi'; return { t: t, n: p.n }; });
 }
 function startLesson(s) {
   var saved = S.data.lesson && S.data.lesson.key === s.key ? S.data.lesson : null;
@@ -370,7 +370,7 @@ function runStep() {
   } else {
     title = 'Bài tập ' + (L.step + 1) + '/10: ' + TYPES[p.t].icon + ' ' + TYPES[p.t].name;
     var pool = s.words.length >= 6 ? s.words : unitPool(s.unit);
-    if (p.t !== 'match') { var cand = s.words.filter(function (o) { return !TYPES[p.t].ok || TYPES[p.t].ok(o); }); items = pick(cand, Math.min(p.n, cand.length)).map(function (o) { return makeQ(p.t, o, pool); }); }
+    if (p.t !== 'match') { var cand = s.words.filter(function (o) { return !TYPES[p.t].ok || TYPES[p.t].ok(o); }); items = pick(cand, Math.min(p.n, cand.length)).map(function (o) { return makeQ(p.t, o, pool); }); if (!items.length) items = pick(s.words, Math.min(p.n, s.words.length)).map(function (o) { return makeQ('en2vi', o, pool); }); }
   }
   var done = function (score, wrongs) {
     L.scores[L.step] = Math.max(L.scores[L.step] || 0, score); persistLesson();

@@ -166,6 +166,7 @@ function detail(sid) {
       var det = String(e.detail || ''), body = '';
       var parts = det.split('Câu sai:\n'), steps = parts[0].trim(), wr = (parts[1] || '').trim(), rec = null, vl = '';
       var mm = det.match(/KETREC:(\{.*\})\s*$/); if (mm) { try { rec = JSON.parse(mm[1]); } catch (_) {} }
+      if (!rec && cur === 'ket' && /Reading & Writing/.test(e.title || '')) { var mw = det.match(/BÀI VIẾT PART 9 \(\d+ từ\): ([\s\S]*?)\n(?:AI \(|Thời gian làm:)/), mp = String(e.id || '').match(/-p9_(\d)$/); rec = { p: 'rw', wt: mw ? mw[1].trim() : '', p9: mp ? +mp[1] : null, p9by: mp ? 'HS tự chọn / AI trên máy HS' : '' }; }
       if (rec || /\nKETREC:|^Thời gian làm:/m.test(wr)) { var ls = wr.split('\n'); vl = ls.filter(function (l) { return /^Thời gian làm:/.test(l); })[0] || ''; wr = ls.filter(function (l) { return /^Câu \d+:/.test(l); }).join('\n'); }
       var nw = wr ? wr.split('\n').length : 0;
       if (steps) body += '<div class="small mut">' + esc(steps) + '</div>';

@@ -57,7 +57,7 @@ h3{margin:16px 0 8px}
 <main id="app"></main>
 <script src="../shared/ken-config.js"></script>
 <script>
-var URL_ = window.KEN_TRACK_URL || '', APPS = [['school', '🎒 KEN SCHOOL (THCS–THPT)', '../school/'], ['vocab', '📘 Oxford 3000', '../vocab/'], ['cam', '📗 Cambridge IELTS', '../cam/'], ['dest', '🧭 Destination (HSG)', '../destination/'], ['french', '🇫🇷 Tiếng Pháp', '../french/']];
+var URL_ = window.KEN_TRACK_URL || '', APPS = [['school', '🎒 KEN SCHOOL (THCS–THPT)', '../school/'], ['vocab', '📘 Oxford 3000', '../vocab/'], ['cam', '📗 Cambridge IELTS', '../cam/'], ['dest', '🧭 Destination (HSG)', '../destination/'], ['french', '🇫🇷 Tiếng Pháp', '../french/'], ['ket', '🎓 KET (A2 Key)', 'https://claude.ai/artifact/HNdy55wDb3dDbzMd1PE7Pr']];
 var app = document.getElementById('app'), pw = sessionStorage.getItem('ken_t_pw') || '', cur = (new URLSearchParams(location.search).get('app')) || 'school';
 if (!APPS.some(function (a) { return a[0] === cur; })) cur = 'school';
 var DATA = {}, F = { q: '', teacher: '', school: '', cls: '', level: '', st: 'all', sort: 'last', up: false };
@@ -111,7 +111,7 @@ function render() {
     '<label>📌 Tình trạng<select id="stSel">' + [['all', 'Tất cả'], ['today', 'Học hôm nay'], ['recent', 'Học 1–2 ngày trước'], ['idle', 'Không học ≥ 3 ngày'], ['low', 'Đúng dưới 60%'], ['viol', 'Có vi phạm 7 ngày']].map(function (o) { return '<option value="' + o[0] + '"' + (F.st === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></label>' +
     (F.teacher || F.school || F.cls || F.level || F.st !== 'all' ? '<button class="btn" id="clr" style="align-self:flex-end">✖ Bỏ lọc</button>' : '') + '</div>' +
     '<div class="filters"><input type="search" id="q" placeholder="🔎 Tìm tên hoặc mã học viên…" value="' + esc(F.q) + '">' +
-    '<button class="btn" id="rf">🔄 Làm mới</button><button class="btn" id="csv">⬇️ Xuất Excel (CSV)</button><a class="btn" href="' + APPS.filter(function (a) { return a[0] === cur; })[0][2] + '?preview=1" target="_blank" style="text-decoration:none">👀 Vào học thử (giáo viên)</a></div>' +
+    '<button class="btn" id="rf">🔄 Làm mới</button><button class="btn" id="csv">⬇️ Xuất Excel (CSV)</button><a class="btn" href="' + (function (u) { return /^https:/.test(u) ? u : u + '?preview=1'; })(APPS.filter(function (a) { return a[0] === cur; })[0][2]) + '" target="_blank" style="text-decoration:none">👀 Vào học thử (giáo viên)</a></div>' +
     '<div class="tw"><table><thead><tr>' + [['name', 'Học viên'], ['school', 'Trường'], ['cls', 'Lớp'], ['teacher', 'Giáo viên'], ['level', lvLabel], ['progress', 'Tiến độ'], ['today', 'Hôm nay'], ['streak', 'Chuỗi'], ['acc7', '% đúng 7 ngày'], ['viol7', 'Vi phạm'], ['last', 'Lần cuối']].map(function (c) { return '<th data-k="' + c[0] + '" class="' + (F.sort === c[0] ? 's' + (F.up ? ' up' : '') : '') + (/streak|today|school|teacher/.test(c[0]) ? ' hide-m' : '') + '">' + c[1] + '</th>'; }).join('') + '</tr></thead><tbody id="tb"></tbody></table></div><p class="mut small" id="cnt"></p></div>';
   app.querySelector('.tabs').onclick = function (e) { var b = e.target.closest('button'); if (!b) return; cur = b.dataset.a; F.cls = ''; F.level = ''; history.replaceState(null, '', '?app=' + cur); render(); };
   app.querySelector('.stats').onclick = function (e) { var b = e.target.closest('.stat'); if (!b) return; F.st = b.dataset.st; render(); };

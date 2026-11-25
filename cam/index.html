@@ -115,6 +115,7 @@ LEVELS.forEach(function (lv) { LISTS[lv] = []; });
 /* ================== TIỆN ÍCH ================== */
 var app = document.getElementById('app');
 function $(s, r) { return (r || document).querySelector(s); }
+function hintW(a) { return String(a).split(/(\s+)/).map(function (t) { return /^\s+$/.test(t) ? '&nbsp;&nbsp;&nbsp;' : '<b>' + esc(t.charAt(0)) + '</b>' + esc(t.slice(1).replace(/[^'’-]/g, ' _')); }).join(''); }
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
 function pick(a, k) { return shuffle(a).slice(0, k); }
@@ -311,8 +312,8 @@ var TYPES = {
   dict: { name: 'Nghe và viết chính tả', icon: '🎙', typing: true, auto: true, make: function (o) {
     return { prompt: '<div class="q">Nghe và viết lại từ</div><div class="row" style="margin:10px 0"><button class="btn pri" data-say="' + esc(o.w) + '">🔊 Nghe</button><button class="btn" data-say="' + esc(o.w) + '" data-rate="0.6">🐢 Nghe chậm</button></div><div class="muted small">Nghĩa: ' + esc(o.vi) + '</div>', accept: answersOf(o), sayNow: o.w };
   } },
-  form: { name: 'Điền dạng đúng của từ vào câu', icon: '📝', typing: true, ok: function (o) { return /\{/.test(o.ex); }, make: function (o) {
-    return { prompt: '<div class="q">Điền từ còn thiếu (viết đúng dạng của từ)</div><div class="sent">' + sentHTML(o, 'gap') + '</div><div class="muted small">Từ gốc: <b>' + esc(o.w.split(/\s*,\s*/)[0]) + '</b> – ' + esc(o.vi) + '</div>', accept: answersOf(o, true) };
+  form: { name: 'Điền từ vào câu (tự luận)', icon: '📝', typing: true, ok: function (o) { return /\{/.test(o.ex); }, make: function (o) {
+    return { prompt: '<div class="q">Điền từ còn thiếu (viết đúng dạng của từ)</div><div class="sent">' + sentHTML(o, 'gap') + '</div><div class="muted small">Nghĩa: ' + esc(o.vi) + ' · Gợi ý: ' + hintW(answersOf(o, true)[0]) + '</div>', accept: answersOf(o, true) };
   } },
   match: { name: 'Ghép từ với nghĩa', icon: '🔗', match: true },
   syn: { name: 'Từ đồng nghĩa trong ngữ cảnh (đề Cambridge)', icon: '📗', mcq: true, ok: function (o) { return o.opts && o.opts.length === 4; }, make: function (o) {

@@ -100,6 +100,7 @@ var BYN = {}; W.forEach(function (o) { BYN[o.n] = o; o.grp = TOPICS[o.t].grp; })
 /* ===== TIỆN ÍCH ===== */
 var app = document.getElementById('app');
 function $(s, r) { return (r || document).querySelector(s); }
+function hintW(a) { return String(a).split(/(\s+)/).map(function (t) { return /^\s+$/.test(t) ? '&nbsp;&nbsp;&nbsp;' : '<b>' + esc(t.charAt(0)) + '</b>' + esc(t.slice(1).replace(/[^'’-]/g, ' _')); }).join(''); }
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
 function pick(a, k) { return shuffle(a).slice(0, k); }
@@ -283,7 +284,7 @@ var TYPES = {
     return { prompt: '<div class="q">Nghe và viết lại từ / cụm từ</div><div class="row" style="margin:10px 0"><button class="btn pri" data-say="' + esc(o.w) + '">🔊 Nghe</button><button class="btn" data-say="' + esc(o.w) + '" data-rate="0.55">🐢 Nghe chậm</button></div><div class="muted small">Nghĩa: ' + esc(o.vi) + '</div>', accept: headAnswers(o), sayNow: o.w, acc: true };
   } },
   form: { name: 'Điền từ vào câu (tự luận)', icon: '📝', typing: true, ok: function (o) { return !!o.form; }, make: function (o) {
-    return { prompt: '<div class="q">Viết từ còn thiếu trong câu (đúng dạng như trong câu)</div><div class="sent">' + sentHTML(o, 'gap') + '</div><div class="muted small">' + esc(o.exvi) + '<br>Từ gốc: <b>' + esc(o.w) + '</b> – ' + esc(o.vi) + '</div>', accept: [o.form], acc: true };
+    return { prompt: '<div class="q">Viết từ còn thiếu trong câu (đúng dạng như trong câu)</div><div class="sent">' + sentHTML(o, 'gap') + '</div><div class="muted small">' + esc(o.exvi) + '<br>Nghĩa: ' + esc(o.vi) + ' · Gợi ý: ' + hintW(o.form) + '</div>', accept: [o.form], acc: true };
   } },
   match: { name: 'Ghép từ với nghĩa', icon: '🔗' }
 };

@@ -45,6 +45,7 @@ pre{white-space:pre-wrap;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;bac
 .ev{background:#fff;border-radius:10px;padding:10px 12px;margin-bottom:8px;border-left:5px solid #cbd5e1}
 .ev.lesson{border-color:#0f766e}.ev.result{border-color:#2563eb}.ev.viol{border-color:var(--bad);background:#fff7f7}
 .ev .t{font-size:12px;color:var(--mut)}.ev details{margin-top:6px}.ev summary{cursor:pointer;color:#2563eb;font-size:13px}
+.p9{margin-top:8px;background:#f6f9ff;border:1px solid #c9d6ee;border-radius:10px;padding:10px 12px}.p9 .wt{white-space:pre-wrap;background:#fff;border:1px dashed #b8c6e0;border-radius:8px;padding:8px 10px;margin:6px 0;font-size:15px}.p9 .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}.p9 select{font:inherit;padding:6px 8px;border-radius:8px;border:1px solid #cbd5e1}.p9 .ai{white-space:pre-wrap;font-size:14px;margin-top:6px}
 .login{max-width:420px;margin:60px auto}
 .err{color:var(--bad);font-weight:600}
 h3{margin:16px 0 8px}
@@ -89,8 +90,8 @@ function renderLogin(msg) {
   $('#lf').onsubmit = function (e) { e.preventDefault(); pw = $('#pw').value.trim(); var b = $('#lf button'); b.disabled = true; b.textContent = 'Đang kiểm tra…';
     api({ action: 'login' }).then(function () { sessionStorage.setItem('ken_t_pw', pw); try { localStorage.setItem('ken_t_pw', pw); } catch (e) {} load(); }).catch(function (er) { renderLogin(er.message); }); };
 }
-function load() {
-  $('#logout').style.display = ''; app.innerHTML = '<div class="empty">⏳ Đang tải dữ liệu…</div>';
+function load(quiet) {
+  $('#logout').style.display = ''; if (!quiet) app.innerHTML = '<div class="empty">⏳ Đang tải dữ liệu…</div>';
   api({ action: 'dashboard' }).then(function (j) {
     DATA = {}; APPS.forEach(function (a) { DATA[a[0]] = []; }); (j.students || []).forEach(function (s) { (DATA[s.app] = DATA[s.app] || []).push(s); });
     if (j.sheet) { var l = $('#sheetLink'); l.href = j.sheet; l.style.display = ''; }
@@ -163,13 +164,34 @@ function detail(sid) {
     $('#evs', d).innerHTML = l.length ? l.map(function (e) {
       var kd = kindOf(e), sc = e.score === '' || e.score == null ? '' : '<span class="pill ' + (+e.score >= 80 ? 'p-ok' : 'p-bad') + '">' + e.score + '%</span>';
       var det = String(e.detail || ''), body = '';
-      var parts = det.split('Câu sai:\n'), steps = parts[0].trim(), wr = (parts[1] || '').trim(), nw = wr ? wr.split('\n').length : 0;
+      var parts = det.split('Câu sai:\n'), steps = parts[0].trim(), wr = (parts[1] || '').trim(), rec = null, vl = '';
+      var mm = det.match(/KETREC:(\{.*\})\s*$/); if (mm) { try { rec = JSON.parse(mm[1]); } catch (_) {} }
+      if (rec || /\nKETREC:|^Thời gian làm:/m.test(wr)) { var ls = wr.split('\n'); vl = ls.filter(function (l) { return /^Thời gian làm:/.test(l); })[0] || ''; wr = ls.filter(function (l) { return /^Câu \d+:/.test(l); }).join('\n'); }
+      var nw = wr ? wr.split('\n').length : 0;
       if (steps) body += '<div class="small mut">' + esc(steps) + '</div>';
+      if (vl) body += '<div class="small mut">' + esc(vl) + '</div>';
+      if (rec && rec.p === 'rw') {
+        var ai = rec.ai, aiT = ai ? 'AI (' + esc(ai.by) + ') chấm: <b>' + ai.mark + '/5</b>\n' + (ai.points || []).map(function (q) { return (q.communicated ? '✅ ' : '❌ ') + esc(q.point); }).join('\n') + (ai.comment_vi ? '\n' + esc(ai.comment_vi) : '') + ((ai.corrections || []).length ? '\nSửa lỗi: ' + ai.corrections.map(function (c) { return '<s>' + esc(c.wrong) + '</s> → ' + esc(c.right); }).join('; ') : '') + (ai.model_answer ? '\nBài mẫu: <i>' + esc(ai.model_answer) + '</i>' : '') : '';
+        body += '<div class="p9" data-id="' + esc(e.id) + '"><b>✍️ Part 9 – bài viết</b> · Điểm hiện tại: <b>' + (rec.p9 == null ? 'chưa chấm' : rec.p9 + '/5') + '</b>' + (rec.p9by ? ' <span class="small mut">(' + esc(rec.p9by) + ')</span>' : '') +
+          (rec.mu ? '<div class="small mut">Cần có: ' + esc(rec.mu) + '</div>' : '') + '<div class="wt">' + (String(rec.wt || '').trim() ? esc(rec.wt) + '\n<span class="small mut">(' + String(rec.wt).trim().split(/\s+/).length + ' từ)</span>' : '<span class="mut">(Học viên không viết)</span>') + '</div>' +
+          (aiT ? '<div class="ai">' + aiT + '</div>' : '') +
+          '<div class="row"><button class="btn" data-p9ai="1">🤖 Chấm lại bằng AI</button><span class="small mut">hoặc GV cho điểm:</span><select>' + [0, 1, 2, 3, 4, 5].map(function (n) { return '<option' + (rec.p9 === n ? ' selected' : '') + '>' + n + '</option>'; }).join('') + '</select><button class="btn" data-p9save="1">💾 Lưu điểm</button><span class="small msg"></span></div></div>';
+      }
       if (wr) body += '<details><summary>Xem ' + nw + ' câu làm sai' + (kd === 'lesson' ? ' (kể cả các lần làm lại)' : '') + '</summary><pre>' + esc(wr) + '</pre></details>';
       return '<div class="ev ' + kd + '"><div class="t">' + esc(e.time) + ' · ' + esc(e.kind) + '</div><div><b>' + esc(e.title) + '</b> ' + sc + (kd === 'result' && e.nWrong === 0 ? ' <span class="pill p-ok">không sai câu nào</span>' : '') + '</div>' + body + '</div>';
     }).join('') : '<div class="empty">Chưa có hoạt động nào.</div>';
   }
   $('#kf', d).onchange = draw;
+  $('#evs', d).onclick = function (ev) {
+    var bt = ev.target.closest('[data-p9ai],[data-p9save]'); if (!bt) return;
+    var box = bt.closest('.p9'), id = box.dataset.id, msg = $('.msg', box), body = { action: 'ket_p9', id: id };
+    if (bt.dataset.p9ai) body.ai = true; else body.p9 = $('select', box).value;
+    box.querySelectorAll('button').forEach(function (b) { b.disabled = true; }); msg.textContent = bt.dataset.p9ai ? '⏳ AI đang chấm (10–30 giây)…' : '⏳ Đang lưu…';
+    api(body).then(function (j) {
+      EV.forEach(function (x) { if (x.id === id) { x.title = j.title; x.score = j.score; x.detail = j.detail; } });
+      draw(); load(true);
+    }).catch(function (er) { msg.textContent = '❌ ' + er.message; box.querySelectorAll('button').forEach(function (b) { b.disabled = false; }); });
+  };
   api({ action: 'student', app: cur, sid: s.sid, school: s.school }).then(function (j) { EV = j.events || []; draw(); }).catch(function (er) { $('#evs', d).innerHTML = '<p class="err">' + esc(er.message) + '</p>'; });
 }
 function kindOf(e) { var k = String(e.kind || ''); return /Vi phạm/.test(k) ? 'viol' : /bài học/.test(k) ? 'lesson' : 'result'; }

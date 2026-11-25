@@ -58,7 +58,7 @@ h3{margin:16px 0 8px}
 <main id="app"></main>
 <script src="../shared/ken-config.js"></script>
 <script>
-var URL_ = window.KEN_TRACK_URL || '', APPS = [['school', '🎒 KEN SCHOOL (THCS–THPT)', '../school/'], ['vocab', '📘 Oxford 3000', '../vocab/'], ['cam', '📗 Cambridge IELTS', '../cam/'], ['dest', '🧭 Destination (HSG)', '../destination/'], ['french', '🇫🇷 Tiếng Pháp', '../french/'], ['ket', '🎓 KET (A2 Key)', 'https://claude.ai/artifact/HNdy55wDb3dDbzMd1PE7Pr']];
+var URL_ = window.KEN_TRACK_URL || '', APPS = [['school', '🎒 KEN SCHOOL (THCS–THPT)', '../school/'], ['vocab', '📘 Oxford 3000', '../vocab/'], ['cam', '📗 Cambridge IELTS', '../cam/'], ['dest', '🧭 Destination (HSG)', '../destination/'], ['path', '🛤️ Pathways 1A·2A·3A', '../pathways/'], ['french', '🇫🇷 Tiếng Pháp', '../french/'], ['ket', '🎓 KET (A2 Key)', 'https://claude.ai/artifact/HNdy55wDb3dDbzMd1PE7Pr']];
 var app = document.getElementById('app'), pw = sessionStorage.getItem('ken_t_pw') || '', cur = (new URLSearchParams(location.search).get('app')) || 'school';
 if (!APPS.some(function (a) { return a[0] === cur; })) cur = 'school';
 var DATA = {}, F = { q: '', teacher: '', school: '', cls: '', level: '', st: 'all', sort: 'last', up: false };
